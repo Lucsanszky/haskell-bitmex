@@ -98,22 +98,3 @@ makeRequest req@BitMEXRequest {..} = do
             AuthApiKeyApiNonce "" `addAuthMethod`
             AuthApiKeyApiKey pub
     liftIO $ dispatchMime mgr config new
--- main :: IO ()
--- main = do
---     mgr <- newManager tlsManagerSettings
---     (pubPath : privPath : _) <- getArgs
---     pub <- T.readFile pubPath
---     priv <- readFile privPath
---     let config =
---             BitMEXWrapperConfig
---             { url = "https://testnet.bitmex.com/api/v1"
---             , manager = mgr
---             , publicKey = pub
---             , privateKey = priv
---             }
---     res <-
---         runReaderT
---             (run (makeRequest $
---                   orderGetOrders (Accept MimeJSON)))
---             config
---     print res
