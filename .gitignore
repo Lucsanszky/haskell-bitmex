@@ -1,0 +1,6 @@
+dist
+dist-newstyle
+docs
+cabal.project.local
+.cabal-sandbox
+cabal.sandbox.config
