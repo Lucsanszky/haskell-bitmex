@@ -1,0 +1,6 @@
+indent-size: 4 
+line-length: 60
+force-trailing-newline: true
+line-breaks: 
+  - :>
+  - :<|>
