@@ -3,8 +3,8 @@
 module Example where
 
 import           BitMEX
-import           BitMEXWrapper.Type
-import           BitMEXWrapper.Wrapper   (makeRequest)
+import           BitMEXWebSockets
+import           BitMEXWrapper
 import           Control.Monad.Reader    (runReaderT)
 import           Data.ByteString         (readFile)
 import qualified Data.Text.IO            as T (readFile)
@@ -12,6 +12,7 @@ import           Network.HTTP.Client     (newManager)
 import           Network.HTTP.Client.TLS
     ( tlsManagerSettings
     )
+import           Network.Socket          (withSocketsDo)
 import           Prelude
     ( IO
     , RealFrac
@@ -19,11 +20,17 @@ import           Prelude
     , ($)
     )
 import           System.Environment      (getArgs)
+import           Wuss                    (runSecureClient)
+
+ws :: IO ()
+ws =
+    withSocketsDo $
+    runSecureClient "testnet.bitmex.com" 443 "/realtime" app
 
 main :: IO ()
 main = do
     mgr <- newManager tlsManagerSettings
-    (pubPath : privPath : _) <- getArgs
+    (pubPath:privPath:_) <- getArgs
     pub <- T.readFile pubPath
     priv <- readFile privPath
     let config =
