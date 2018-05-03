@@ -1,0 +1,1 @@
+module BitMEXWebSockets.Type where

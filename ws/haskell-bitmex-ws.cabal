@@ -4,6 +4,7 @@
 -- The name of the package.
 name:                haskell-bitmex-ws
 
+
 -- The package version.  See the Haskell package versioning policy (PVP) 
 -- for standards guiding when and how versions should be incremented.
 -- https://wiki.haskell.org/Package_versioning_policy
@@ -48,7 +49,9 @@ cabal-version:       >=1.10
 
 library
   -- Modules exported by the library.
-  -- exposed-modules:     
+  exposed-modules:    BitMEXWebSockets
+                    , BitMEXWebSockets.API
+                    , BitMEXWebSockets.Type
   
   -- Modules included in this library but not exported.
   -- other-modules:       
@@ -58,9 +61,14 @@ library
   
   -- Other library packages from which modules are imported.
   build-depends:       base >=4.10 && <4.11
+                     , mtl
+                     , network >= 2.6
+                     , text >= 1.2
+                     , websockets >= 0.12
+                     , wuss
   
   -- Directories containing source files.
-  hs-source-dirs:      src
+  hs-source-dirs:      lib
   
   -- Base language which the package is written in.
   default-language:    Haskell2010
