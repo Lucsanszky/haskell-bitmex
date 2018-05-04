@@ -3,7 +3,7 @@
 module Example where
 
 import           BitMEX
-import           BitMEXWebSockets
+import qualified BitMEXWebSockets        as WS
 import           BitMEXWrapper
 import           Control.Monad.Reader    (runReaderT)
 import           Data.ByteString         (readFile)
@@ -25,7 +25,7 @@ import           Wuss                    (runSecureClient)
 ws :: IO ()
 ws =
     withSocketsDo $
-    runSecureClient "testnet.bitmex.com" 443 "/realtime" app
+    runSecureClient "testnet.bitmex.com" 443 "/realtime" WS.app
 
 main :: IO ()
 main = do
