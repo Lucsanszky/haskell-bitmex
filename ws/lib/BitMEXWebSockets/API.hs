@@ -3,6 +3,7 @@ module BitMEXWebSockets.API
     ) where
 
 import           BitMEXWebSockets.Type
+import           BitMEXWrapper
 import           Control.Concurrent    (forkIO)
 import           Control.Monad         (forever, unless)
 import           Control.Monad.Trans   (liftIO)

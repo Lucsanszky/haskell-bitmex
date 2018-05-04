@@ -61,6 +61,7 @@ library
   
   -- Other library packages from which modules are imported.
   build-depends:       base >=4.10 && <4.11
+                     , api-wrapper >= 0.1
                      , aeson >= 1.2
                      , mtl
                      , network >= 2.6

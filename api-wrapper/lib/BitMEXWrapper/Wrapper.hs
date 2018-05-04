@@ -1,5 +1,6 @@
 module BitMEXWrapper.Wrapper
     ( makeRequest
+    , connect
     ) where
 
 import           BitMEX
@@ -14,17 +15,20 @@ import           Crypto.MAC.HMAC
 import           Data.ByteArray
     ( ByteArrayAccess
     )
-import           Data.ByteString            (append)
 import           Data.ByteString.Char8      (pack)
 import           Data.ByteString.Conversion (toByteString')
+import           Data.ByteString.Lazy       (append)
 import           Data.ByteString.Lazy.Char8 (unpack)
 import qualified Data.Text                  as T (pack)
 import qualified Data.Text.IO               as T (readFile)
 import           Data.Time.Clock.POSIX      (getPOSIXTime)
+import           Network.Socket             (withSocketsDo)
+import           Network.WebSockets         (ClientApp)
 import           Prelude
     ( Bool (..)
     , IO
     , Int
+    , Maybe (..)
     , RealFrac
     , Show
     , filter
@@ -40,6 +44,9 @@ import           Prelude
     , (>>=)
     )
 import           System.Environment         (getArgs)
+import           Wuss
+    ( runSecureClient
+    )
 
 sign ::
        (ByteArrayAccess a, Show a)
@@ -51,11 +58,12 @@ sign body = do
 
 makeRESTConfig :: BitMEXReader BitMEXConfig
 makeRESTConfig = do
-    host <- asks url
+    base <- asks url
+    path <- asks path
     logCxt <- liftIO $ initLogContext
     return $
         BitMEXConfig
-        { configHost = host
+        { configHost = append base path
         , configUserAgent =
               "swagger-haskell-http-client/1.0.0"
         , configLogExecWithContext =
@@ -76,7 +84,7 @@ makeRequest ::
     => BitMEXRequest req contentType res accept
     -> BitMEXReader (MimeResult res)
 makeRequest req@BitMEXRequest {..} = do
-    mgr <- asks manager
+    Just mgr <- asks manager
     priv <- asks privateKey
     pub <- asks publicKey
     time <- liftIO $ getPOSIXTime >>= return . makeTimestamp
@@ -98,3 +106,10 @@ makeRequest req@BitMEXRequest {..} = do
             AuthApiKeyApiNonce "" `addAuthMethod`
             AuthApiKeyApiKey pub
     liftIO $ dispatchMime mgr config new
+
+connect :: ClientApp () -> BitMEXReader ()
+connect app = do
+    base <- asks url
+    path <- asks path
+    liftIO . withSocketsDo $
+        runSecureClient (unpack base) 443 (unpack path) app

@@ -17,11 +17,13 @@ import           Prelude
     ( Applicative
     , Functor
     , IO
+    , Maybe
     )
 
 data BitMEXWrapperConfig = BitMEXWrapperConfig
     { url        :: !LBS.ByteString
-    , manager    :: !Manager
+    , path       :: !LBS.ByteString
+    , manager    :: Maybe Manager
     , publicKey  :: !Text
     , privateKey :: !SBS.ByteString
     }

@@ -7,25 +7,35 @@ import qualified BitMEXWebSockets        as WS
 import           BitMEXWrapper
 import           Control.Monad.Reader    (runReaderT)
 import           Data.ByteString         (readFile)
+import           Data.ByteString         (ByteString)
+import           Data.Text               (Text)
 import qualified Data.Text.IO            as T (readFile)
 import           Network.HTTP.Client     (newManager)
 import           Network.HTTP.Client.TLS
     ( tlsManagerSettings
     )
-import           Network.Socket          (withSocketsDo)
 import           Prelude
     ( IO
+    , Maybe (..)
     , RealFrac
     , print
     , ($)
     )
 import           System.Environment      (getArgs)
-import           Wuss                    (runSecureClient)
 
 ws :: IO ()
-ws =
-    withSocketsDo $
-    runSecureClient "testnet.bitmex.com" 443 "/realtime" WS.app
+ws = do
+    let pub = ""
+        priv = ""
+        config =
+            BitMEXWrapperConfig
+            { url = "testnet.bitmex.com"
+            , path = "/realtime"
+            , manager = Nothing
+            , publicKey = pub
+            , privateKey = priv
+            }
+    runReaderT (run (connect WS.app)) config
 
 main :: IO ()
 main = do
@@ -35,8 +45,9 @@ main = do
     priv <- readFile privPath
     let config =
             BitMEXWrapperConfig
-            { url = "https://testnet.bitmex.com/api/v1"
-            , manager = mgr
+            { url = "https://testnet.bitmex.com"
+            , path = "/api/v1"
+            , manager = Just mgr
             , publicKey = pub
             , privateKey = priv
             }
