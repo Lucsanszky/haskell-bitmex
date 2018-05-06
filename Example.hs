@@ -23,11 +23,12 @@ import           Prelude
     )
 import           System.Environment      (getArgs)
 
-ws :: IO ()
-ws = do
-    let pub = ""
-        priv = ""
-        config =
+main :: IO ()
+main = do
+    (pubPath:privPath:_) <- getArgs
+    pub <- T.readFile pubPath
+    priv <- readFile privPath
+    let config =
             BitMEXWrapperConfig
             { url = "testnet.bitmex.com"
             , path = "/realtime"
@@ -37,8 +38,8 @@ ws = do
             }
     runReaderT (run (connect WS.app)) config
 
-main :: IO ()
-main = do
+main' :: IO ()
+main' = do
     mgr <- newManager tlsManagerSettings
     (pubPath:privPath:_) <- getArgs
     pub <- T.readFile pubPath

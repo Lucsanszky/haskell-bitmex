@@ -12,8 +12,9 @@ import           Data.Aeson
     , toJSON
     )
 import           Data.Char    (toLower)
+import           Data.Text    (Text)
 import           GHC.Generics
-import           Prelude      (Eq, Show, drop)
+import           Prelude      (Eq, Int, Show, drop)
 
 data Command
     = Subscribe
@@ -73,9 +74,9 @@ instance ToJSON Topic where
                   (\(x:xs) -> (toLower x : xs))
             }
 
-data Message = Message
+data Message a = Message
     { op   :: !Command
-    , args :: [Topic]
+    , args :: [a]
     } deriving (Eq, Show, Generic)
 
-instance ToJSON Message
+instance ToJSON a => ToJSON (Message a)

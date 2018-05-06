@@ -1,6 +1,8 @@
 module BitMEXWrapper.Wrapper
     ( makeRequest
     , connect
+    , sign
+    , makeTimestamp
     ) where
 
 import           BitMEX
@@ -19,11 +21,18 @@ import           Data.ByteString.Char8      (pack)
 import           Data.ByteString.Conversion (toByteString')
 import           Data.ByteString.Lazy       (append)
 import           Data.ByteString.Lazy.Char8 (unpack)
-import qualified Data.Text                  as T (pack)
+import qualified Data.Text                  as T
+    ( Text
+    , pack
+    , unpack
+    )
 import qualified Data.Text.IO               as T (readFile)
 import           Data.Time.Clock.POSIX      (getPOSIXTime)
 import           Network.Socket             (withSocketsDo)
-import           Network.WebSockets         (ClientApp)
+import           Network.WebSockets
+    ( ClientApp
+    , Connection
+    )
 import           Prelude
     ( Bool (..)
     , IO
@@ -34,9 +43,11 @@ import           Prelude
     , filter
     , floor
     , head
+    , print
     , return
     , show
     , ($)
+    , (*)
     , (+)
     , (++)
     , (.)
@@ -74,7 +85,7 @@ makeRESTConfig = do
         }
 
 makeTimestamp :: (RealFrac a) => a -> Int
-makeTimestamp = (+ 5) . floor
+makeTimestamp = floor . (* 1000)
 
 makeRequest ::
        ( Produces req accept
@@ -107,9 +118,16 @@ makeRequest req@BitMEXRequest {..} = do
             AuthApiKeyApiKey pub
     liftIO $ dispatchMime mgr config new
 
-connect :: ClientApp () -> BitMEXReader ()
+connect ::
+       ((Digest SHA256) -> Int -> T.Text -> Connection -> IO ())
+    -> BitMEXReader ()
 connect app = do
     base <- asks url
     path <- asks path
+    priv <- asks privateKey
+    pub <- asks publicKey
+    time <- liftIO $ getPOSIXTime >>= return . makeTimestamp
+    sig <- sign (pack ("GET" ++ "/realtime" ++ show time))
     liftIO . withSocketsDo $
-        runSecureClient (unpack base) 443 (unpack path) app
+        runSecureClient (unpack base) 443 (unpack path) $ \conn ->
+            app sig time pub conn

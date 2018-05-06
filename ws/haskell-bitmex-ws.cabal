@@ -61,11 +61,14 @@ library
   
   -- Other library packages from which modules are imported.
   build-depends:       base >=4.10 && <4.11
+                     , bytestring >= 0.10
                      , api-wrapper >= 0.1
                      , aeson >= 1.2
+                     , cryptonite >= 0.25
                      , mtl
                      , network >= 2.6
                      , text >= 1.2
+                     , time >= 1.8
                      , websockets >= 0.12
                      , wuss
   
