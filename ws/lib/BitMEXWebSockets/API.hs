@@ -9,7 +9,11 @@ import           Control.Monad          (forever, unless)
 import           Control.Monad.Reader   (asks, liftIO)
 import           Crypto.Hash            (Digest)
 import           Crypto.Hash.Algorithms (SHA256)
-import           Data.Aeson             (encode)
+import           Data.Aeson
+    ( Value
+    , decode
+    , encode
+    )
 import           Data.ByteString.Char8  (pack)
 import qualified Data.Text              as T
     ( Text
@@ -28,6 +32,8 @@ import           Network.WebSockets
 import           Prelude
     ( IO
     , Int
+    , Maybe
+    , String
     , filter
     , print
     , return
@@ -40,29 +46,6 @@ import           Prelude
     , (>>=)
     )
 
-signWS :: Connection -> BitMEXReader ()
-signWS conn = do
-    priv <- asks privateKey
-    pub <- asks publicKey
-    time <- liftIO $ getPOSIXTime >>= return . makeTimestamp
-    sig <- sign (pack ("GET/realtime" ++ show time))
-    liftIO $ print sig
-    liftIO $
-        sendTextData conn $
-        encode $
-        Message {op = Subscribe, args = [Connected]}
-        -- Message
-        -- { op = AuthKey
-        -- , args = [pub, (T.pack . show) time, (T.pack . show) sig]
-        -- }
-    liftIO $ loop
-    liftIO $ sendClose conn ("Connection closed" :: T.Text)
-  where
-    loop =
-        getLine >>= \line ->
-            unless (T.null line) $
-            sendTextData conn line >> loop
-
 app :: (Digest SHA256)
     -> Int
     -> T.Text
@@ -73,16 +56,18 @@ app sig time pub conn = do
         forkIO $
         forever $ do
             msg <- receiveData conn
-            liftIO $ putStrLn msg
-    sendTextData conn $
+            liftIO $ (print . show) (decode msg :: Maybe Response)
+    forkIO $ sendTextData conn $
         T.pack
             ("{\"op\": \"authKey\", \"args\": [" ++
              (show pub) ++
              "," ++
              (show time) ++
              "," ++ "\"" ++ (show sig) ++ "\"" ++ "]}")
-    sendTextData conn $
-        encode $ Message {op = Subscribe, args = [Chat]}
+    forkIO $ sendTextData conn $
+        encode $ Message {op = Subscribe, args = [OrderBookL2 XBTUSD :: Topic Symbol]}
+    forkIO $ sendTextData conn $
+        encode $ Message {op = Subscribe, args = [OrderBookL2 XBTM18 :: Topic Symbol]}
     loop
     sendClose conn ("Connection closed" :: T.Text)
   where
