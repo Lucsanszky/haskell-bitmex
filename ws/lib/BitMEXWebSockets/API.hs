@@ -2,6 +2,10 @@ module BitMEXWebSockets.API
     ( app
     ) where
 
+import           BitMEX.Model
+    ( Announcement
+    , OrderBookL2
+    )
 import           BitMEXWebSockets.Type
 import           BitMEXWrapper
 import           Control.Concurrent     (forkIO)
@@ -10,7 +14,8 @@ import           Control.Monad.Reader   (asks, liftIO)
 import           Crypto.Hash            (Digest)
 import           Crypto.Hash.Algorithms (SHA256)
 import           Data.Aeson
-    ( Value
+    ( FromJSON
+    , Value
     , decode
     , encode
     )
@@ -56,18 +61,31 @@ app sig time pub conn = do
         forkIO $
         forever $ do
             msg <- receiveData conn
-            liftIO $ (print . show) (decode msg :: Maybe Response)
-    forkIO $ sendTextData conn $
+            liftIO $
+                (print . show)
+                    (decode msg :: Maybe Response)
+    forkIO $
+        sendTextData conn $
         T.pack
             ("{\"op\": \"authKey\", \"args\": [" ++
              (show pub) ++
              "," ++
              (show time) ++
              "," ++ "\"" ++ (show sig) ++ "\"" ++ "]}")
-    forkIO $ sendTextData conn $
-        encode $ Message {op = Subscribe, args = [OrderBookL2 XBTUSD :: Topic Symbol]}
-    forkIO $ sendTextData conn $
-        encode $ Message {op = Subscribe, args = [OrderBookL2 XBTM18 :: Topic Symbol]}
+    forkIO $
+        sendTextData conn $
+        encode $
+        Message
+        { op = Subscribe
+        , args = [OrderBookL2 XBTUSD :: Topic Symbol]
+        }
+    -- forkIO $
+    --     sendTextData conn $
+    --     encode $
+    --     Message
+    --     { op = Subscribe
+    --     , args = [OrderBookL2 XBTM18 :: Topic Symbol]
+    --     }
     loop
     sendClose conn ("Connection closed" :: T.Text)
   where
