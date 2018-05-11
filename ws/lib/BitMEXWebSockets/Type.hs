@@ -105,7 +105,7 @@ instance FromJSON Action where
         opts =
             defaultOptions
             { constructorTagModifier =
-                  (\(x:xs) -> (toLower x : xs))
+                  \(x:xs) -> (toLower x : xs)
             }
 
 data Symbol
@@ -138,7 +138,7 @@ instance ToJSON Command where
         opts =
             defaultOptions
             { constructorTagModifier =
-                  (\(x:xs) -> (toLower x : xs))
+                  \(x:xs) -> (toLower x : xs)
             }
 
 instance FromJSON Command
@@ -203,7 +203,7 @@ instance (ToJSON a) => ToJSON (Topic a) where
         opts =
             defaultOptions
             { constructorTagModifier =
-                  (\(x:xs) -> (toLower x : xs))
+                  \(x:xs) -> (toLower x : xs)
             }
 
 instance (FromJSON a) => FromJSON (Topic a)
@@ -254,11 +254,10 @@ instance ToJSON BitMEXInfo
 
 instance FromJSON BitMEXInfo
 
-data BitMEXError = BitMEXError
-    { error :: !Text
-    } deriving (Eq, Show, Generic)
+newtype BitMEXError = BitMEXError
+    { error :: Text
+    } deriving (Eq, Show, ToJSON, FromJSON, Generic)
 
-instance ToJSON BitMEXError
 data ResponseOrderBook10 = ResponseOrderBook10
     { symbol    :: !Symbol
     , timestamp :: !Text
@@ -266,7 +265,6 @@ data ResponseOrderBook10 = ResponseOrderBook10
     , bids      :: !(Vector (Vector Double))
     } deriving (Eq, Show, Generic)
 
-instance FromJSON BitMEXError
 instance ToJSON ResponseOrderBook10
 instance FromJSON ResponseOrderBook10
 
