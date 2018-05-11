@@ -259,8 +259,16 @@ data BitMEXError = BitMEXError
     } deriving (Eq, Show, Generic)
 
 instance ToJSON BitMEXError
+data ResponseOrderBook10 = ResponseOrderBook10
+    { symbol    :: !Symbol
+    , timestamp :: !Text
+    , asks      :: !(Vector (Vector Double))
+    , bids      :: !(Vector (Vector Double))
+    } deriving (Eq, Show, Generic)
 
 instance FromJSON BitMEXError
+instance ToJSON ResponseOrderBook10
+instance FromJSON ResponseOrderBook10
 
 data Response
     = AK (Table M.APIKey)
@@ -283,6 +291,7 @@ data Response
     | N (Table M.Notification)
     | O (Table M.Order)
     | OB (Table M.OrderBookL2)
+    | OB10 (Table ResponseOrderBook10)
     | P (Table M.Position)
     | Q (Table M.Quote)
     | Setl (Table M.Settlement)
@@ -334,6 +343,8 @@ instance FromJSON Response where
                     O <$> genericParseJSON opts (Object o)
                 Just "orderBookL2" ->
                     OB <$> genericParseJSON opts (Object o)
+                Just "orderBook10" ->
+                    OB10 <$> genericParseJSON opts (Object o)
                 Just "position" ->
                     P <$> genericParseJSON opts (Object o)
                 Just "privateNotifications" ->
