@@ -263,8 +263,39 @@ instance ToJSON BitMEXError
 instance FromJSON BitMEXError
 
 data Response
-    = Ann (Table M.Announcement)
+    = AK (Table M.APIKey)
+    | AT (Table M.AccessToken)
+    | Aff (Table M.Affiliate)
+    | Ann (Table M.Announcement)
+    | C (Table M.Chat)
+    | CC (Table M.ChatChannels)
+    | CU (Table M.ConnectedUsers)
+    | Err (Table M.Error)
+    | Exe (Table M.Execution)
+    | F (Table M.Funding)
+    | IC (Table M.IndexComposite)
+    | I (Table M.Instrument)
+    | II (Table M.InstrumentInterval)
+    | Insu (Table M.Insurance)
+    | LB (Table M.Leaderboard)
+    | L (Table M.Liquidation)
+    | M (Table M.Margin)
+    | N (Table M.Notification)
+    | O (Table M.Order)
     | OB (Table M.OrderBookL2)
+    | P (Table M.Position)
+    | Q (Table M.Quote)
+    | Setl (Table M.Settlement)
+    | S (Table M.Stats)
+    | SH (Table M.StatsHistory)
+    | SU (Table M.StatsUSD)
+    | T (Table M.Trade)
+    | TB (Table M.TradeBin)
+    | TX (Table M.Transaction)
+    | U (Table M.User)
+    | UC (Table M.UserCommission)
+    | UP (Table M.UserPreferences)
+    | W (Table M.Wallet)
     | Status BitMEXStatus
     | Info BitMEXInfo
     | Error BitMEXError
@@ -278,10 +309,48 @@ instance FromJSON Response where
             info <- o .:? "info"
             error <- o .:? "error"
             case (kind :: Maybe Text) of
-                Just "orderBookL2" ->
-                    OB <$> genericParseJSON opts (Object o)
                 Just "announcement" ->
                     Ann <$> genericParseJSON opts (Object o)
+                Just "affiliate" ->
+                    Aff <$> genericParseJSON opts (Object o)
+                Just "chat" ->
+                    C <$> genericParseJSON opts (Object o)
+                Just "connected" ->
+                    CU <$> genericParseJSON opts (Object o)
+                Just "execution" ->
+                    Exe <$> genericParseJSON opts (Object o)
+                Just "funding" ->
+                    F <$> genericParseJSON opts (Object o)
+                Just "instrument" ->
+                    I <$> genericParseJSON opts (Object o)
+                Just "insurance" ->
+                    Insu <$>
+                    genericParseJSON opts (Object o)
+                Just "liquidation" ->
+                    L <$> genericParseJSON opts (Object o)
+                Just "margin" ->
+                    M <$> genericParseJSON opts (Object o)
+                Just "order" ->
+                    O <$> genericParseJSON opts (Object o)
+                Just "orderBookL2" ->
+                    OB <$> genericParseJSON opts (Object o)
+                Just "position" ->
+                    P <$> genericParseJSON opts (Object o)
+                Just "privateNotifications" ->
+                    N <$> genericParseJSON opts (Object o)
+                Just "publicNotifications" ->
+                    N <$> genericParseJSON opts (Object o)
+                Just "quote" ->
+                    Q <$> genericParseJSON opts (Object o)
+                Just "settlement" ->
+                    Setl <$>
+                    genericParseJSON opts (Object o)
+                Just "trade" ->
+                    T <$> genericParseJSON opts (Object o)
+                Just "transact" ->
+                    TX <$> genericParseJSON opts (Object o)
+                Just "wallet" ->
+                    W <$> genericParseJSON opts (Object o)
                 Nothing ->
                     case (success :: Maybe Bool) of
                         Just _ ->
