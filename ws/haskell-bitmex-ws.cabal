@@ -70,6 +70,7 @@ library
                      , network >= 2.6
                      , text >= 1.2
                      , time >= 1.8
+                     , vector >= 0.12
                      , websockets >= 0.12
                      , wuss
   

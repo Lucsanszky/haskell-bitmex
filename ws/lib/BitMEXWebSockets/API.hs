@@ -27,6 +27,7 @@ import qualified Data.Text              as T
     )
 import           Data.Text.IO           (getLine, putStrLn)
 import           Data.Time.Clock.POSIX  (getPOSIXTime)
+import           Data.Vector            (fromList)
 import           Network.WebSockets
     ( ClientApp
     , Connection
@@ -77,7 +78,7 @@ app sig time pub conn = do
         encode $
         Message
         { op = Subscribe
-        , args = [OrderBookL2 XBTUSD :: Topic Symbol]
+        , args = fromList [OrderBook10 XBTUSD :: Topic Symbol]
         }
     -- forkIO $
     --     sendTextData conn $

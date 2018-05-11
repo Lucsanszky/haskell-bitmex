@@ -62,6 +62,7 @@ import           Data.Aeson
 import           Data.Aeson.Types (Parser)
 import           Data.Char        (toLower)
 import           Data.Text        (Text, append, pack)
+import           Data.Vector      (Vector)
 import           GHC.Generics
 import           Prelude
     ( Bool (..)
@@ -210,7 +211,7 @@ instance (FromJSON a) => FromJSON (Topic a)
 
 data Message a = Message
     { op   :: !Command
-    , args :: ![a]
+    , args :: !(Vector a)
     } deriving (Eq, Show, Generic)
 
 instance ToJSON a => ToJSON (Message a)
@@ -220,8 +221,8 @@ instance FromJSON a => FromJSON (Message a)
 data Table a = Table
     { _table       :: !Text
     , _action      :: !Action
-    , _data        :: ![a]
-    , _keys        :: !(Maybe [Text])
+    , _data        :: !(Vector a)
+    , _keys        :: !(Maybe (Vector Text))
     , _foreignKeys :: !(Maybe Value)
     , _types       :: !(Maybe Value)
     , _filter      :: !(Maybe Value)
