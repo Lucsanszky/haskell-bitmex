@@ -6,12 +6,14 @@ module BitMEXWebSockets.Types.Request
 
 import           BitMEXWebSockets.Types.General
 import           Data.Aeson
-    ( ToJSON
+    ( SumEncoding (UntaggedValue)
+    , ToJSON
     , Value (String)
     , constructorTagModifier
     , defaultOptions
     , genericToJSON
     , object
+    , sumEncoding
     , toJSON
     , (.=)
     )
@@ -116,6 +118,7 @@ instance (ToJSON a) => ToJSON (Topic a) where
             defaultOptions
             { constructorTagModifier =
                   \(x:xs) -> (toLower x : xs)
+            , sumEncoding = UntaggedValue
             }
 
 data Message a = Message

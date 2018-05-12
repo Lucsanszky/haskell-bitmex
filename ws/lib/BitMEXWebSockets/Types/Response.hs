@@ -141,9 +141,14 @@ data INFO = INFO
 
 instance FromJSON INFO
 
-newtype ERROR = ERROR
-    { error :: Text
-    } deriving (Eq, Show, FromJSON, Generic)
+data ERROR = ERROR
+    { error   :: !Text
+    , status  :: !(Maybe Int)
+    , meta    :: !(Maybe Value)
+    , request :: !(Maybe Value)
+    } deriving (Eq, Show, Generic)
+
+instance FromJSON ERROR
 
 data RespAffiliate = RespAffiliate
     { account         :: !Integer -- ^ /Required/ "account"
