@@ -1,12 +1,8 @@
-module BitMEXWebSockets.Type
-    ( Command(..)
-    , Topic(..)
-    , Message(..)
-    , Symbol(..)
-    , Response(..)
+module BitMEXWebSockets.Types.Response
+    ( Response(..)
     ) where
 
-import qualified BitMEX.Model     as M
+import qualified BitMEX.Model                   as M
     ( APIKey
     , AccessToken
     , Affiliate
@@ -41,7 +37,8 @@ import qualified BitMEX.Model     as M
     , UserPreferences
     , Wallet
     )
-import           Control.Monad    (fail)
+import           BitMEXWebSockets.Types.General
+import           Control.Monad                  (fail)
 import           Data.Aeson
     ( FromJSON
     , SumEncoding (UntaggedValue)
@@ -51,33 +48,25 @@ import           Data.Aeson
     , defaultOptions
     , fieldLabelModifier
     , genericParseJSON
-    , genericToJSON
     , parseJSON
     , sumEncoding
-    , toJSON
     , withObject
     , (.:)
     , (.:?)
     )
-import           Data.Aeson.Types (Parser)
-import           Data.Char        (toLower)
-import           Data.Text        (Text, append, pack)
-import           Data.Vector      (Vector)
+import           Data.Char                      (toLower)
+import           Data.Text                      (Text)
+import           Data.Vector                    (Vector)
 import           GHC.Generics
 import           Prelude
-    ( Bool (..)
+    ( Bool
     , Double
     , Eq
     , Integer
-    , Maybe
     , Maybe (..)
     , Show
     , drop
-    , return
-    , show
     , ($)
-    , (++)
-    , (.)
     , (<$>)
     , (<*>)
     )
@@ -86,8 +75,6 @@ data Side
     = Buy
     | Sell
     deriving (Eq, Show, Generic)
-
-instance ToJSON Side
 
 instance FromJSON Side
 
@@ -98,8 +85,6 @@ data Action
     | Delete
     deriving (Eq, Show, Generic)
 
-instance ToJSON Action
-
 instance FromJSON Action where
     parseJSON = genericParseJSON opts
       where
@@ -109,116 +94,7 @@ instance FromJSON Action where
                   \(x:xs) -> (toLower x : xs)
             }
 
-data Symbol
-    = XBTUSD
-    | XBTM18
-    | XBTU18
-    | XBT7D_U110
-    | ADAM18
-    | BCHM18
-    | ETHM18
-    | LTCM18
-    | XRPM18
-    deriving (Eq, Show, Generic)
-
-instance ToJSON Symbol
-
-instance FromJSON Symbol
-
-data Command
-    = Subscribe
-    | Unsubscribe
-    | Ping
-    | CancelAllAfter
-    | AuthKey
-    deriving (Eq, Show, Generic)
-
-instance ToJSON Command where
-    toJSON = genericToJSON opts
-      where
-        opts =
-            defaultOptions
-            { constructorTagModifier =
-                  \(x:xs) -> (toLower x : xs)
-            }
-
-instance FromJSON Command
-
-data Topic a
-    = Announcement
-    | Chat
-    | Connected
-    | Funding
-    | Instrument
-    | Insurance
-    | Liquidation
-    | OrderBookL2 Symbol
-    | OrderBook10 Symbol
-    | PublicNotifications
-    | Quote Symbol
-    | QuoteBin1m Symbol
-    | QuoteBin5m Symbol
-    | QuoteBin1h Symbol
-    | QuoteBin1d Symbol
-    | Settlement
-    | Trade Symbol
-    | TradeBin1m Symbol
-    | TradeBin5m Symbol
-    | TradeBin1h Symbol
-    | TradeBin1d Symbol
-    | Affiliate
-    | Execution
-    | Order
-    | Margin
-    | Position
-    | PrivateNotifications
-    | Transact
-    | Wallet
-    deriving (Eq, Show, Generic)
-
-instance (ToJSON a) => ToJSON (Topic a) where
-    toJSON t@(OrderBookL2 x) =
-        String (append "orderBookL2:" ((pack . show) x))
-    toJSON t@(OrderBook10 x) =
-        String (append "orderBook10:" ((pack . show) x))
-    toJSON t@(QuoteBin1m x) =
-        String (append "quoteBin1m:" ((pack . show) x))
-    toJSON t@(QuoteBin5m x) =
-        String (append "quoteBin5m:" ((pack . show) x))
-    toJSON t@(QuoteBin1h x) =
-        String (append "quoteBin1h:" ((pack . show) x))
-    toJSON t@(QuoteBin1d x) =
-        String (append "quoteBin1d:" ((pack . show) x))
-    toJSON t@(Trade x) =
-        String (append "trade:" ((pack . show) x))
-    toJSON t@(TradeBin1m x) =
-        String (append "tradeBin1m:" ((pack . show) x))
-    toJSON t@(TradeBin5m x) =
-        String (append "tradeBin5m:" ((pack . show) x))
-    toJSON t@(TradeBin1h x) =
-        String (append "tradeBin1h:" ((pack . show) x))
-    toJSON t@(TradeBin1d x) =
-        String (append "tradeBin1d:" ((pack . show) x))
-    toJSON x = genericToJSON opts x
-      where
-        opts =
-            defaultOptions
-            { constructorTagModifier =
-                  \(x:xs) -> (toLower x : xs)
-            }
-
-instance (FromJSON a) => FromJSON (Topic a)
-
-data Message a = Message
-    { op   :: !Command
-    , args :: !(Vector a)
-    } deriving (Eq, Show, Generic)
-
-instance ToJSON a => ToJSON (Message a)
-
-instance FromJSON a => FromJSON (Message a)
-
-data Table a = Table
+data TABLE a = TABLE
     { _table       :: !Text
     , _action      :: !Action
     , _data        :: !(Vector a)
@@ -229,21 +105,17 @@ data Table a = Table
     , _attributes  :: !(Maybe Value)
     } deriving (Eq, Show, Generic)
 
-instance (ToJSON a) => ToJSON (Table a)
+instance (FromJSON a) => FromJSON (TABLE a)
 
-instance (FromJSON a) => FromJSON (Table a)
-
-data BitMEXStatus = BitMEXStatus
+data STATUS = STATUS
     { success   :: !Bool
     , subscribe :: !(Maybe Text)
     , request   :: !Value
     } deriving (Eq, Show, Generic)
 
-instance ToJSON BitMEXStatus
+instance FromJSON STATUS
 
-instance FromJSON BitMEXStatus
-
-data BitMEXInfo = BitMEXInfo
+data INFO = INFO
     { info      :: !Text
     , version   :: !Text
     , timestamp :: !Text
@@ -251,62 +123,59 @@ data BitMEXInfo = BitMEXInfo
     , limit     :: !Value
     } deriving (Eq, Show, Generic)
 
-instance ToJSON BitMEXInfo
+instance FromJSON INFO
 
-instance FromJSON BitMEXInfo
-
-newtype BitMEXError = BitMEXError
+newtype ERROR = ERROR
     { error :: Text
-    } deriving (Eq, Show, ToJSON, FromJSON, Generic)
+    } deriving (Eq, Show, FromJSON, Generic)
 
-data ResponseOrderBook10 = ResponseOrderBook10
+data RespOrderBook10 = RespOrderBook10
     { symbol    :: !Symbol
     , timestamp :: !Text
     , asks      :: !(Vector (Vector Double))
     , bids      :: !(Vector (Vector Double))
     } deriving (Eq, Show, Generic)
 
-instance ToJSON ResponseOrderBook10
-instance FromJSON ResponseOrderBook10
+instance FromJSON RespOrderBook10
 
 data Response
-    = AK (Table M.APIKey)
-    | AT (Table M.AccessToken)
-    | Aff (Table M.Affiliate)
-    | Ann (Table M.Announcement)
-    | C (Table M.Chat)
-    | CC (Table M.ChatChannels)
-    | CU (Table M.ConnectedUsers)
-    | Err (Table M.Error)
-    | Exe (Table M.Execution)
-    | F (Table M.Funding)
-    | IC (Table M.IndexComposite)
-    | I (Table M.Instrument)
-    | II (Table M.InstrumentInterval)
-    | Insu (Table M.Insurance)
-    | LB (Table M.Leaderboard)
-    | L (Table M.Liquidation)
-    | M (Table M.Margin)
-    | N (Table M.Notification)
-    | O (Table M.Order)
-    | OB (Table M.OrderBookL2)
-    | OB10 (Table ResponseOrderBook10)
-    | P (Table M.Position)
-    | Q (Table M.Quote)
-    | Setl (Table M.Settlement)
-    | S (Table M.Stats)
-    | SH (Table M.StatsHistory)
-    | SU (Table M.StatsUSD)
-    | T (Table M.Trade)
-    | TB (Table M.TradeBin)
-    | TX (Table M.Transaction)
-    | U (Table M.User)
-    | UC (Table M.UserCommission)
-    | UP (Table M.UserPreferences)
-    | W (Table M.Wallet)
-    | Status BitMEXStatus
-    | Info BitMEXInfo
-    | Error BitMEXError
+    = AK (TABLE M.APIKey)
+    | AT (TABLE M.AccessToken)
+    | Aff (TABLE M.Affiliate)
+    | Ann (TABLE M.Announcement)
+    | C (TABLE M.Chat)
+    | CC (TABLE M.ChatChannels)
+    | CU (TABLE M.ConnectedUsers)
+    | Err (TABLE M.Error)
+    | Exe (TABLE M.Execution)
+    | F (TABLE M.Funding)
+    | IC (TABLE M.IndexComposite)
+    | I (TABLE M.Instrument)
+    | II (TABLE M.InstrumentInterval)
+    | Insu (TABLE M.Insurance)
+    | LB (TABLE M.Leaderboard)
+    | L (TABLE M.Liquidation)
+    | M (TABLE M.Margin)
+    | N (TABLE M.Notification)
+    | O (TABLE M.Order)
+    | OB (TABLE M.OrderBookL2)
+    | OB10 (TABLE RespOrderBook10)
+    | P (TABLE M.Position)
+    | Q (TABLE M.Quote)
+    | Setl (TABLE M.Settlement)
+    | S (TABLE M.Stats)
+    | SH (TABLE M.StatsHistory)
+    | SU (TABLE M.StatsUSD)
+    | T (TABLE M.Trade)
+    | TB (TABLE M.TradeBin)
+    | TX (TABLE M.Transaction)
+    | U (TABLE M.User)
+    | UC (TABLE M.UserCommission)
+    | UP (TABLE M.UserPreferences)
+    | W (TABLE M.Wallet)
+    | Status STATUS
+    | Info INFO
+    | Error ERROR
     deriving (Eq, Show, Generic)
 
 instance FromJSON Response where
@@ -343,7 +212,8 @@ instance FromJSON Response where
                 Just "orderBookL2" ->
                     OB <$> genericParseJSON opts (Object o)
                 Just "orderBook10" ->
-                    OB10 <$> genericParseJSON opts (Object o)
+                    OB10 <$>
+                    genericParseJSON opts (Object o)
                 Just "position" ->
                     P <$> genericParseJSON opts (Object o)
                 Just "privateNotifications" ->

@@ -51,7 +51,10 @@ library
   -- Modules exported by the library.
   exposed-modules:    BitMEXWebSockets
                     , BitMEXWebSockets.API
-                    , BitMEXWebSockets.Type
+                    , BitMEXWebSockets.Types
+                    , BitMEXWebSockets.Types.General
+                    , BitMEXWebSockets.Types.Request
+                    , BitMEXWebSockets.Types.Response
   
   -- Modules included in this library but not exported.
   -- other-modules:       

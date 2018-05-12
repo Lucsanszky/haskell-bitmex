@@ -2,35 +2,23 @@ module BitMEXWebSockets.API
     ( app
     ) where
 
-import           BitMEX.Model
-    ( Announcement
-    , OrderBookL2
-    )
-import           BitMEXWebSockets.Type
-import           BitMEXWrapper
+import           BitMEXWebSockets.Types
 import           Control.Concurrent     (forkIO)
 import           Control.Monad          (forever, unless)
-import           Control.Monad.Reader   (asks, liftIO)
+import           Control.Monad.Reader   (liftIO)
 import           Crypto.Hash            (Digest)
 import           Crypto.Hash.Algorithms (SHA256)
 import           Data.Aeson
-    ( FromJSON
-    , Value
+    ( Value (String)
     , decode
     , encode
+    , toJSON
     )
-import           Data.ByteString.Char8  (pack)
-import qualified Data.Text              as T
-    ( Text
-    , null
-    , pack
-    )
-import           Data.Text.IO           (getLine, putStrLn)
-import           Data.Time.Clock.POSIX  (getPOSIXTime)
+import           Data.Text              (Text, null)
+import           Data.Text.IO           (getLine)
 import           Data.Vector            (fromList)
 import           Network.WebSockets
-    ( ClientApp
-    , Connection
+    ( Connection
     , receiveData
     , sendClose
     , sendTextData
@@ -39,24 +27,15 @@ import           Prelude
     ( IO
     , Int
     , Maybe
-    , String
-    , filter
     , print
-    , return
     , show
     , ($)
-    , (++)
     , (.)
-    , (/=)
     , (>>)
     , (>>=)
     )
 
-app :: (Digest SHA256)
-    -> Int
-    -> T.Text
-    -> Connection
-    -> IO ()
+app :: (Digest SHA256) -> Int -> Text -> Connection -> IO ()
 app sig time pub conn = do
     _ <-
         forkIO $
@@ -67,30 +46,28 @@ app sig time pub conn = do
                     (decode msg :: Maybe Response)
     forkIO $
         sendTextData conn $
-        T.pack
-            ("{\"op\": \"authKey\", \"args\": [" ++
-             (show pub) ++
-             "," ++
-             (show time) ++
-             "," ++ "\"" ++ (show sig) ++ "\"" ++ "]}")
+        encode $
+        Message
+        { op = AuthKey
+        , args =
+              fromList
+                  [ String pub
+                  , toJSON time
+                  , (toJSON . show) sig
+                  ]
+        }
     forkIO $
         sendTextData conn $
         encode $
         Message
         { op = Subscribe
-        , args = fromList [OrderBook10 XBTUSD :: Topic Symbol]
+        , args =
+              fromList [OrderBook10 XBTUSD :: Topic Symbol]
         }
-    -- forkIO $
-    --     sendTextData conn $
-    --     encode $
-    --     Message
-    --     { op = Subscribe
-    --     , args = [OrderBookL2 XBTM18 :: Topic Symbol]
-    --     }
     loop
-    sendClose conn ("Connection closed" :: T.Text)
+    sendClose conn ("Connection closed" :: Text)
   where
     loop =
         getLine >>= \line ->
-            unless (T.null line) $
+            unless (null line) $
             sendTextData conn line >> loop
