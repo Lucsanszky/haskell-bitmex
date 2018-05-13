@@ -1,4 +1,4 @@
-name:           bitmex
+name:           haskell-bitmex-rest
 version:        0.1.0.0
 synopsis:       Auto-generated bitmex API Client
 description:    .
@@ -67,7 +67,7 @@ library
       BitMEX.Model
       BitMEX.ModelLens
   other-modules:
-      Paths_bitmex
+      Paths_haskell_bitmex_rest
   default-language: Haskell2010
 
 test-suite tests
@@ -81,7 +81,7 @@ test-suite tests
     , transformers >=0.4.0.0
     , mtl >=2.2.1
     , unordered-containers
-    , bitmex
+    , haskell-bitmex-rest
     , bytestring >=0.10.0 && <0.11
     , containers
     , hspec >=1.8

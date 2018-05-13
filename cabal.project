@@ -1,3 +1,3 @@
-packages: api-wrapper/
+packages: wrapper/
           rest/
           ws/

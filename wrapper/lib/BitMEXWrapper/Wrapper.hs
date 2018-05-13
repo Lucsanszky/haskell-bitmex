@@ -26,7 +26,7 @@ import           BitMEXWebSockets.Types
     ( Command (AuthKey)
     , Message (..)
     )
-import           BitMEXWrapper.Type
+import           BitMEXWrapper.Types
 import           Control.Concurrent         (forkIO)
 import           Control.Monad.Reader       (asks, liftIO)
 import           Crypto.Hash                (Digest)

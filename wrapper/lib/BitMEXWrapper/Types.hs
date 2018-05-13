@@ -1,4 +1,4 @@
-module BitMEXWrapper.Type
+module BitMEXWrapper.Types
     ( BitMEXWrapperConfig(..)
     , BitMEXReader(..)
     ) where
