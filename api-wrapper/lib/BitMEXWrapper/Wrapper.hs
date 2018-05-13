@@ -6,13 +6,39 @@ module BitMEXWrapper.Wrapper
     ) where
 
 import           BitMEX
+    ( AuthApiKeyApiKey (..)
+    , AuthApiKeyApiNonce (..)
+    , AuthApiKeyApiSignature (..)
+    , BitMEXConfig (..)
+    , BitMEXRequest (..)
+    , MimeResult
+    , MimeType
+    , MimeUnrender
+    , Produces
+    , addAuthMethod
+    , dispatchMime
+    , initLogContext
+    , runDefaultLogExecWithContext
+    , setHeader
+    , withStdoutLogging
+    )
+import           BitMEXWebSockets.Types
+    ( Command (AuthKey)
+    , Message (..)
+    )
 import           BitMEXWrapper.Type
+import           Control.Concurrent         (forkIO)
 import           Control.Monad.Reader       (asks, liftIO)
 import           Crypto.Hash                (Digest)
 import           Crypto.Hash.Algorithms     (SHA256)
 import           Crypto.MAC.HMAC
     ( hmac
     , hmacGetDigest
+    )
+import           Data.Aeson
+    ( Value (String)
+    , encode
+    , toJSON
     )
 import           Data.ByteArray
     ( ByteArrayAccess
@@ -21,21 +47,16 @@ import           Data.ByteString.Char8      (pack)
 import           Data.ByteString.Conversion (toByteString')
 import           Data.ByteString.Lazy       (append)
 import           Data.ByteString.Lazy.Char8 (unpack)
-import qualified Data.Text                  as T
-    ( Text
-    , pack
-    , unpack
-    )
-import qualified Data.Text.IO               as T (readFile)
+import qualified Data.Text                  as T (pack)
 import           Data.Time.Clock.POSIX      (getPOSIXTime)
+import           Data.Vector                (fromList)
 import           Network.Socket             (withSocketsDo)
 import           Network.WebSockets
     ( ClientApp
-    , Connection
+    , sendTextData
     )
 import           Prelude
     ( Bool (..)
-    , IO
     , Int
     , Maybe (..)
     , RealFrac
@@ -43,18 +64,15 @@ import           Prelude
     , filter
     , floor
     , head
-    , print
     , return
     , show
     , ($)
     , (*)
-    , (+)
     , (++)
     , (.)
     , (/=)
     , (>>=)
     )
-import           System.Environment         (getArgs)
 import           Wuss
     ( runSecureClient
     )
@@ -118,9 +136,7 @@ makeRequest req@BitMEXRequest {..} = do
             AuthApiKeyApiKey pub
     liftIO $ dispatchMime mgr config new
 
-connect ::
-       ((Digest SHA256) -> Int -> T.Text -> Connection -> IO ())
-    -> BitMEXReader ()
+connect :: ClientApp () -> BitMEXReader ()
 connect app = do
     base <- asks url
     path <- asks path
@@ -129,5 +145,17 @@ connect app = do
     time <- liftIO $ getPOSIXTime >>= return . makeTimestamp
     sig <- sign (pack ("GET" ++ "/realtime" ++ show time))
     liftIO . withSocketsDo $
-        runSecureClient (unpack base) 443 (unpack path) $ \conn ->
-            app sig time pub conn
+        runSecureClient (unpack base) 443 (unpack path) $ \conn -> do
+            forkIO $
+                sendTextData conn $
+                encode $
+                Message
+                { op = AuthKey
+                , args =
+                      fromList
+                          [ String pub
+                          , toJSON time
+                          , (toJSON . show) sig
+                          ]
+                }
+            app conn

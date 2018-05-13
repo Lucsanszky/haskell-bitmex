@@ -6,27 +6,18 @@ import           BitMEXWebSockets.Types
 import           Control.Concurrent     (forkIO)
 import           Control.Monad          (forever, unless)
 import           Control.Monad.Reader   (liftIO)
-import           Crypto.Hash            (Digest)
-import           Crypto.Hash.Algorithms (SHA256)
-import           Data.Aeson
-    ( Value (String)
-    , decode
-    , encode
-    , toJSON
-    )
+import           Data.Aeson             (decode, encode)
 import           Data.Text              (Text, null)
 import           Data.Text.IO           (getLine)
 import           Data.Vector            (fromList)
 import           Network.WebSockets
-    ( Connection
+    ( ClientApp
     , receiveData
     , sendClose
     , sendTextData
     )
 import           Prelude
-    ( IO
-    , Int
-    , Maybe
+    ( Maybe
     , print
     , show
     , ($)
@@ -35,8 +26,8 @@ import           Prelude
     , (>>=)
     )
 
-app :: (Digest SHA256) -> Int -> Text -> Connection -> IO ()
-app sig time pub conn = do
+app :: ClientApp ()
+app conn = do
     _ <-
         forkIO $
         forever $ do
@@ -44,18 +35,6 @@ app sig time pub conn = do
             liftIO $
                 (print . show)
                     (decode msg :: Maybe Response)
-    forkIO $
-        sendTextData conn $
-        encode $
-        Message
-        { op = AuthKey
-        , args =
-              fromList
-                  [ String pub
-                  , toJSON time
-                  , (toJSON . show) sig
-                  ]
-        }
     forkIO $
         sendTextData conn $
         encode $
