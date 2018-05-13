@@ -23,7 +23,7 @@ import           Prelude
 data BitMEXWrapperConfig = BitMEXWrapperConfig
     { url        :: !LBS.ByteString
     , path       :: !LBS.ByteString
-    , manager    :: Maybe Manager
+    , manager    :: !(Maybe Manager)
     , publicKey  :: !Text
     , privateKey :: !SBS.ByteString
     }
