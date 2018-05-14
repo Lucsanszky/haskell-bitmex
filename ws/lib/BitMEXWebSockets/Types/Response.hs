@@ -31,7 +31,6 @@ import           Control.Monad                  (fail)
 import           Data.Aeson
     ( FromJSON
     , SumEncoding (UntaggedValue)
-    , ToJSON
     , Value (..)
     , constructorTagModifier
     , defaultOptions
@@ -40,7 +39,6 @@ import           Data.Aeson
     , parseJSON
     , sumEncoding
     , withObject
-    , (.:)
     , (.:?)
     )
 import           Data.Char                      (toLower)
@@ -60,7 +58,6 @@ import           Prelude
     , ($)
     , (.)
     , (<$>)
-    , (<*>)
     )
 
 data Side

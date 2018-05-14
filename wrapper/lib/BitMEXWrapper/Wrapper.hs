@@ -60,7 +60,6 @@ import           Prelude
     , Int
     , Maybe (..)
     , RealFrac
-    , Show
     , filter
     , floor
     , head
@@ -71,6 +70,7 @@ import           Prelude
     , (++)
     , (.)
     , (/=)
+    , (<$>)
     , (>>=)
     )
 import           Wuss
@@ -78,7 +78,7 @@ import           Wuss
     )
 
 sign ::
-       (ByteArrayAccess a, Show a)
+       (ByteArrayAccess a)
     => a
     -> BitMEXReader (Digest SHA256)
 sign body = do
@@ -89,8 +89,8 @@ makeRESTConfig :: BitMEXReader BitMEXConfig
 makeRESTConfig = do
     base <- asks url
     path <- asks path
-    logCxt <- liftIO $ initLogContext
-    return $
+    logCxt <- liftIO initLogContext
+    return
         BitMEXConfig
         { configHost = append base path
         , configUserAgent =
@@ -114,9 +114,8 @@ makeRequest ::
     -> BitMEXReader (MimeResult res)
 makeRequest req@BitMEXRequest {..} = do
     Just mgr <- asks manager
-    priv <- asks privateKey
     pub <- asks publicKey
-    time <- liftIO $ getPOSIXTime >>= return . makeTimestamp
+    time <- liftIO $ makeTimestamp <$> getPOSIXTime
     config0 <- makeRESTConfig >>= liftIO . withStdoutLogging
     let verb = filter (/= '"') $ show rMethod
     sig <-
@@ -140,22 +139,22 @@ connect :: ClientApp () -> BitMEXReader ()
 connect app = do
     base <- asks url
     path <- asks path
-    priv <- asks privateKey
     pub <- asks publicKey
-    time <- liftIO $ getPOSIXTime >>= return . makeTimestamp
+    time <- liftIO $ makeTimestamp <$> getPOSIXTime
     sig <- sign (pack ("GET" ++ "/realtime" ++ show time))
     liftIO . withSocketsDo $
         runSecureClient (unpack base) 443 (unpack path) $ \conn -> do
-            forkIO $
+            _ <-
+                forkIO $
                 sendTextData conn $
-                encode $
-                Message
-                { op = AuthKey
-                , args =
-                      fromList
-                          [ String pub
-                          , toJSON time
-                          , (toJSON . show) sig
-                          ]
-                }
+                encode
+                    Message
+                    { op = AuthKey
+                    , args =
+                          fromList
+                              [ String pub
+                              , toJSON time
+                              , (toJSON . show) sig
+                              ]
+                    }
             app conn

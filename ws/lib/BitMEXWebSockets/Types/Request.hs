@@ -12,32 +12,21 @@ import           Data.Aeson
     , constructorTagModifier
     , defaultOptions
     , genericToJSON
-    , object
     , sumEncoding
     , toJSON
-    , (.=)
     )
 import           Data.Char                      (toLower)
 import           Data.Text
-    ( Text
-    , append
+    ( append
     , pack
     )
-import           Data.Vector
-    ( Vector
-    , (!)
-    )
+import           Data.Vector                    (Vector)
 import           GHC.Generics
 import           Prelude
     ( Eq
     , Show
-    , String
     , show
-    , (++)
     , (.)
-    )
-import qualified Prelude                        as P
-    ( String
     )
 
 data Command
@@ -90,29 +79,29 @@ data Topic a
     deriving (Eq, Show, Generic)
 
 instance (ToJSON a) => ToJSON (Topic a) where
-    toJSON t@(OrderBookL2 x) =
-        String (append "orderBookL2:" ((pack . show) x))
-    toJSON t@(OrderBook10 x) =
-        String (append "orderBook10:" ((pack . show) x))
-    toJSON t@(QuoteBin1m x) =
-        String (append "quoteBin1m:" ((pack . show) x))
-    toJSON t@(QuoteBin5m x) =
-        String (append "quoteBin5m:" ((pack . show) x))
-    toJSON t@(QuoteBin1h x) =
-        String (append "quoteBin1h:" ((pack . show) x))
-    toJSON t@(QuoteBin1d x) =
-        String (append "quoteBin1d:" ((pack . show) x))
-    toJSON t@(Trade x) =
-        String (append "trade:" ((pack . show) x))
-    toJSON t@(TradeBin1m x) =
-        String (append "tradeBin1m:" ((pack . show) x))
-    toJSON t@(TradeBin5m x) =
-        String (append "tradeBin5m:" ((pack . show) x))
-    toJSON t@(TradeBin1h x) =
-        String (append "tradeBin1h:" ((pack . show) x))
-    toJSON t@(TradeBin1d x) =
-        String (append "tradeBin1d:" ((pack . show) x))
-    toJSON x = genericToJSON opts x
+    toJSON (OrderBookL2 v) =
+        String (append "orderBookL2:" ((pack . show) v))
+    toJSON (OrderBook10 v) =
+        String (append "orderBook10:" ((pack . show) v))
+    toJSON (QuoteBin1m v) =
+        String (append "quoteBin1m:" ((pack . show) v))
+    toJSON (QuoteBin5m v) =
+        String (append "quoteBin5m:" ((pack . show) v))
+    toJSON (QuoteBin1h v) =
+        String (append "quoteBin1h:" ((pack . show) v))
+    toJSON (QuoteBin1d v) =
+        String (append "quoteBin1d:" ((pack . show) v))
+    toJSON (Trade v) =
+        String (append "trade:" ((pack . show) v))
+    toJSON (TradeBin1m v) =
+        String (append "tradeBin1m:" ((pack . show) v))
+    toJSON (TradeBin5m v) =
+        String (append "tradeBin5m:" ((pack . show) v))
+    toJSON (TradeBin1h v) =
+        String (append "tradeBin1h:" ((pack . show) v))
+    toJSON (TradeBin1d v) =
+        String (append "tradeBin1d:" ((pack . show) v))
+    toJSON v = genericToJSON opts v
       where
         opts =
             defaultOptions
