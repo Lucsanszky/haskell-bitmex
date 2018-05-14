@@ -1,6 +1,7 @@
 module BitMEXWrapper.Types
     ( BitMEXWrapperConfig(..)
     , BitMEXReader(..)
+    , Environment(..)
     ) where
 
 import           Control.Monad.Reader
@@ -15,17 +16,30 @@ import           Data.Text            (Text)
 import           Network.HTTP.Client  (Manager)
 import           Prelude
     ( Applicative
+    , Eq
     , Functor
     , IO
     , Maybe
+    , Show
+    , show
     )
 
+data Environment
+    = MainNet
+    | TestNet
+    deriving (Eq)
+
+instance Show Environment where
+    show MainNet = "https://www.bitmex.com"
+    show TestNet = "https://testnet.bitmex.com"
+
 data BitMEXWrapperConfig = BitMEXWrapperConfig
-    { url        :: !LBS.ByteString
-    , path       :: !LBS.ByteString
-    , manager    :: !(Maybe Manager)
-    , publicKey  :: !Text
-    , privateKey :: !SBS.ByteString
+    { environment :: !Environment
+    , pathREST    :: !(Maybe LBS.ByteString)
+    , pathWS      :: !(Maybe LBS.ByteString)
+    , manager     :: !(Maybe Manager)
+    , publicKey   :: !Text
+    , privateKey  :: !SBS.ByteString
     }
 
 newtype BitMEXReader a = BitMEXReader

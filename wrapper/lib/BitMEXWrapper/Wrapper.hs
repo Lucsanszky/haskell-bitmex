@@ -46,7 +46,10 @@ import           Data.ByteArray
 import           Data.ByteString.Char8      (pack)
 import           Data.ByteString.Conversion (toByteString')
 import           Data.ByteString.Lazy       (append)
-import           Data.ByteString.Lazy.Char8 (unpack)
+import qualified Data.ByteString.Lazy.Char8 as LC
+    ( pack
+    , unpack
+    )
 import qualified Data.Text                  as T (pack)
 import           Data.Time.Clock.POSIX      (getPOSIXTime)
 import           Data.Vector                (fromList)
@@ -60,6 +63,7 @@ import           Prelude
     , Int
     , Maybe (..)
     , RealFrac
+    , drop
     , filter
     , floor
     , head
@@ -87,8 +91,9 @@ sign body = do
 
 makeRESTConfig :: BitMEXReader BitMEXConfig
 makeRESTConfig = do
-    base <- asks url
-    path <- asks path
+    env <- asks environment
+    let base = (LC.pack . show) env
+    Just path <- asks pathREST
     logCxt <- liftIO initLogContext
     return
         BitMEXConfig
@@ -123,7 +128,7 @@ makeRequest req@BitMEXRequest {..} = do
             (pack
                  (verb ++
                   "/api/v1" ++
-                  (unpack . head) rUrlPath ++ show time))
+                  (LC.unpack . head) rUrlPath ++ show time))
     let new =
             setHeader
                 req
@@ -137,13 +142,14 @@ makeRequest req@BitMEXRequest {..} = do
 
 connect :: ClientApp () -> BitMEXReader ()
 connect app = do
-    base <- asks url
-    path <- asks path
+    env <- asks environment
+    let base = ((drop 8) . show) env
+    Just path <- asks pathWS
     pub <- asks publicKey
     time <- liftIO $ makeTimestamp <$> getPOSIXTime
     sig <- sign (pack ("GET" ++ "/realtime" ++ show time))
     liftIO . withSocketsDo $
-        runSecureClient (unpack base) 443 (unpack path) $ \conn -> do
+        runSecureClient base 443 (LC.unpack path) $ \conn -> do
             _ <-
                 forkIO $
                 sendTextData conn $

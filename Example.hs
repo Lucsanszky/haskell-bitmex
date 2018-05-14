@@ -62,19 +62,12 @@ main = do
     (pubPath:privPath:_) <- getArgs
     pub <- T.readFile pubPath
     priv <- readFile privPath
-    let configREST =
+    let config =
             BitMEXWrapperConfig
-            { url = "https://testnet.bitmex.com"
-            , path = "/api/v1"
+            { environment = TestNet
+            , pathREST = Just "/api/v1"
+            , pathWS = Just "/realtime"
             , manager = Just mgr
-            , publicKey = pub
-            , privateKey = priv
-            }
-        configWS =
-            BitMEXWrapperConfig
-            { url = "testnet.bitmex.com"
-            , path = "/realtime"
-            , manager = Nothing
             , publicKey = pub
             , privateKey = priv
             }
@@ -82,6 +75,6 @@ main = do
         runReaderT
             (run (makeRequest $
                   orderGetOrders (Accept MimeJSON)))
-            configREST
+            config
     print res
-    runReaderT (run (connect app)) configWS
+    runReaderT (run (connect app)) config
