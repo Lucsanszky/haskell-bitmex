@@ -23,9 +23,6 @@ module BitMEXWebSockets.Types.Response
     ) where
 
 import           BitMEX.Core                    (DateTime)
-import qualified BitMEX.Model                   as M
-    ( TradeBin
-    )
 import           BitMEXWebSockets.Types.General
 import           Control.Monad                  (fail)
 import           Data.Aeson
@@ -624,6 +621,8 @@ data RespTrade = RespTrade
 
 instance FromJSON RespTrade
 
+-- TODO: TradeBin
+
 data RespTransaction = RespTransaction
     { transactId     :: !Text -- ^ /Required/ "transactID"
     , account        :: !(Maybe Integer) -- ^ "account"
@@ -690,7 +689,7 @@ data Response
     | Q (TABLE RespQuote)
     | Setl (TABLE RespSettlement)
     | T (TABLE RespTrade)
-    | TB (TABLE M.TradeBin)
+    -- | TB (TABLE RespTradeBin)
     | TX (TABLE RespTransaction)
     | W (TABLE RespWallet)
     | Status STATUS
