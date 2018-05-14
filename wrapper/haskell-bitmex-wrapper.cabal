@@ -63,7 +63,6 @@ library
                      , bytestring-conversion >= 0.3
                      , cryptonite >= 0.25
                      , http-client >=0.5 && <0.6
-                     , http-client-tls
                      , memory >= 0.14
                      , text >=0.11 && <1.3
                      , time >=1.5 && <1.9
