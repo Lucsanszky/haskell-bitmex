@@ -55,6 +55,15 @@ library
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:    
   
+
+  ghc-options: -Wall
+               -O2
+               -funbox-strict-fields
+               -fwarn-unused-imports
+               -Wcompat
+               -Wincomplete-record-updates
+               -Wincomplete-uni-patterns
+               -Wredundant-constraints
   -- Other library packages from which modules are imported.
   build-depends:       base >=4.10 && <4.11
                      , mtl >=2.2.1
