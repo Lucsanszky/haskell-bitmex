@@ -3,7 +3,7 @@ module BitMEXWebSockets.API
     ) where
 
 import           BitMEXWebSockets.Types
-import           Data.Aeson             (encode)
+import           Data.Aeson             (ToJSON, encode)
 import           Data.Vector            (fromList)
 import           Network.WebSockets
     ( Connection
@@ -12,7 +12,7 @@ import           Network.WebSockets
 import           Prelude                (IO, ($))
 
 sendMessage ::
-       Connection -> Command -> [Topic Symbol] -> IO ()
+       (ToJSON a) => Connection -> Command -> [a] -> IO ()
 sendMessage conn comm topics =
     sendTextData conn $
     encode $ Message {op = comm, args = fromList topics}
