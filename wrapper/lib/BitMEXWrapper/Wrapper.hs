@@ -22,23 +22,17 @@ import           BitMEX
     , setHeader
     , withStdoutLogging
     )
-import           BitMEXWebSockets.Types
-    ( Command (AuthKey)
-    , Message (..)
-    )
 import           BitMEXWrapper.Types
-import           Control.Concurrent         (forkIO)
-import           Control.Monad.Reader       (asks, liftIO)
+import           Control.Monad.Reader
+    ( asks
+    , liftIO
+    , runReaderT
+    )
 import           Crypto.Hash                (Digest)
 import           Crypto.Hash.Algorithms     (SHA256)
 import           Crypto.MAC.HMAC
     ( hmac
     , hmacGetDigest
-    )
-import           Data.Aeson
-    ( Value (String)
-    , encode
-    , toJSON
     )
 import           Data.ByteArray
     ( ByteArrayAccess
@@ -52,14 +46,10 @@ import qualified Data.ByteString.Lazy.Char8 as LC
     )
 import qualified Data.Text                  as T (pack)
 import           Data.Time.Clock.POSIX      (getPOSIXTime)
-import           Data.Vector                (fromList)
 import           Network.Socket             (withSocketsDo)
-import           Network.WebSockets
-    ( ClientApp
-    , sendTextData
-    )
 import           Prelude
     ( Bool (..)
+    , IO ()
     , Int
     , Maybe (..)
     , RealFrac
@@ -140,27 +130,10 @@ makeRequest req@BitMEXRequest {..} = do
             AuthApiKeyApiKey pub
     liftIO $ dispatchMime mgr config new
 
-connect :: ClientApp () -> BitMEXReader ()
-connect app = do
-    env <- asks environment
-    let base = ((drop 8) . show) env
-    Just path <- asks pathWS
-    pub <- asks publicKey
-    time <- liftIO $ makeTimestamp <$> getPOSIXTime
-    sig <- sign (pack ("GET" ++ "/realtime" ++ show time))
-    liftIO . withSocketsDo $
+connect :: BitMEXWrapperConfig -> BitMEXApp () -> IO ()
+connect config@BitMEXWrapperConfig {..} app = do
+    let base = (drop 8 . show) environment
+        Just path = pathWS
+    withSocketsDo $
         runSecureClient base 443 (LC.unpack path) $ \conn -> do
-            _ <-
-                forkIO $
-                sendTextData conn $
-                encode
-                    Message
-                    { op = AuthKey
-                    , args =
-                          fromList
-                              [ String pub
-                              , toJSON time
-                              , (toJSON . show) sig
-                              ]
-                    }
-            app conn
+            runReaderT (run (app conn)) config

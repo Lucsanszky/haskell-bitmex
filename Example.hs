@@ -3,26 +3,35 @@
 module Example where
 
 import           BitMEX
+    ( Accept (..)
+    , MimeJSON (..)
+    , orderGetOrders
+    )
 import           BitMEXWebSockets
 import           BitMEXWrapper
 import           Control.Concurrent      (forkIO)
 import           Control.Monad           (forever, unless)
 import           Control.Monad.Reader    (liftIO)
-import           Control.Monad.Reader    (runReaderT)
-import           Data.Aeson              (decode)
+import qualified Control.Monad.Reader    as R (asks)
+import           Data.Aeson
+    ( Value (String)
+    , decode
+    , toJSON
+    )
 import           Data.ByteString         (readFile)
+import           Data.ByteString.Char8   (pack)
 import           Data.Text               (Text, null)
 import qualified Data.Text.IO            as T
     ( getLine
     , readFile
     )
+import           Data.Time.Clock.POSIX   (getPOSIXTime)
 import           Network.HTTP.Client     (newManager)
 import           Network.HTTP.Client.TLS
     ( tlsManagerSettings
     )
 import           Network.WebSockets
-    ( ClientApp
-    , receiveData
+    ( receiveData
     , sendClose
     , sendTextData
     )
@@ -32,29 +41,51 @@ import           Prelude
     , print
     , show
     , ($)
+    , (++)
     , (.)
+    , (<$>)
     , (>>)
     , (>>=)
     )
 import           System.Environment      (getArgs)
 
-app :: ClientApp ()
+app :: BitMEXApp ()
 app conn = do
-    _ <-
-        forkIO $
-        forever $ do
-            msg <- receiveData conn
-            liftIO $
-                (print . show)
-                    (decode msg :: Maybe Response)
-    forkIO $ sendMessage conn Subscribe [OrderBook10 XBTUSD]
-    loop
-    sendClose conn ("Connection closed" :: Text)
+    pub <- R.asks publicKey
+    time <- liftIO $ makeTimestamp <$> getPOSIXTime
+    sig <- sign (pack ("GET" ++ "/realtime" ++ show time))
+    x <- makeRequest $ orderGetOrders (Accept MimeJSON)
+    liftIO $ do
+        print x
+        _ <-
+            forkIO $
+            sendMessage
+                conn
+                AuthKey
+                [ String pub
+                , toJSON time
+                , (toJSON . show) sig
+                ]
+        _ <-
+            forkIO $
+            forever $ do
+                msg <- receiveData conn
+                liftIO $
+                    (print . show)
+                        (decode msg :: Maybe Response)
+        _ <-
+            forkIO $
+            sendMessage
+                conn
+                Subscribe
+                [OrderBook10 XBTUSD :: Topic Symbol]
+        loop
+        sendClose conn ("Connection closed" :: Text)
   where
     loop =
         T.getLine >>= \line ->
-            unless (null line) $
-            sendTextData conn line >> loop
+            unless (null line) sendTextData conn line >>
+            loop
 
 main :: IO ()
 main = do
@@ -71,10 +102,4 @@ main = do
             , publicKey = pub
             , privateKey = priv
             }
-    res <-
-        runReaderT
-            (run (makeRequest $
-                  orderGetOrders (Accept MimeJSON)))
-            config
-    print res
-    runReaderT (run (connect app)) config
+    connect config app
