@@ -2,6 +2,7 @@ module BitMEXWrapper.Types
     ( BitMEXWrapperConfig(..)
     , BitMEXReader(..)
     , Environment(..)
+    , BitMEXApp
     ) where
 
 import           Control.Monad.Reader
@@ -14,6 +15,7 @@ import qualified Data.ByteString      as SBS (ByteString)
 import qualified Data.ByteString.Lazy as LBS (ByteString)
 import           Data.Text            (Text)
 import           Network.HTTP.Client  (Manager)
+import           Network.WebSockets   (Connection)
 import           Prelude
     ( Applicative
     , Eq
@@ -50,3 +52,5 @@ newtype BitMEXReader a = BitMEXReader
                , MonadIO
                , MonadReader BitMEXWrapperConfig
                )
+
+type BitMEXApp a = Connection -> BitMEXReader a
