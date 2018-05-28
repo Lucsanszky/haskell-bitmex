@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Example where
+module Main where
 
 import           BitMEX
     ( Accept (..)
@@ -84,8 +84,8 @@ app conn = do
   where
     loop =
         T.getLine >>= \line ->
-            unless (null line) sendTextData conn line >>
-            loop
+            unless (null line) $
+            sendTextData conn line >> loop
 
 main :: IO ()
 main = do
