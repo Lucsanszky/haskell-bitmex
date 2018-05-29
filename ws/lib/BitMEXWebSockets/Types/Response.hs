@@ -20,6 +20,10 @@ module BitMEXWebSockets.Types.Response
     , RespTrade(..)
     , RespTransaction(..)
     , RespWallet(..)
+    , TABLE(..)
+    , STATUS(..)
+    , INFO(..)
+    , ERROR(..)
     ) where
 
 import           BitMEX.Core                    (DateTime)
