@@ -1,11 +1,9 @@
-module BitMEXWebSockets.Types.General
+module BitMEXClient.WebSockets.Types.General
     ( Symbol(..)
     , Currency(..)
     ) where
 
-import           Data.Aeson   (FromJSON, ToJSON)
-import           GHC.Generics
-import           Prelude      (Eq, Show)
+import           BitMEXClient.CustomPrelude
 
 data Currency
     = XBT

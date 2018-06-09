@@ -1,5 +1,5 @@
 -- The name of the package.
-name:                haskell-bitmex-wrapper
+name:                haskell-bitmex-client
 
 -- The package version.  See the Haskell package versioning policy (PVP)
 -- for standards guiding when and how versions should be incremented.
@@ -45,12 +45,19 @@ cabal-version:       >=1.10
 
 library
   -- Modules exported by the library.
-  exposed-modules:    BitMEXWrapper
-                    , BitMEXWrapper.Types
-                    , BitMEXWrapper.Wrapper
+  exposed-modules:    BitMEXClient
 
   -- Modules included in this library but not exported.
-  -- other-modules:
+  other-modules: BitMEXClient.CustomPrelude
+               , BitMEXClient.WebSockets
+               , BitMEXClient.Wrapper
+               , BitMEXClient.WebSockets.API
+               , BitMEXClient.WebSockets.Types
+               , BitMEXClient.WebSockets.Types.General
+               , BitMEXClient.WebSockets.Types.Request
+               , BitMEXClient.WebSockets.Types.Response
+               , BitMEXClient.Wrapper.API
+               , BitMEXClient.Wrapper.Types
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
@@ -64,6 +71,7 @@ library
                -Wincomplete-record-updates
                -Wincomplete-uni-patterns
                -Wredundant-constraints
+
   -- Other library packages from which modules are imported.
   build-depends:       base >=4.10 && <4.11
                      , mtl >=2.2.1
@@ -79,7 +87,6 @@ library
                      , time >=1.5 && <1.9
                      , haskell-bitmex-rest
                      , safe-exceptions <0.2
-                     , haskell-bitmex-ws
                      , network >= 2.6
                      , vector >=0.10.9 && <0.13
                      , websockets >= 0.12
@@ -91,7 +98,9 @@ library
   -- Base language which the package is written in.
   default-language:    Haskell2010
 
-  default-extensions:  GeneralizedNewtypeDeriving
+  default-extensions:  DeriveGeneric
+                       DuplicateRecordFields
+                       GeneralizedNewtypeDeriving
                        MultiParamTypeClasses
                        NoImplicitPrelude
                        OverloadedStrings
@@ -106,11 +115,12 @@ executable example
                      , aeson >=1.0 && <2.0
                      , bytestring >=0.10.0 && <0.11
                      , haskell-bitmex-rest
-                     , haskell-bitmex-wrapper
-                     , haskell-bitmex-ws
+                     , haskell-bitmex-client
                      , http-client >=0.5 && <0.6
                      , http-client-tls >= 0.3
                      , katip >= 0.5
                      , text >=0.11 && <1.3
                      , time >=1.5 && <1.9
                      , websockets >= 0.12
+
+  default-language:    Haskell2010

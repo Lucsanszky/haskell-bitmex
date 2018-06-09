@@ -1,4 +1,4 @@
-module BitMEXWebSockets.Types.Response
+module BitMEXClient.WebSockets.Types.Response
     ( Response(..)
     , RespAffiliate(..)
     , RespAnnouncement(..)
@@ -26,39 +26,16 @@ module BitMEXWebSockets.Types.Response
     , ERROR(..)
     ) where
 
-import           BitMEX.Core                    (DateTime)
-import           BitMEXWebSockets.Types.General
-import           Control.Monad                  (fail)
-import           Data.Aeson
-    ( FromJSON
-    , SumEncoding (UntaggedValue)
-    , Value (..)
-    , constructorTagModifier
-    , defaultOptions
-    , fieldLabelModifier
-    , genericParseJSON
-    , parseJSON
-    , sumEncoding
-    , withObject
-    , (.:?)
+import           BitMEX.Core
+    ( DateTime
     )
-import           Data.Char                      (toLower)
-import           Data.Text                      (Text)
-import           Data.Vector                    (Vector)
-import           GHC.Generics
-import           Prelude
-    ( Bool
-    , Double
-    , Eq
-    , Int
-    , Integer
-    , Maybe (..)
-    , Show
-    , drop
-    , map
-    , ($)
-    , (.)
-    , (<$>)
+import           BitMEXClient.CustomPrelude
+import           BitMEXClient.WebSockets.Types.General
+import           Data.Text
+    ( Text
+    )
+import           Data.Vector
+    ( Vector
     )
 
 data Side

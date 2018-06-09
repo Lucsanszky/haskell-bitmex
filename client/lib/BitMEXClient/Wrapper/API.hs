@@ -1,4 +1,4 @@
-module BitMEXWrapper.Wrapper
+module BitMEXClient.Wrapper.API
     ( makeRequest
     , connect
     , sign
@@ -23,71 +23,30 @@ import           BitMEX
     , withStdoutLogging
     )
 import           BitMEX.Logging
-import           BitMEXWebSockets.Types     (Response)
-import           BitMEXWrapper.Types
-import           Control.Exception.Safe     (MonadCatch)
-import           Control.Monad.IO.Class     (MonadIO)
-import           Control.Monad.Reader
-    ( asks
-    , liftIO
-    , runReaderT
-    )
-import           Crypto.Hash                (Digest)
-import           Crypto.Hash.Algorithms     (SHA256)
-import           Crypto.MAC.HMAC
-    ( hmac
-    , hmacGetDigest
-    )
-import           Data.Aeson                 (decode)
+import           BitMEXClient.CustomPrelude
+import           BitMEXClient.WebSockets.Types (Response)
+import           BitMEXClient.Wrapper.Types
 import           Data.ByteArray
     ( ByteArrayAccess
     )
-import           Data.ByteString.Char8      (pack)
-import           Data.ByteString.Conversion (toByteString')
-import           Data.ByteString.Lazy       (append)
-import qualified Data.ByteString.Lazy.Char8 as LC
+import qualified Data.ByteString.Char8         as BC (pack)
+import           Data.ByteString.Conversion
+    ( toByteString'
+    )
+import qualified Data.ByteString.Lazy          as LBS
+    ( append
+    )
+import qualified Data.ByteString.Lazy.Char8    as LBC
     ( pack
     , unpack
     )
-import qualified Data.Text                  as T
-    ( Text
-    , pack
+import           Data.Text                     (Text)
+import qualified Data.Text                     as T (pack)
+import qualified Data.Text.Lazy                as LT
+    ( toStrict
     )
-import           Data.Text.Lazy             (toStrict)
-import           Data.Text.Lazy.Encoding    (decodeUtf8)
-import           Data.Time.Clock.POSIX      (getPOSIXTime)
-import           Network.HTTP.Client        (newManager)
-import           Network.HTTP.Client.TLS
-    ( tlsManagerSettings
-    )
-import           Network.Socket             (withSocketsDo)
-
-import           Network.WebSockets
-    ( Connection
-    , receiveData
-    )
-import           Prelude
-    ( Bool (..)
-    , IO ()
-    , Int
-    , Maybe (..)
-    , RealFrac
-    , drop
-    , filter
-    , floor
-    , head
-    , return
-    , show
-    , ($)
-    , (*)
-    , (++)
-    , (.)
-    , (/=)
-    , (<$>)
-    , (>>=)
-    )
-import           Wuss
-    ( runSecureClient
+import qualified Data.Text.Lazy.Encoding       as LT
+    ( decodeUtf8
     )
 
 sign ::
@@ -108,11 +67,11 @@ makeRESTConfig = do
             case p of
                 Nothing -> "/api/v1"
                 Just x  -> x
-    let base = (LC.pack . show) env
+    let base = (LBC.pack . show) env
         logExecContext = asks logExecContext
     return
         BitMEXConfig
-        { configHost = append base path
+        { configHost = LBS.append base path
         , configUserAgent =
               "swagger-haskell-http-client/1.0.0"
         , configLogExecWithContext = logExecContext
@@ -138,10 +97,10 @@ makeRequest req@BitMEXRequest {..} = do
     let verb = filter (/= '"') $ show rMethod
     sig <-
         sign
-            (pack
+            (BC.pack
                  (verb ++
                   "/api/v1" ++
-                  (LC.unpack . head) rUrlPath ++ show time))
+                  (LBC.unpack . head) rUrlPath ++ show time))
     let new =
             setHeader
                 req
@@ -167,7 +126,7 @@ connect config@BitMEXWrapperConfig {..} app = do
                 Nothing -> "/realtime"
                 Just x  -> x
     withSocketsDo $
-        runSecureClient base 443 (LC.unpack path) $ \conn -> do
+        runSecureClient base 443 (LBC.unpack path) $ \conn -> do
             runReaderT (run (app conn)) config
 
 getMessage ::
@@ -180,11 +139,11 @@ getMessage conn config = do
         case (decode msg :: Maybe Response) of
             Nothing -> do
                 _log "WebSocket" levelError $
-                    (toStrict . decodeUtf8) msg
+                    (LT.toStrict . LT.decodeUtf8) msg
                 return Nothing
             Just r -> do
                 _log "WebSocket" levelInfo $
-                    (toStrict . decodeUtf8) msg
+                    (LT.toStrict . LT.decodeUtf8) msg
                 return (Just r)
 
 withStdoutLoggingWS ::
@@ -204,7 +163,7 @@ runConfigLog config =
 
 runConfigLogWithExceptions ::
        (MonadCatch m, MonadIO m)
-    => T.Text
+    => Text
     -> BitMEXWrapperConfig
     -> LogExec m
 runConfigLogWithExceptions src config =

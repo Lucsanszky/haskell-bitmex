@@ -1,0 +1,2 @@
+-c "cabal new-repl"
+--restart=./haskell-bitmex-client.cabal

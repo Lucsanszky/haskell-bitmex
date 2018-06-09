@@ -1,2 +1,0 @@
--c "cabal new-repl"
---restart=./haskell-bitmex-ws.cabal

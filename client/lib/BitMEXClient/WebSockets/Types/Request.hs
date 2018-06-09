@@ -1,32 +1,17 @@
-module BitMEXWebSockets.Types.Request
+module BitMEXClient.WebSockets.Types.Request
     ( Command(..)
     , Topic(..)
     , Message(..)
     ) where
 
-import           BitMEXWebSockets.Types.General
-import           Data.Aeson
-    ( SumEncoding (UntaggedValue)
-    , ToJSON
-    , Value (String)
-    , constructorTagModifier
-    , defaultOptions
-    , genericToJSON
-    , sumEncoding
-    , toJSON
-    )
-import           Data.Char                      (toLower)
-import           Data.Text
+import           BitMEXClient.CustomPrelude
+import           BitMEXClient.WebSockets.Types.General
+import qualified Data.Text                             as T
     ( append
     , pack
     )
-import           Data.Vector                    (Vector)
-import           GHC.Generics
-import           Prelude
-    ( Eq
-    , Show
-    , show
-    , (.)
+import           Data.Vector
+    ( Vector
     )
 
 data Command
@@ -82,27 +67,27 @@ data Topic a
 
 instance (ToJSON a) => ToJSON (Topic a) where
     toJSON (OrderBookL2 v) =
-        String (append "orderBookL2:" ((pack . show) v))
+        String (T.append "orderBookL2:" ((T.pack . show) v))
     toJSON (OrderBook10 v) =
-        String (append "orderBook10:" ((pack . show) v))
+        String (T.append "orderBook10:" ((T.pack . show) v))
     toJSON (QuoteBin1m v) =
-        String (append "quoteBin1m:" ((pack . show) v))
+        String (T.append "quoteBin1m:" ((T.pack . show) v))
     toJSON (QuoteBin5m v) =
-        String (append "quoteBin5m:" ((pack . show) v))
+        String (T.append "quoteBin5m:" ((T.pack . show) v))
     toJSON (QuoteBin1h v) =
-        String (append "quoteBin1h:" ((pack . show) v))
+        String (T.append "quoteBin1h:" ((T.pack . show) v))
     toJSON (QuoteBin1d v) =
-        String (append "quoteBin1d:" ((pack . show) v))
+        String (T.append "quoteBin1d:" ((T.pack . show) v))
     toJSON (Trade v) =
-        String (append "trade:" ((pack . show) v))
+        String (T.append "trade:" ((T.pack . show) v))
     toJSON (TradeBin1m v) =
-        String (append "tradeBin1m:" ((pack . show) v))
+        String (T.append "tradeBin1m:" ((T.pack . show) v))
     toJSON (TradeBin5m v) =
-        String (append "tradeBin5m:" ((pack . show) v))
+        String (T.append "tradeBin5m:" ((T.pack . show) v))
     toJSON (TradeBin1h v) =
-        String (append "tradeBin1h:" ((pack . show) v))
+        String (T.append "tradeBin1h:" ((T.pack . show) v))
     toJSON (TradeBin1d v) =
-        String (append "tradeBin1d:" ((pack . show) v))
+        String (T.append "tradeBin1d:" ((T.pack . show) v))
     toJSON v = genericToJSON opts v
       where
         opts =

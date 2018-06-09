@@ -1,4 +1,4 @@
-module BitMEXWrapper.Types
+module BitMEXClient.Wrapper.Types
     ( BitMEXWrapperConfig(..)
     , BitMEXReader(..)
     , Environment(..)
@@ -9,26 +9,14 @@ import           BitMEX
     ( LogContext
     , LogExecWithContext
     )
-import           Control.Monad.Reader
-    ( Monad
-    , MonadIO
-    , MonadReader
-    , ReaderT
+import           BitMEXClient.CustomPrelude
+import qualified Data.ByteString            as BS
+    ( ByteString
     )
-import qualified Data.ByteString      as SBS (ByteString)
-import qualified Data.ByteString.Lazy as LBS (ByteString)
-import           Data.Text            (Text)
-import           Network.HTTP.Client  (Manager)
-import           Network.WebSockets   (Connection)
-import           Prelude
-    ( Applicative
-    , Eq
-    , Functor
-    , IO
-    , Maybe
-    , Show
-    , show
+import qualified Data.ByteString.Lazy       as LBS
+    ( ByteString
     )
+import           Data.Text                  (Text)
 
 data Environment
     = MainNet
@@ -45,7 +33,7 @@ data BitMEXWrapperConfig = BitMEXWrapperConfig
     , pathWS         :: !(Maybe LBS.ByteString)
     , manager        :: !(Maybe Manager)
     , publicKey      :: !Text
-    , privateKey     :: !SBS.ByteString
+    , privateKey     :: !BS.ByteString
     , logExecContext :: !LogExecWithContext
     , logContext     :: !LogContext
     }

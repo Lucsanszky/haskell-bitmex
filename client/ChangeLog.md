@@ -1,4 +1,4 @@
-# Revision history for haskell-bitmex-ws
+# Revision history for haskell-bitmex-client
 
 ## 0.1.0.0  -- YYYY-mm-dd
 

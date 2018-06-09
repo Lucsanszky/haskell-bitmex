@@ -9,8 +9,21 @@ import           BitMEX
     , orderGetOrders
     , runDefaultLogExecWithContext
     )
-import           BitMEXWebSockets
-import           BitMEXWrapper
+import           BitMEXClient
+    ( BitMEXApp
+    , BitMEXWrapperConfig (..)
+    , Command (..)
+    , Environment (..)
+    , Symbol (..)
+    , Topic (..)
+    , connect
+    , getMessage
+    , makeRequest
+    , makeTimestamp
+    , sendMessage
+    , sign
+    , withStdoutLoggingWS
+    )
 import           Control.Concurrent      (forkIO)
 import           Control.Exception
 import           Control.Monad           (forever, unless)
@@ -66,7 +79,7 @@ app conn = do
     sig <- sign (pack ("GET" ++ "/realtime" ++ show time))
     x <- makeRequest $ orderGetOrders (Accept MimeJSON)
     liftIO $ do
-        -- print x
+        print x
         _ <-
             forkIO $
             sendMessage
@@ -76,13 +89,7 @@ app conn = do
                 , toJSON time
                 , (toJSON . show) sig
                 ]
-        _ <-
-            forkIO $
-            forever $ do
-                getMessage conn config
-                -- msg <- receiveData conn
-                -- liftIO $
-                    -- (print . show) msg
+        _ <- forkIO $ forever $ do getMessage conn config
         _ <-
             forkIO $
             sendMessage
