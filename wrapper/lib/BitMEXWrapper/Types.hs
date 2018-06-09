@@ -1,5 +1,3 @@
-{-# LANGUAGE RankNTypes #-}
-
 module BitMEXWrapper.Types
     ( BitMEXWrapperConfig(..)
     , BitMEXReader(..)
