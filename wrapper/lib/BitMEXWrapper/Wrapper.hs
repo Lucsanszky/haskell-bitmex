@@ -1,8 +1,12 @@
+{-# LANGUAGE RankNTypes #-}
+
 module BitMEXWrapper.Wrapper
     ( makeRequest
     , connect
     , sign
     , makeTimestamp
+    , getMessage
+    , withStdoutLoggingWS
     ) where
 
 import           BitMEX
@@ -11,6 +15,9 @@ import           BitMEX
     , AuthApiKeyApiSignature (..)
     , BitMEXConfig (..)
     , BitMEXRequest (..)
+    , LogContext
+    , LogExec
+    , LogExecWithContext
     , MimeResult
     , MimeType
     , MimeUnrender
@@ -22,7 +29,11 @@ import           BitMEX
     , setHeader
     , withStdoutLogging
     )
+import           BitMEX.Logging
+import           BitMEXWebSockets.Types     (Response)
 import           BitMEXWrapper.Types
+import           Control.Exception.Safe     (MonadCatch)
+import           Control.Monad.IO.Class     (MonadIO)
 import           Control.Monad.Reader
     ( asks
     , liftIO
@@ -34,6 +45,7 @@ import           Crypto.MAC.HMAC
     ( hmac
     , hmacGetDigest
     )
+import           Data.Aeson                 (decode)
 import           Data.ByteArray
     ( ByteArrayAccess
     )
@@ -44,9 +56,18 @@ import qualified Data.ByteString.Lazy.Char8 as LC
     ( pack
     , unpack
     )
-import qualified Data.Text                  as T (pack)
+import qualified Data.Text                  as T
+    ( Text
+    , pack
+    )
+import           Data.Text.Lazy             (toStrict)
+import           Data.Text.Lazy.Encoding    (decodeUtf8)
 import           Data.Time.Clock.POSIX      (getPOSIXTime)
 import           Network.Socket             (withSocketsDo)
+import           Network.WebSockets
+    ( Connection
+    , receiveData
+    )
 import           Prelude
     ( Bool (..)
     , IO ()
@@ -57,6 +78,7 @@ import           Prelude
     , filter
     , floor
     , head
+    , print
     , return
     , show
     , ($)
@@ -84,14 +106,14 @@ makeRESTConfig = do
     env <- asks environment
     let base = (LC.pack . show) env
     Just path <- asks pathREST
-    logCxt <- liftIO initLogContext
+    logCxt <- asks logContext
+    let logExecContext = asks logExecContext
     return
         BitMEXConfig
         { configHost = append base path
         , configUserAgent =
               "swagger-haskell-http-client/1.0.0"
-        , configLogExecWithContext =
-              runDefaultLogExecWithContext
+        , configLogExecWithContext = logExecContext
         , configLogContext = logCxt
         , configAuthMethods = []
         , configValidateAuthMethods = True
@@ -137,3 +159,30 @@ connect config@BitMEXWrapperConfig {..} app = do
     withSocketsDo $
         runSecureClient base 443 (LC.unpack path) $ \conn -> do
             runReaderT (run (app conn)) config
+
+getMessage :: Connection -> BitMEXWrapperConfig -> IO (Maybe Response)
+getMessage conn config = do
+    msg <- receiveData conn
+    runConfigLogWithExceptions "WebSocket" config $ do
+        case (decode msg :: Maybe Response) of
+            Nothing -> do
+                    _log "WebSocket" levelError $ (toStrict . decodeUtf8) msg
+                    return Nothing
+            Just r -> do
+                  _log "WebSocket" levelInfo $ (toStrict . decodeUtf8) msg
+                  return (Just r)
+
+withStdoutLoggingWS :: BitMEXWrapperConfig -> IO BitMEXWrapperConfig
+withStdoutLoggingWS p = do
+    logCxt <- stdoutLoggingContext (logContext p)
+    return $ p { logExecContext = stdoutLoggingExec, logContext = logCxt }
+
+runConfigLog
+  :: MonadIO m
+  => BitMEXWrapperConfig -> LogExec m
+runConfigLog config = logExecContext config (logContext config)
+
+runConfigLogWithExceptions
+  :: (MonadCatch m, MonadIO m)
+  => T.Text -> BitMEXWrapperConfig -> LogExec m
+runConfigLogWithExceptions src config = runConfigLog config . logExceptions src

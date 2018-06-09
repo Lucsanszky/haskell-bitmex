@@ -5,14 +5,17 @@ module Main where
 import           BitMEX
     ( Accept (..)
     , MimeJSON (..)
+    , initLogContext
     , orderGetOrders
+    , runDefaultLogExecWithContext
     )
 import           BitMEXWebSockets
 import           BitMEXWrapper
 import           Control.Concurrent      (forkIO)
+import           Control.Exception
 import           Control.Monad           (forever, unless)
 import           Control.Monad.Reader    (liftIO)
-import qualified Control.Monad.Reader    as R (asks)
+import qualified Control.Monad.Reader    as R (ask, asks)
 import           Data.Aeson
     ( Value (String)
     , decode
@@ -26,6 +29,7 @@ import qualified Data.Text.IO            as T
     , readFile
     )
 import           Data.Time.Clock.POSIX   (getPOSIXTime)
+import           Katip
 import           Network.HTTP.Client     (newManager)
 import           Network.HTTP.Client.TLS
     ( tlsManagerSettings
@@ -36,27 +40,33 @@ import           Network.WebSockets
     , sendTextData
     )
 import           Prelude
-    ( IO
+    ( Bool (True)
+    , IO
     , Maybe (..)
+    , mempty
     , print
+    , return
     , show
     , ($)
     , (++)
     , (.)
     , (<$>)
+    , (=<<)
     , (>>)
     , (>>=)
     )
 import           System.Environment      (getArgs)
+import           System.IO               (stdout)
 
 app :: BitMEXApp ()
 app conn = do
+    config <- R.ask
     pub <- R.asks publicKey
     time <- liftIO $ makeTimestamp <$> getPOSIXTime
     sig <- sign (pack ("GET" ++ "/realtime" ++ show time))
     x <- makeRequest $ orderGetOrders (Accept MimeJSON)
     liftIO $ do
-        print x
+        -- print x
         _ <-
             forkIO $
             sendMessage
@@ -69,10 +79,10 @@ app conn = do
         _ <-
             forkIO $
             forever $ do
-                msg <- receiveData conn
-                liftIO $
-                    (print . show)
-                        (decode msg :: Maybe Response)
+                getMessage conn config
+                -- msg <- receiveData conn
+                -- liftIO $
+                    -- (print . show) msg
         _ <-
             forkIO $
             sendMessage
@@ -93,7 +103,8 @@ main = do
     (pubPath:privPath:_) <- getArgs
     pub <- T.readFile pubPath
     priv <- readFile privPath
-    let config =
+    logCxt <- initLogContext
+    let config0 =
             BitMEXWrapperConfig
             { environment = TestNet
             , pathREST = Just "/api/v1"
@@ -101,5 +112,8 @@ main = do
             , manager = Just mgr
             , publicKey = pub
             , privateKey = priv
+            , logExecContext = runDefaultLogExecWithContext
+            , logContext = logCxt
             }
+    config <- return config0 >>= withStdoutLoggingWS
     connect config app

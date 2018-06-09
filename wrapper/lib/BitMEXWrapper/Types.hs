@@ -1,3 +1,5 @@
+{-# LANGUAGE RankNTypes #-}
+
 module BitMEXWrapper.Types
     ( BitMEXWrapperConfig(..)
     , BitMEXReader(..)
@@ -5,11 +7,17 @@ module BitMEXWrapper.Types
     , BitMEXApp
     ) where
 
+import           BitMEX
+    ( LogContext
+    , LogExecWithContext
+    )
 import           Control.Monad.Reader
     ( Monad
     , MonadIO
     , MonadReader
     , ReaderT
+    , asks
+    , local
     )
 import qualified Data.ByteString      as SBS (ByteString)
 import qualified Data.ByteString.Lazy as LBS (ByteString)
@@ -36,12 +44,14 @@ instance Show Environment where
     show TestNet = "https://testnet.bitmex.com"
 
 data BitMEXWrapperConfig = BitMEXWrapperConfig
-    { environment :: !Environment
-    , pathREST    :: !(Maybe LBS.ByteString)
-    , pathWS      :: !(Maybe LBS.ByteString)
-    , manager     :: !(Maybe Manager)
-    , publicKey   :: !Text
-    , privateKey  :: !SBS.ByteString
+    { environment    :: !Environment
+    , pathREST       :: !(Maybe LBS.ByteString)
+    , pathWS         :: !(Maybe LBS.ByteString)
+    , manager        :: !(Maybe Manager)
+    , publicKey      :: !Text
+    , privateKey     :: !SBS.ByteString
+    , logExecContext :: !LogExecWithContext
+    , logContext     :: !LogContext
     }
 
 newtype BitMEXReader a = BitMEXReader
@@ -54,3 +64,24 @@ newtype BitMEXReader a = BitMEXReader
                )
 
 type BitMEXApp a = Connection -> BitMEXReader a
+
+-- instance K.Katip BitMEXReader where
+--     getLogEnv = asks logEnv
+--     localLogEnv f (BitMEXReader m) =
+--         BitMEXReader
+--             (local (\s -> s {logEnv = f (logEnv s)}) m)
+
+-- instance K.KatipContext BitMEXReader where
+--     getKatipContext = asks logContext
+--     localKatipContext f (BitMEXReader m) =
+--         BitMEXReader
+--             (local
+--                  (\s -> s {logContext = f (logContext s)})
+--                  m)
+--     getKatipNamespace = asks logNamespace
+--     localKatipNamespace f (BitMEXReader m) =
+--         BitMEXReader
+--             (local
+--                  (\s ->
+--                       s {logNamespace = f (logNamespace s)})
+--                  m)

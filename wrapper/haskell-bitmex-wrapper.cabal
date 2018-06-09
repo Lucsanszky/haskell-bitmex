@@ -1,7 +1,7 @@
 -- The name of the package.
 name:                haskell-bitmex-wrapper
 
--- The package version.  See the Haskell package versioning policy (PVP) 
+-- The package version.  See the Haskell package versioning policy (PVP)
 -- for standards guiding when and how versions should be incremented.
 -- https://wiki.haskell.org/Package_versioning_policy
 -- PVP summary:      +-+------- breaking API changes
@@ -10,10 +10,10 @@ name:                haskell-bitmex-wrapper
 version:             0.1.0.0
 
 -- A short (one-line) description of the package.
--- synopsis:            
+-- synopsis:
 
 -- A longer description of the package.
--- description:         
+-- description:
 
 -- The license under which the package is released.
 license:             BSD3
@@ -24,18 +24,18 @@ license-file:        LICENSE
 -- The package author(s).
 author:              Lucsanszky
 
--- An email address to which users can send suggestions, bug reports, and 
+-- An email address to which users can send suggestions, bug reports, and
 -- patches.
 maintainer:          dan.lucsanszky@gmail.com
 
 -- A copyright notice.
--- copyright:           
+-- copyright:
 
 category:            Web
 
 build-type:          Simple
 
--- Extra files to be distributed with the package, such as examples or a 
+-- Extra files to be distributed with the package, such as examples or a
 -- README.
 extra-source-files:  ChangeLog.md
 
@@ -48,13 +48,13 @@ library
   exposed-modules:    BitMEXWrapper
                     , BitMEXWrapper.Types
                     , BitMEXWrapper.Wrapper
-  
+
   -- Modules included in this library but not exported.
-  -- other-modules:       
-  
+  -- other-modules:
+
   -- LANGUAGE extensions used by modules in this package.
-  -- other-extensions:    
-  
+  -- other-extensions:
+
 
   ghc-options: -Wall
                -O2
@@ -72,19 +72,21 @@ library
                      , bytestring-conversion >= 0.3
                      , cryptonite >= 0.25
                      , http-client >=0.5 && <0.6
+                     , katip >= 0.5
                      , memory >= 0.14
                      , text >=0.11 && <1.3
                      , time >=1.5 && <1.9
                      , haskell-bitmex-rest
+                     , safe-exceptions <0.2
                      , haskell-bitmex-ws
                      , network >= 2.6
                      , vector >=0.10.9 && <0.13
                      , websockets >= 0.12
                      , wuss >= 1.1
-  
+
   -- Directories containing source files.
   hs-source-dirs:      lib
-  
+
   -- Base language which the package is written in.
   default-language:    Haskell2010
 
@@ -106,6 +108,7 @@ executable example
                      , haskell-bitmex-ws
                      , http-client >=0.5 && <0.6
                      , http-client-tls >= 0.3
+                     , katip >= 0.5
                      , text >=0.11 && <1.3
                      , time >=1.5 && <1.9
                      , websockets >= 0.12
