@@ -16,8 +16,6 @@ import           Control.Monad.Reader
     , MonadIO
     , MonadReader
     , ReaderT
-    , asks
-    , local
     )
 import qualified Data.ByteString      as SBS (ByteString)
 import qualified Data.ByteString.Lazy as LBS (ByteString)
@@ -64,24 +62,3 @@ newtype BitMEXReader a = BitMEXReader
                )
 
 type BitMEXApp a = Connection -> BitMEXReader a
-
--- instance K.Katip BitMEXReader where
---     getLogEnv = asks logEnv
---     localLogEnv f (BitMEXReader m) =
---         BitMEXReader
---             (local (\s -> s {logEnv = f (logEnv s)}) m)
-
--- instance K.KatipContext BitMEXReader where
---     getKatipContext = asks logContext
---     localKatipContext f (BitMEXReader m) =
---         BitMEXReader
---             (local
---                  (\s -> s {logContext = f (logContext s)})
---                  m)
---     getKatipNamespace = asks logNamespace
---     localKatipNamespace f (BitMEXReader m) =
---         BitMEXReader
---             (local
---                  (\s ->
---                       s {logNamespace = f (logNamespace s)})
---                  m)

@@ -1,5 +1,3 @@
-{-# LANGUAGE RankNTypes #-}
-
 module BitMEXWrapper.Wrapper
     ( makeRequest
     , connect
@@ -15,17 +13,12 @@ import           BitMEX
     , AuthApiKeyApiSignature (..)
     , BitMEXConfig (..)
     , BitMEXRequest (..)
-    , LogContext
-    , LogExec
-    , LogExecWithContext
     , MimeResult
     , MimeType
     , MimeUnrender
     , Produces
     , addAuthMethod
     , dispatchMime
-    , initLogContext
-    , runDefaultLogExecWithContext
     , setHeader
     , withStdoutLogging
     )
@@ -63,7 +56,12 @@ import qualified Data.Text                  as T
 import           Data.Text.Lazy             (toStrict)
 import           Data.Text.Lazy.Encoding    (decodeUtf8)
 import           Data.Time.Clock.POSIX      (getPOSIXTime)
+import           Network.HTTP.Client        (newManager)
+import           Network.HTTP.Client.TLS
+    ( tlsManagerSettings
+    )
 import           Network.Socket             (withSocketsDo)
+
 import           Network.WebSockets
     ( Connection
     , receiveData
@@ -78,7 +76,6 @@ import           Prelude
     , filter
     , floor
     , head
-    , print
     , return
     , show
     , ($)
@@ -104,10 +101,15 @@ sign body = do
 makeRESTConfig :: BitMEXReader BitMEXConfig
 makeRESTConfig = do
     env <- asks environment
-    let base = (LC.pack . show) env
-    Just path <- asks pathREST
     logCxt <- asks logContext
-    let logExecContext = asks logExecContext
+    path <-
+        asks pathREST >>= \p ->
+            return $
+            case p of
+                Nothing -> "/api/v1"
+                Just x  -> x
+    let base = (LC.pack . show) env
+        logExecContext = asks logExecContext
     return
         BitMEXConfig
         { configHost = append base path
@@ -130,7 +132,6 @@ makeRequest ::
     => BitMEXRequest req contentType res accept
     -> BitMEXReader (MimeResult res)
 makeRequest req@BitMEXRequest {..} = do
-    Just mgr <- asks manager
     pub <- asks publicKey
     time <- liftIO $ makeTimestamp <$> getPOSIXTime
     config0 <- makeRESTConfig >>= liftIO . withStdoutLogging
@@ -150,39 +151,61 @@ makeRequest req@BitMEXRequest {..} = do
             AuthApiKeyApiSignature ((T.pack . show) sig) `addAuthMethod`
             AuthApiKeyApiNonce "" `addAuthMethod`
             AuthApiKeyApiKey pub
+    mgr <-
+        asks manager >>= \m ->
+            case m of
+                Nothing ->
+                    liftIO $ newManager tlsManagerSettings
+                Just x -> return x
     liftIO $ dispatchMime mgr config new
 
 connect :: BitMEXWrapperConfig -> BitMEXApp () -> IO ()
 connect config@BitMEXWrapperConfig {..} app = do
     let base = (drop 8 . show) environment
-        Just path = pathWS
+        path =
+            case pathWS of
+                Nothing -> "/realtime"
+                Just x  -> x
     withSocketsDo $
         runSecureClient base 443 (LC.unpack path) $ \conn -> do
             runReaderT (run (app conn)) config
 
-getMessage :: Connection -> BitMEXWrapperConfig -> IO (Maybe Response)
+getMessage ::
+       Connection
+    -> BitMEXWrapperConfig
+    -> IO (Maybe Response)
 getMessage conn config = do
     msg <- receiveData conn
     runConfigLogWithExceptions "WebSocket" config $ do
         case (decode msg :: Maybe Response) of
             Nothing -> do
-                    _log "WebSocket" levelError $ (toStrict . decodeUtf8) msg
-                    return Nothing
+                _log "WebSocket" levelError $
+                    (toStrict . decodeUtf8) msg
+                return Nothing
             Just r -> do
-                  _log "WebSocket" levelInfo $ (toStrict . decodeUtf8) msg
-                  return (Just r)
+                _log "WebSocket" levelInfo $
+                    (toStrict . decodeUtf8) msg
+                return (Just r)
 
-withStdoutLoggingWS :: BitMEXWrapperConfig -> IO BitMEXWrapperConfig
+withStdoutLoggingWS ::
+       BitMEXWrapperConfig -> IO BitMEXWrapperConfig
 withStdoutLoggingWS p = do
     logCxt <- stdoutLoggingContext (logContext p)
-    return $ p { logExecContext = stdoutLoggingExec, logContext = logCxt }
+    return $
+        p
+        { logExecContext = stdoutLoggingExec
+        , logContext = logCxt
+        }
 
-runConfigLog
-  :: MonadIO m
-  => BitMEXWrapperConfig -> LogExec m
-runConfigLog config = logExecContext config (logContext config)
+runConfigLog ::
+       MonadIO m => BitMEXWrapperConfig -> LogExec m
+runConfigLog config =
+    logExecContext config (logContext config)
 
-runConfigLogWithExceptions
-  :: (MonadCatch m, MonadIO m)
-  => T.Text -> BitMEXWrapperConfig -> LogExec m
-runConfigLogWithExceptions src config = runConfigLog config . logExceptions src
+runConfigLogWithExceptions ::
+       (MonadCatch m, MonadIO m)
+    => T.Text
+    -> BitMEXWrapperConfig
+    -> LogExec m
+runConfigLogWithExceptions src config =
+    runConfigLog config . logExceptions src

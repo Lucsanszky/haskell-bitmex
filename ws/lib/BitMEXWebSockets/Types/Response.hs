@@ -81,7 +81,10 @@ instance FromJSON Action where
         opts =
             defaultOptions
             { constructorTagModifier =
-                  \(x:xs) -> (toLower x : xs)
+                  \xs ->
+                      case xs of
+                          []      -> xs
+                          (x:xs') -> (toLower x : xs')
             }
 
 data NotificationType
@@ -626,7 +629,6 @@ data RespTrade = RespTrade
 instance FromJSON RespTrade
 
 -- TODO: TradeBin
-
 data RespTransaction = RespTransaction
     { transactId     :: !Text -- ^ /Required/ "transactID"
     , account        :: !(Maybe Integer) -- ^ "account"
@@ -754,6 +756,9 @@ instance FromJSON Response where
                     TX <$> genericParseJSON opts (Object o)
                 Just "wallet" ->
                     W <$> genericParseJSON opts (Object o)
+                Just _ ->
+                    fail
+                        "Cannot parse response: the kind of the response is not supported"
                 Nothing ->
                     case (success :: Maybe Bool) of
                         Just _ ->
@@ -771,7 +776,7 @@ instance FromJSON Response where
                                                 (Object o)
                                         Nothing ->
                                             fail
-                                                "something went wrong"
+                                                "Cannot parse response: unknown response format"
       where
         opts =
             defaultOptions

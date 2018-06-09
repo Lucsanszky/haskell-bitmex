@@ -43,7 +43,9 @@ instance ToJSON Command where
         opts =
             defaultOptions
             { constructorTagModifier =
-                  \(x:xs) -> (toLower x : xs)
+                  \xs -> case xs of
+                      []        -> xs
+                      (x : xs') -> (toLower x : xs')
             }
 
 data Topic a
@@ -106,7 +108,9 @@ instance (ToJSON a) => ToJSON (Topic a) where
         opts =
             defaultOptions
             { constructorTagModifier =
-                  \(x:xs) -> (toLower x : xs)
+                  \xs -> case xs of
+                      []        -> xs
+                      (x : xs') -> (toLower x : xs')
             , sumEncoding = UntaggedValue
             }
 
