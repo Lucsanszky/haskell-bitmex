@@ -28,7 +28,7 @@ import           BitMEXClient.CustomPrelude
 import           BitMEXClient.WebSockets.Types
     ( Command
     , Message (..)
-    , Response
+    , Response (..)
     )
 import           BitMEXClient.Wrapper.Types
 import           Data.ByteArray
@@ -144,13 +144,23 @@ getMessage conn config = do
     runConfigLogWithExceptions "WebSocket" config $ do
         case (decode msg :: Maybe Response) of
             Nothing -> do
-                _log "WebSocket" levelError $
-                    (LT.toStrict . LT.decodeUtf8) msg
+                errorLog msg
                 return Nothing
             Just r -> do
-                _log "WebSocket" levelInfo $
-                    (LT.toStrict . LT.decodeUtf8) msg
-                return (Just r)
+                case r of
+                    Error _ -> do
+                        errorLog msg
+                        return (Just r)
+                    _ -> do
+                        fullLog msg
+                        return (Just r)
+  where
+    fullLog msg =
+        _log "WebSocket" levelInfo $
+        (LT.toStrict . LT.decodeUtf8) msg
+    errorLog msg =
+        _log "WebSocket" levelError $
+        (LT.toStrict . LT.decodeUtf8) msg
 
 sendMessage ::
        (ToJSON a) => Connection -> Command -> [a] -> IO ()
