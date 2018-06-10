@@ -4,6 +4,7 @@ module BitMEXClient.Wrapper.API
     , sign
     , makeTimestamp
     , getMessage
+    , sendMessage
     , withStdoutLoggingWS
     ) where
 
@@ -24,7 +25,11 @@ import           BitMEX
     )
 import           BitMEX.Logging
 import           BitMEXClient.CustomPrelude
-import           BitMEXClient.WebSockets.Types (Response)
+import           BitMEXClient.WebSockets.Types
+    ( Command
+    , Message (..)
+    , Response
+    )
 import           BitMEXClient.Wrapper.Types
 import           Data.ByteArray
     ( ByteArrayAccess
@@ -48,6 +53,7 @@ import qualified Data.Text.Lazy                as LT
 import qualified Data.Text.Lazy.Encoding       as LT
     ( decodeUtf8
     )
+import           Data.Vector                   (fromList)
 
 sign ::
        (ByteArrayAccess a)
@@ -145,6 +151,12 @@ getMessage conn config = do
                 _log "WebSocket" levelInfo $
                     (LT.toStrict . LT.decodeUtf8) msg
                 return (Just r)
+
+sendMessage ::
+       (ToJSON a) => Connection -> Command -> [a] -> IO ()
+sendMessage conn comm topics =
+    sendTextData conn $
+    encode $ Message {op = comm, args = fromList topics}
 
 withStdoutLoggingWS ::
        BitMEXWrapperConfig -> IO BitMEXWrapperConfig

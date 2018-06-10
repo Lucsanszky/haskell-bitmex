@@ -42,7 +42,6 @@ extra-source-files:  ChangeLog.md
 -- Constraint on the version of Cabal needed to build this package.
 cabal-version:       >=1.10
 
-
 library
   -- Modules exported by the library.
   exposed-modules:    BitMEXClient
@@ -51,7 +50,6 @@ library
   other-modules: BitMEXClient.CustomPrelude
                , BitMEXClient.WebSockets
                , BitMEXClient.Wrapper
-               , BitMEXClient.WebSockets.API
                , BitMEXClient.WebSockets.Types
                , BitMEXClient.WebSockets.Types.General
                , BitMEXClient.WebSockets.Types.Request
