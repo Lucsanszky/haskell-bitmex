@@ -58,12 +58,12 @@ import           Data.Vector                   (fromList)
 sign ::
        (ByteArrayAccess a)
     => a
-    -> BitMEXReader (Digest SHA256)
+    -> BitMEXReader IO (Digest SHA256)
 sign body = do
     secret <- asks privateKey
     return . hmacGetDigest . hmac secret $ body
 
-makeRESTConfig :: BitMEXReader BitMEXConfig
+makeRESTConfig :: BitMEXReader IO BitMEXConfig
 makeRESTConfig = do
     env <- asks environment
     logCxt <- asks logContext
@@ -95,7 +95,7 @@ makeRequest ::
        , MimeType contentType
        )
     => BitMEXRequest req contentType res accept
-    -> BitMEXReader (MimeResult res)
+    -> BitMEXReader IO (MimeResult res)
 makeRequest req@BitMEXRequest {..} = do
     pub <- asks publicKey
     time <- liftIO $ makeTimestamp <$> getPOSIXTime
@@ -124,7 +124,7 @@ makeRequest req@BitMEXRequest {..} = do
                 Just x -> return x
     liftIO $ dispatchMime mgr config new
 
-connect :: BitMEXWrapperConfig -> BitMEXApp () -> IO ()
+connect :: BitMEXWrapperConfig -> BitMEXApp IO () -> IO ()
 connect config@BitMEXWrapperConfig {..} app = do
     let base = (drop 8 . show) environment
         path =

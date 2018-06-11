@@ -8,6 +8,7 @@ import           Control.Monad.Reader    as X
     ( Monad
     , MonadIO
     , MonadReader
+    , MonadTrans
     , ReaderT
     , asks
     , liftIO

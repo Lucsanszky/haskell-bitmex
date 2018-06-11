@@ -71,7 +71,7 @@ import           Prelude
 import           System.Environment      (getArgs)
 import           System.IO               (stdout)
 
-app :: BitMEXApp ()
+app :: BitMEXApp IO ()
 app conn = do
     config <- R.ask
     pub <- R.asks publicKey

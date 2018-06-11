@@ -38,13 +38,14 @@ data BitMEXWrapperConfig = BitMEXWrapperConfig
     , logContext     :: !LogContext
     }
 
-newtype BitMEXReader a = BitMEXReader
-    { run :: (ReaderT BitMEXWrapperConfig IO) a
+newtype BitMEXReader m a = BitMEXReader
+    { run :: ReaderT BitMEXWrapperConfig m a
     } deriving ( Applicative
                , Functor
                , Monad
                , MonadIO
                , MonadReader BitMEXWrapperConfig
+               , MonadTrans
                )
 
-type BitMEXApp a = Connection -> BitMEXReader a
+type BitMEXApp m a = Connection -> BitMEXReader m a
