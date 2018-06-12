@@ -156,23 +156,23 @@ data RespChat = RespChat
     , message   :: !Text -- ^ /Required/ "message"
     , html      :: !Text -- ^ /Required/ "html"
     , fromBot   :: !(Maybe Bool) -- ^ "fromBot"
-    , channelId :: !(Maybe Double) -- ^ "channelID"
+    , channelID :: !(Maybe Double) -- ^ "channelID"
     } deriving (Show, Eq, Generic)
 
 instance FromJSON RespChat
 
 data RespConnectedUsers = RespConnectedUsers
-    { connectedUsersUsers :: !(Maybe Int) -- ^ "users"
-    , connectedUsersBots  :: !(Maybe Int) -- ^ "bots"
+    { users :: !(Maybe Int) -- ^ "users"
+    , bots  :: !(Maybe Int) -- ^ "bots"
     } deriving (Show, Eq, Generic)
 
 instance FromJSON RespConnectedUsers
 
 data RespExecution = RespExecution
-    { execId                :: !Text -- ^ /Required/ "execID"
-    , orderId               :: !(Maybe Text) -- ^ "orderID"
-    , clOrdId               :: !(Maybe Text) -- ^ "clOrdID"
-    , clOrdLinkId           :: !(Maybe Text) -- ^ "clOrdLinkID"
+    { execID                :: !Text -- ^ /Required/ "execID"
+    , orderID               :: !(Maybe Text) -- ^ "orderID"
+    , clOrdID               :: !(Maybe Text) -- ^ "clOrdID"
+    , clOrdLinkID           :: !(Maybe Text) -- ^ "clOrdLinkID"
     , account               :: !(Maybe Integer) -- ^ "account"
     , symbol                :: !(Maybe Symbol) -- ^ "symbol"
     , side                  :: !(Maybe Side) -- ^ "side"
@@ -209,7 +209,7 @@ data RespExecution = RespExecution
     , tradePublishIndicator :: !(Maybe Text) -- ^ "tradePublishIndicator"
     , multiLegReportingType :: !(Maybe Text) -- ^ "multiLegReportingType"
     , text                  :: !(Maybe Text) -- ^ "text"
-    , trdMatchId            :: !(Maybe Text) -- ^ "trdMatchID"
+    , trdMatchID            :: !(Maybe Text) -- ^ "trdMatchID"
     , execCost              :: !(Maybe Integer) -- ^ "execCost"
     , execComm              :: !(Maybe Integer) -- ^ "execComm"
     , homeNotional          :: !(Maybe Double) -- ^ "homeNotional"
@@ -340,7 +340,7 @@ data RespInsurance = RespInsurance
 instance FromJSON RespInsurance
 
 data RespLiquidation = RespLiquidation
-    { orderId   :: !Text -- ^ /Required/ "orderID"
+    { orderID   :: !Text -- ^ /Required/ "orderID"
     , symbol    :: !(Maybe Symbol) -- ^ "symbol"
     , side      :: !(Maybe Side) -- ^ "side"
     , price     :: !(Maybe Double) -- ^ "price"
@@ -414,9 +414,9 @@ instance FromJSON RespNotification where
         opts = defaultOptions {fieldLabelModifier = drop 1}
 
 data RespOrder = RespOrder
-    { orderId               :: !Text -- ^ /Required/ "orderID"
-    , clOrdId               :: !(Maybe Text) -- ^ "clOrdID"
-    , clOrdLinkId           :: !(Maybe Text) -- ^ "clOrdLinkID"
+    { orderID               :: !Text -- ^ /Required/ "orderID"
+    , clOrdID               :: !(Maybe Text) -- ^ "clOrdID"
+    , clOrdLinkID           :: !(Maybe Text) -- ^ "clOrdLinkID"
     , account               :: !(Maybe Integer) -- ^ "account"
     , symbol                :: !(Maybe Symbol) -- ^ "symbol"
     , side                  :: !(Maybe Side) -- ^ "side"
@@ -597,7 +597,7 @@ data RespTrade = RespTrade
     , size            :: !(Maybe Integer) -- ^ "size"
     , price           :: !(Maybe Double) -- ^ "price"
     , tickDirection   :: !(Maybe Text) -- ^ "tickDirection"
-    , trdMatchId      :: !(Maybe Text) -- ^ "trdMatchID"
+    , trdMatchID      :: !(Maybe Text) -- ^ "trdMatchID"
     , grossValue      :: !(Maybe Integer) -- ^ "grossValue"
     , homeNotional    :: !(Maybe Double) -- ^ "homeNotional"
     , foreignNotional :: !(Maybe Double) -- ^ "foreignNotional"
@@ -607,7 +607,7 @@ instance FromJSON RespTrade
 
 -- TODO: TradeBin
 data RespTransaction = RespTransaction
-    { transactId     :: !Text -- ^ /Required/ "transactID"
+    { transactID     :: !Text -- ^ /Required/ "transactID"
     , account        :: !(Maybe Integer) -- ^ "account"
     , currency       :: !(Maybe Currency) -- ^ "currency"
     , transactType   :: !(Maybe Text) -- ^ "transactType"
