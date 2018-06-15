@@ -17,9 +17,11 @@ import           BitMEX
     , MimeResult
     , MimeType
     , MimeUnrender
+    , ParamBody (..)
     , Produces
     , addAuthMethod
     , dispatchMime
+    , paramsBodyL
     , setHeader
     , withStdoutLogging
     )
@@ -34,7 +36,10 @@ import           BitMEXClient.Wrapper.Types
 import           Data.ByteArray
     ( ByteArrayAccess
     )
-import qualified Data.ByteString.Char8         as BC (pack)
+import qualified Data.ByteString.Char8         as BC
+    ( pack
+    , unpack
+    )
 import           Data.ByteString.Conversion
     ( toByteString'
     )
@@ -102,11 +107,28 @@ makeRequest req@BitMEXRequest {..} = do
     config0 <- makeRESTConfig >>= liftIO . withStdoutLogging
     let verb = filter (/= '"') $ show rMethod
     sig <-
-        sign
-            (BC.pack
-                 (verb ++
-                  "/api/v1" ++
-                  (LBC.unpack . head) rUrlPath ++ show time))
+        case rParams ^. paramsBodyL of
+            ParamBodyBL lbs ->
+                sign
+                    (BC.pack
+                         (verb ++
+                          "/api/v1" ++
+                          (LBC.unpack . head) rUrlPath ++
+                          show time ++ LBC.unpack lbs))
+            ParamBodyB bs ->
+                sign
+                    (BC.pack
+                         (verb ++
+                          "/api/v1" ++
+                          (LBC.unpack . head) rUrlPath ++
+                          show time ++ BC.unpack bs))
+            _ ->
+                sign
+                    (BC.pack
+                         (verb ++
+                          "/api/v1" ++
+                          (LBC.unpack . head) rUrlPath ++
+                          show time))
     let new =
             setHeader
                 req
