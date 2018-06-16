@@ -1,9 +1,19 @@
 module BitMEXClient.WebSockets.Types.General
     ( Symbol(..)
     , Currency(..)
+    , Side(..)
     ) where
 
 import           BitMEXClient.CustomPrelude
+
+data Side
+    = Buy
+    | Sell
+    deriving (Eq, Show, Generic)
+
+instance FromJSON Side
+
+instance ToJSON Side
 
 data Currency
     = XBT

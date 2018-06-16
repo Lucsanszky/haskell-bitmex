@@ -38,13 +38,6 @@ import           Data.Vector
     ( Vector
     )
 
-data Side
-    = Buy
-    | Sell
-    deriving (Eq, Show, Generic)
-
-instance FromJSON Side
-
 data Action
     = Partial
     | Update
