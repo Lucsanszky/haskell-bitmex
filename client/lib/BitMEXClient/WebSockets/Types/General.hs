@@ -2,6 +2,9 @@ module BitMEXClient.WebSockets.Types.General
     ( Symbol(..)
     , Currency(..)
     , Side(..)
+    , OrderType(..)
+    , ExecutionInstruction(..)
+    , ContingencyType(..)
     ) where
 
 import           BitMEXClient.CustomPrelude
@@ -72,3 +75,50 @@ data Symbol
 instance ToJSON Symbol
 
 instance FromJSON Symbol
+
+data OrderType
+    = Market
+    | Limit
+    | Stop
+    | StopLimit
+    | MarketIfTouched
+    | LimitIfTouched
+    | MarketWithLeftOverAsLimit
+    | Pegged
+    deriving (Eq, Show, Generic)
+
+instance FromJSON OrderType
+
+instance ToJSON OrderType
+
+data ExecutionInstruction
+    = ParticipateDoNotInitiate
+    | AllOrNone
+    | MarkPrice
+    | IndexPrice
+    | LastPrice
+    | Close
+    | ReduceOnly
+    | Fixed
+    deriving (Eq, Show, Generic)
+
+instance FromJSON ExecutionInstruction
+
+instance ToJSON ExecutionInstruction
+
+data ContingencyType
+    = OCO
+    | OTO
+    | OUOA
+    | OUOP
+    deriving (Eq, Generic)
+
+instance Show ContingencyType where
+    show OCO  = "OneCancelsTheOther"
+    show OTO  = "OneTriggersTheOther"
+    show OUOA = "OneUpdatesTheOtherAbsolute"
+    show OUOP = "OneUpdatesTheOtherProportional"
+
+instance FromJSON ContingencyType
+
+instance ToJSON ContingencyType
