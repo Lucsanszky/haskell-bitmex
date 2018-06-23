@@ -55,6 +55,7 @@ library
                , BitMEXClient.WebSockets.Types.Request
                , BitMEXClient.WebSockets.Types.Response
                , BitMEXClient.Wrapper.API
+               , BitMEXClient.Wrapper.Logging
                , BitMEXClient.Wrapper.Types
 
   -- LANGUAGE extensions used by modules in this package.
