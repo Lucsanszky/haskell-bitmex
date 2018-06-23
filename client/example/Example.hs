@@ -8,6 +8,7 @@ import           BitMEX
     , initLogContext
     , orderGetOrders
     , runDefaultLogExecWithContext
+    , stdoutLoggingContext
     )
 import           BitMEXClient
     ( BitMEXApp
@@ -22,7 +23,6 @@ import           BitMEXClient
     , makeTimestamp
     , sendMessage
     , sign
-    , withStdoutLoggingWS
     )
 import           Control.Concurrent      (forkIO)
 import           Control.Exception
@@ -111,7 +111,7 @@ main = do
     pub <- T.readFile pubPath
     priv <- readFile privPath
     logCxt <- initLogContext
-    let config0 =
+    let config =
             BitMEXWrapperConfig
             { environment = TestNet
             , pathREST = Just "/api/v1"
@@ -121,6 +121,6 @@ main = do
             , privateKey = priv
             , logExecContext = runDefaultLogExecWithContext
             , logContext = logCxt
+            , logContextFunction = stdoutLoggingContext
             }
-    config <- return config0 >>= withStdoutLoggingWS
     connect config app

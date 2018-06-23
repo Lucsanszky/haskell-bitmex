@@ -5,7 +5,6 @@ module BitMEXClient.Wrapper.API
     , makeTimestamp
     , getMessage
     , sendMessage
-    , withStdoutLoggingWS
     ) where
 
 import           BitMEX
@@ -23,7 +22,6 @@ import           BitMEX
     , dispatchMime
     , paramsBodyL
     , setHeader
-    , withStdoutLogging
     )
 import           BitMEX.Logging
 import           BitMEXClient.CustomPrelude
@@ -32,6 +30,7 @@ import           BitMEXClient.WebSockets.Types
     , Message (..)
     , Response (..)
     )
+import           BitMEXClient.Wrapper.Logging
 import           BitMEXClient.Wrapper.Types
 import           Data.ByteArray
     ( ByteArrayAccess
@@ -50,7 +49,6 @@ import qualified Data.ByteString.Lazy.Char8    as LBC
     ( pack
     , unpack
     )
-import           Data.Text                     (Text)
 import qualified Data.Text                     as T (pack)
 import qualified Data.Text.Lazy                as LT
     ( toStrict
@@ -103,8 +101,13 @@ makeRequest ::
     -> BitMEXReader IO (MimeResult res)
 makeRequest req@BitMEXRequest {..} = do
     pub <- asks publicKey
+    logCxtF <- asks logContextFunction
     time <- liftIO $ makeTimestamp <$> getPOSIXTime
-    config0 <- makeRESTConfig >>= liftIO . withStdoutLogging
+    config0 <-
+        makeRESTConfig >>= \c ->
+            liftIO $
+            (logCxtF (configLogContext c)) >>= \cxt ->
+                withLoggingBitMEXConfig cxt c
     let verb = filter (/= '"') $ show rMethod
     sig <-
         case rParams ^. paramsBodyL of
@@ -147,12 +150,15 @@ makeRequest req@BitMEXRequest {..} = do
     liftIO $ dispatchMime mgr config new
 
 connect :: BitMEXWrapperConfig -> BitMEXApp IO () -> IO ()
-connect config@BitMEXWrapperConfig {..} app = do
+connect initConfig@BitMEXWrapperConfig {..} app = do
     let base = (drop 8 . show) environment
         path =
             case pathWS of
                 Nothing -> "/realtime"
                 Just x  -> x
+    config <-
+        logContextFunction (logContext) >>= \ctx ->
+            withLoggingBitMEXWrapper ctx initConfig
     withSocketsDo $
         runSecureClient base 443 (LBC.unpack path) $ \conn -> do
             runReaderT (run (app conn)) config
@@ -189,26 +195,3 @@ sendMessage ::
 sendMessage conn comm topics =
     sendTextData conn $
     encode $ Message {op = comm, args = fromList topics}
-
-withStdoutLoggingWS ::
-       BitMEXWrapperConfig -> IO BitMEXWrapperConfig
-withStdoutLoggingWS p = do
-    logCxt <- stdoutLoggingContext (logContext p)
-    return $
-        p
-        { logExecContext = stdoutLoggingExec
-        , logContext = logCxt
-        }
-
-runConfigLog ::
-       MonadIO m => BitMEXWrapperConfig -> LogExec m
-runConfigLog config =
-    logExecContext config (logContext config)
-
-runConfigLogWithExceptions ::
-       (MonadCatch m, MonadIO m)
-    => Text
-    -> BitMEXWrapperConfig
-    -> LogExec m
-runConfigLogWithExceptions src config =
-    runConfigLog config . logExceptions src
