@@ -176,18 +176,32 @@ getMessage conn config = do
                 return Nothing
             Just r -> do
                 case r of
+                    P _ -> do
+                        log' "Positions" msg
+                        return (Just r)
+                    OB10 _ -> do
+                        log' "OB10" msg
+                        return (Just r)
+                    Exe _ -> do
+                        log' "Execution" msg
+                        return (Just r)
+                    O _ -> do
+                        log' "Order" msg
+                        return (Just r)
+                    M _ -> do
+                        log' "Margin" msg
+                        return (Just r)
                     Error _ -> do
                         errorLog msg
                         return (Just r)
                     _ -> do
-                        fullLog msg
+                        log' "WebSocket" msg
                         return (Just r)
   where
-    fullLog msg =
-        _log "WebSocket" levelInfo $
+    log' s msg = _log s levelInfo $
         (LT.toStrict . LT.decodeUtf8) msg
     errorLog msg =
-        _log "WebSocket" levelError $
+        _log "WebSocket Error" levelError $
         (LT.toStrict . LT.decodeUtf8) msg
 
 sendMessage ::
