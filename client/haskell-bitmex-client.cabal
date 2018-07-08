@@ -63,7 +63,7 @@ library
 
 
   ghc-options: -Wall
-               -O2
+               -O1
                -funbox-strict-fields
                -fwarn-unused-imports
                -Wcompat
