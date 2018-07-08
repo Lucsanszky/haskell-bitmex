@@ -39,6 +39,7 @@ import           Data.Aeson              as X
     , (.:?)
     )
 import           Data.Char               as X (toLower)
+import           Data.Monoid             as X ((<>))
 import           Data.Time.Clock.POSIX   as X (getPOSIXTime)
 import           GHC.Generics            as X
 import           Lens.Micro              as X ((.~), (^.))
@@ -49,6 +50,7 @@ import           Network.HTTP.Client     as X
 import           Network.HTTP.Client.TLS as X
     ( tlsManagerSettings
     )
+import           Network.HTTP.Types.URI  as X (renderQuery)
 import           Network.Socket          as X
     ( withSocketsDo
     )

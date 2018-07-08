@@ -21,6 +21,7 @@ import           BitMEX
     , addAuthMethod
     , dispatchMime
     , paramsBodyL
+    , paramsQueryL
     , setHeader
     )
 import           BitMEX.Logging
@@ -57,6 +58,7 @@ import qualified Data.Text.Lazy.Encoding       as LT
     ( decodeUtf8
     )
 import           Data.Vector                   (fromList)
+import           Prelude                       (print)
 
 sign ::
        (ByteArrayAccess a)
@@ -109,28 +111,32 @@ makeRequest req@BitMEXRequest {..} = do
             (logCxtF (configLogContext c)) >>= \cxt ->
                 withLoggingBitMEXConfig cxt c
     let verb = filter (/= '"') $ show rMethod
+    let query = rParams ^. paramsQueryL
     sig <-
         case rParams ^. paramsBodyL of
             ParamBodyBL lbs ->
                 sign
                     (BC.pack
-                         (verb ++
-                          "/api/v1" ++
-                          (LBC.unpack . head) rUrlPath ++
-                          show time ++ LBC.unpack lbs))
+                         (verb <>
+                          "/api/v1" <>
+                          (LBC.unpack . head) rUrlPath <>
+                          BC.unpack (renderQuery True query) <>
+                          show time <> LBC.unpack lbs))
             ParamBodyB bs ->
                 sign
                     (BC.pack
-                         (verb ++
-                          "/api/v1" ++
-                          (LBC.unpack . head) rUrlPath ++
-                          show time ++ BC.unpack bs))
+                         (verb <> "/api/v1" <>
+                          (LBC.unpack . head) rUrlPath <>
+                          BC.unpack (renderQuery True query) <>
+                          show time <>
+                          BC.unpack bs))
             _ ->
                 sign
                     (BC.pack
-                         (verb ++
-                          "/api/v1" ++
-                          (LBC.unpack . head) rUrlPath ++
+                         (verb <>
+                          "/api/v1" <>
+                          (LBC.unpack . head) rUrlPath <>
+                          BC.unpack (renderQuery True query) <>
                           show time))
     let new =
             setHeader
@@ -198,8 +204,8 @@ getMessage conn config = do
                         log' "WebSocket" msg
                         return (Just r)
   where
-    log' s msg = _log s levelInfo $
-        (LT.toStrict . LT.decodeUtf8) msg
+    log' s msg =
+        _log s levelInfo $ (LT.toStrict . LT.decodeUtf8) msg
     errorLog msg =
         _log "WebSocket Error" levelError $
         (LT.toStrict . LT.decodeUtf8) msg

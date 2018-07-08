@@ -80,6 +80,7 @@ library
                      , cryptonite >= 0.25
                      , http-client >=0.5 && <0.6
                      , http-client-tls >= 0.3
+                     , http-types >= 0.10
                      , katip >= 0.5
                      , microlens >= 0.4
                      , memory >= 0.14
