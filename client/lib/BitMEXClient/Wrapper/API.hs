@@ -58,7 +58,6 @@ import qualified Data.Text.Lazy.Encoding       as LT
     ( decodeUtf8
     )
 import           Data.Vector                   (fromList)
-import           Prelude                       (print)
 
 sign ::
        (ByteArrayAccess a)
