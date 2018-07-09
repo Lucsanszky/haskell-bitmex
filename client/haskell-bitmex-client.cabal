@@ -64,6 +64,9 @@ library
 
   ghc-options: -Wall
                -O1
+               -threaded
+               -rtsopts
+               -with-rtsopts=-N
                -funbox-strict-fields
                -fwarn-unused-imports
                -Wcompat
