@@ -184,7 +184,7 @@ getMessage conn config = do
                     P _ -> do
                         log' "Positions" msg
                         return (Just r)
-                    OB10 _ ->
+                    OB10 _ -> do
                         log' "OB10" msg
                         return (Just r)
                     Exe _ -> do
