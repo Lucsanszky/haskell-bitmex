@@ -13,15 +13,15 @@ import           BitMEXClient.CustomPrelude
 import           BitMEXClient.Wrapper.Types
 import           Data.Text                  (Text)
 
-withLoggingBitMEXWrapper :: LogContext -> BitMEXWrapperConfig -> IO BitMEXWrapperConfig
-withLoggingBitMEXWrapper context config = return $
+withLoggingBitMEXWrapper :: LogContext -> BitMEXWrapperConfig -> BitMEXWrapperConfig
+withLoggingBitMEXWrapper context config =
     config
     { logExecContext = runDefaultLogExecWithContext
     , logContext = context
     }
 
-withLoggingBitMEXConfig :: LogContext -> BitMEXConfig -> IO BitMEXConfig
-withLoggingBitMEXConfig context config = return $
+withLoggingBitMEXConfig :: LogContext -> BitMEXConfig -> BitMEXConfig
+withLoggingBitMEXConfig context config =
     config
     { configLogExecWithContext = runDefaultLogExecWithContext
     , configLogContext = context

@@ -102,13 +102,11 @@ makeRequest ::
     -> BitMEXReader (MimeResult res)
 makeRequest req@BitMEXRequest {..} = do
     pub <- asks publicKey
-    logCxtF <- asks logContextFunction
+    logCxt <- asks logContext
     time <- liftIO $ makeTimestamp <$> getPOSIXTime
     config0 <-
-        makeRESTConfig >>= \c ->
-            liftIO $
-            (logCxtF (configLogContext c)) >>= \cxt ->
-                withLoggingBitMEXConfig cxt c
+        makeRESTConfig >>=
+            liftIO . return . withLoggingBitMEXConfig logCxt
     let verb = filter (/= '"') $ show rMethod
     let query = rParams ^. paramsQueryL
     sig <-
@@ -161,9 +159,7 @@ connect initConfig@BitMEXWrapperConfig {..} app = do
             case pathWS of
                 Nothing -> "/realtime"
                 Just x  -> x
-    config <-
-        logContextFunction (logContext) >>= \ctx ->
-            withLoggingBitMEXWrapper ctx initConfig
+    config <- return $ withLoggingBitMEXWrapper logContext initConfig
     withSocketsDo $
         runSecureClient base 443 (LBC.unpack path) $ \conn -> do
             runReaderT (run (app conn)) config

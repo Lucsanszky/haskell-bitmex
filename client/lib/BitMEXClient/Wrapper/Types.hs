@@ -28,15 +28,14 @@ instance Show Environment where
     show TestNet = "https://testnet.bitmex.com"
 
 data BitMEXWrapperConfig = BitMEXWrapperConfig
-    { environment        :: !Environment
-    , pathREST           :: !(Maybe LBS.ByteString)
-    , pathWS             :: !(Maybe LBS.ByteString)
-    , manager            :: !(Maybe Manager)
-    , publicKey          :: !Text
-    , privateKey         :: !BS.ByteString
-    , logExecContext     :: !LogExecWithContext
-    , logContext         :: !LogContext
-    , logContextFunction :: !(LogContext -> IO LogContext)
+    { environment    :: !Environment
+    , pathREST       :: !(Maybe LBS.ByteString)
+    , pathWS         :: !(Maybe LBS.ByteString)
+    , manager        :: !(Maybe Manager)
+    , publicKey      :: !Text
+    , privateKey     :: !BS.ByteString
+    , logExecContext :: !LogExecWithContext
+    , logContext     :: !LogContext
     }
 
 newtype BitMEXReader a = BitMEXReader
