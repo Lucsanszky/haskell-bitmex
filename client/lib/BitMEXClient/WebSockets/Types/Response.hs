@@ -24,6 +24,7 @@ module BitMEXClient.WebSockets.Types.Response
     , STATUS(..)
     , INFO(..)
     , ERROR(..)
+    , Action(..)
     ) where
 
 import           BitMEX.Core
