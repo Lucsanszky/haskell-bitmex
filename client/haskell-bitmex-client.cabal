@@ -125,3 +125,21 @@ executable example
                      , websockets >= 0.12
 
   default-language:    Haskell2010
+
+benchmark bench-api
+  hs-source-dirs:      benchmarks
+  type:                exitcode-stdio-1.0
+  main-is:             Benchmark.hs
+  build-depends:       criterion
+                     , base >= 4.10
+                     , bytestring >= 0.10
+                     , http-client-tls >= 0.3
+                     , http-client >= 0.5
+                     , text >= 1.2
+                     , haskell-bitmex-rest >= 0.1
+                     , haskell-bitmex-client >= 0.1
+                     , mtl >= 2.2.1
+                     , aeson >= 1.2
+
+  default-extensions:  NoImplicitPrelude
+                       OverloadedStrings
