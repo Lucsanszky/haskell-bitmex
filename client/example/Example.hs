@@ -121,6 +121,5 @@ main = do
             , privateKey = priv
             , logExecContext = runDefaultLogExecWithContext
             , logContext = logCxt
-            , logContextFunction = stdoutLoggingContext
             }
     connect config app
