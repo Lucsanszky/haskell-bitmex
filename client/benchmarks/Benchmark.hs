@@ -18,7 +18,7 @@ import           Prelude
     , ($)
     , (.)
     )
-import           System.Environment      (getArgs)
+import           System.Environment      (getArgs, withArgs)
 
 updateLeverage ::
        Symbol
@@ -41,7 +41,7 @@ updateLeverage sym lev = do
 
 main = do
     mgr <- newManager tlsManagerSettings
-    (pubPath:privPath:_) <- getArgs
+    (pubPath:privPath:rest) <- getArgs
     pub <- T.readFile pubPath
     priv <- readFile privPath
     logCxt <- Mex.initLogContext
@@ -57,14 +57,24 @@ main = do
                   Mex.runDefaultLogExecWithContext
             , logContext = logCxt
             }
-    defaultMain
-        [ bench "post leverage" $
-          nfIO
-              (R.runReaderT
-                   (run (do r <-
-                                updateLeverage
-                                    XBTUSD
-                                    (Mex.Leverage 3)
-                            return ()))
-                   config)
-        ]
+    withArgs rest $
+        defaultMain
+            [ bench "post leverage" $
+              nfIO
+                  (R.runReaderT
+                       (run (do r <-
+                                    updateLeverage
+                                        XBTUSD
+                                        (Mex.Leverage 3)
+                                return ()))
+                       config)
+            , bench "keep-alive leverage" $
+              nfIO
+                  (R.runReaderT
+                       (run (do r <-
+                                    updateLeverage
+                                        XBTUSD
+                                        (Mex.Leverage 4)
+                                return ()))
+                       config)
+            ]
