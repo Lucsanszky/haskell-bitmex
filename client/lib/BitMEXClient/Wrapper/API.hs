@@ -91,7 +91,7 @@ makeRESTConfig = do
         }
 
 makeTimestamp :: (RealFrac a) => a -> Int
-makeTimestamp = floor . (* 1000)
+makeTimestamp = floor . (* 1000000)
 
 makeRequest ::
        ( Produces req accept
