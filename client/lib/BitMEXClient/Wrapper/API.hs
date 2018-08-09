@@ -1,6 +1,7 @@
 module BitMEXClient.Wrapper.API
     ( makeRequest
     , connect
+    , withConnectAndSubscribe
     , sign
     , makeTimestamp
     , getMessage
@@ -26,10 +27,15 @@ import           BitMEX
     )
 import           BitMEX.Logging
 import           BitMEXClient.CustomPrelude
+import qualified BitMEXClient.CustomPrelude    as CP
+    ( String
+    )
 import           BitMEXClient.WebSockets.Types
-    ( Command
+    ( Command (..)
     , Message (..)
     , Response (..)
+    , Symbol
+    , Topic (..)
     )
 import           BitMEXClient.Wrapper.Logging
 import           BitMEXClient.Wrapper.Types
@@ -50,7 +56,10 @@ import qualified Data.ByteString.Lazy.Char8    as LBC
     ( pack
     , unpack
     )
-import qualified Data.Text                     as T (pack)
+import qualified Data.Text                     as T
+    ( Text
+    , pack
+    )
 import qualified Data.Text.Lazy                as LT
     ( toStrict
     )
@@ -106,7 +115,7 @@ makeRequest req@BitMEXRequest {..} = do
     time <- liftIO $ makeTimestamp <$> getPOSIXTime
     config0 <-
         makeRESTConfig >>=
-            liftIO . return . withLoggingBitMEXConfig logCxt
+        liftIO . return . withLoggingBitMEXConfig logCxt
     let verb = filter (/= '"') $ show rMethod
     let query = rParams ^. paramsQueryL
     sig <-
@@ -114,11 +123,11 @@ makeRequest req@BitMEXRequest {..} = do
             ParamBodyBL lbs ->
                 sign
                     (BC.pack
-                         (verb <>
-                          "/api/v1" <>
+                         (verb <> "/api/v1" <>
                           (LBC.unpack . head) rUrlPath <>
                           BC.unpack (renderQuery True query) <>
-                          show time <> LBC.unpack lbs))
+                          show time <>
+                          LBC.unpack lbs))
             ParamBodyB bs ->
                 sign
                     (BC.pack
@@ -130,8 +139,7 @@ makeRequest req@BitMEXRequest {..} = do
             _ ->
                 sign
                     (BC.pack
-                         (verb <>
-                          "/api/v1" <>
+                         (verb <> "/api/v1" <>
                           (LBC.unpack . head) rUrlPath <>
                           BC.unpack (renderQuery True query) <>
                           show time))
@@ -152,6 +160,36 @@ makeRequest req@BitMEXRequest {..} = do
                 Just x -> return x
     liftIO $ dispatchMime mgr config new
 
+withConnectAndSubscribe ::
+       BitMEXWrapperConfig
+    -> [Topic Symbol]
+    -> ClientApp a -> IO a
+withConnectAndSubscribe config@BitMEXWrapperConfig {..} ts app = do
+    let base = (drop 8 . show) environment
+        path =
+            case pathWS of
+                Nothing -> "/realtime"
+                Just x  -> x
+    withSocketsDo $
+        runSecureClient base 443 (LBC.unpack path) $ \c -> do
+            time <- makeTimestamp <$> getPOSIXTime
+            sig <-
+                runReaderT
+                    (run (sign
+                              (BC.pack
+                                   ("GET" ++
+                                    "/realtime" ++ show time))))
+                    config
+            sendMessage
+                c
+                AuthKey
+                [ String publicKey
+                , toJSON time
+                , (toJSON . show) sig
+                ]
+            sendMessage c Subscribe ts
+            app c
+
 connect :: BitMEXWrapperConfig -> BitMEXApp () -> IO ()
 connect initConfig@BitMEXWrapperConfig {..} app = do
     let base = (drop 8 . show) environment
@@ -159,7 +197,9 @@ connect initConfig@BitMEXWrapperConfig {..} app = do
             case pathWS of
                 Nothing -> "/realtime"
                 Just x  -> x
-    config <- return $ withLoggingBitMEXWrapper logContext initConfig
+    config <-
+        return $
+        withLoggingBitMEXWrapper logContext initConfig
     withSocketsDo $
         runSecureClient base 443 (LBC.unpack path) $ \conn -> do
             runReaderT (run (app conn)) config

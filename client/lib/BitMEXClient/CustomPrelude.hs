@@ -55,7 +55,8 @@ import           Network.Socket          as X
     ( withSocketsDo
     )
 import           Network.WebSockets      as X
-    ( Connection
+    ( ClientApp
+    , Connection
     , receiveData
     , sendTextData
     )
@@ -71,6 +72,7 @@ import           Prelude                 as X
     , Maybe (..)
     , RealFrac
     , Show
+    , String
     , drop
     , filter
     , floor
