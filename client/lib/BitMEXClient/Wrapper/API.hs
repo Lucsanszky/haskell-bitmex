@@ -2,6 +2,7 @@ module BitMEXClient.Wrapper.API
     ( makeRequest
     , connect
     , withConnectAndSubscribe
+    , withConnectAndSubscribeMD
     , sign
     , makeTimestamp
     , getMessage
@@ -190,6 +191,37 @@ withConnectAndSubscribe config@BitMEXWrapperConfig {..} ts app = do
             sendMessage c Subscribe ts
             app c
 
+withConnectAndSubscribeMD ::
+       BitMEXWrapperConfig
+    -> [Topic Symbol]
+    -> ClientApp a -> IO a
+withConnectAndSubscribeMD config@BitMEXWrapperConfig {..} ts app = do
+    let base = (drop 8 . show) environment
+        path =
+            case pathWS of
+                Nothing -> "/realtimemd"
+                Just x  -> x
+    withSocketsDo $
+        runSecureClient base 443 (LBC.unpack path) $ \c -> do
+            time <- makeTimestamp <$> getPOSIXTime
+            sig <-
+                runReaderT
+                    (run (sign
+                              (BC.pack
+                                   ("GET" ++
+                                    "/realtime" ++ show time))))
+                    config
+            sendTextData c $ ("[1, \"testmd\", \"somestream\"]" :: T.Text)
+            sendMessageMD
+                c
+                AuthKey
+                [ String publicKey
+                , toJSON time
+                , (toJSON . show) sig
+                ]
+            sendMessageMD c Subscribe ts
+            app c
+
 connect :: BitMEXWrapperConfig -> BitMEXApp () -> IO ()
 connect initConfig@BitMEXWrapperConfig {..} app = do
     let base = (drop 8 . show) environment
@@ -250,3 +282,9 @@ sendMessage ::
 sendMessage conn comm topics =
     sendTextData conn $
     encode $ Message {op = comm, args = fromList topics}
+
+sendMessageMD ::
+    (ToJSON a) => Connection -> Command -> [a] -> IO ()
+sendMessageMD conn comm topics =
+    sendTextData conn $
+    "[0, \"testmd\", \"somestream\"," <> (encode $ Message {op = comm, args = fromList topics}) <> "]"
