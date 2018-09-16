@@ -2,7 +2,6 @@ module BitMEXClient.Wrapper.API
     ( makeRequest
     , connect
     , withConnectAndSubscribe
-    , withConnectAndSubscribeMD
     , sign
     , makeTimestamp
     , getMessage
