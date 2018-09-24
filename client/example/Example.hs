@@ -2,16 +2,24 @@
 
 module Main where
 
-import           BitMEX
+import qualified BitMEX                  as Mex
     ( Accept (..)
+    , ContentType (..)
+    , Leverage (..)
     , MimeJSON (..)
+    , MimeResult
+    , Position
+    , Symbol (..)
     , initLogContext
     , orderGetOrders
+    , positionUpdateLeverage
     , runDefaultLogExecWithContext
     , stdoutLoggingContext
+    , _setBodyLBS
     )
 import           BitMEXClient
     ( BitMEXApp
+    , BitMEXReader
     , BitMEXWrapperConfig (..)
     , Command (..)
     , Environment (..)
@@ -34,9 +42,12 @@ import           Data.Aeson
     , decode
     , toJSON
     )
+import           Data.Aeson
 import           Data.ByteString         (readFile)
 import           Data.ByteString.Char8   (pack)
+import           Data.Monoid
 import           Data.Text               (Text, null)
+import qualified Data.Text               as T (pack)
 import qualified Data.Text.IO            as T
     ( getLine
     , readFile
@@ -71,13 +82,35 @@ import           Prelude
 import           System.Environment      (getArgs)
 import           System.IO               (stdout)
 
+updateLeverage ::
+       Symbol
+    -> Mex.Leverage
+    -> BitMEXReader (Mex.MimeResult Mex.Position)
+updateLeverage sym lev = do
+    let leverageTemplate =
+            Mex.positionUpdateLeverage
+                (Mex.ContentType Mex.MimeJSON)
+                (Mex.Accept Mex.MimeJSON)
+                (Mex.Symbol ((T.pack . show) sym))
+                lev
+        leverageRequest =
+            Mex._setBodyLBS leverageTemplate $
+            "{\"leverage\": " <> encode (Mex.unLeverage lev) <>
+            ", \"symbol\": " <>
+            encode ((T.pack . show) sym) <>
+            "}"
+    makeRequest leverageRequest
+
 app :: BitMEXApp ()
 app conn = do
     config <- R.ask
     pub <- R.asks publicKey
     time <- liftIO $ makeTimestamp <$> getPOSIXTime
-    sig <- sign (pack ("GET" ++ "/realtime" ++ show time))
-    x <- makeRequest $ orderGetOrders (Accept MimeJSON)
+    sig <- sign (pack ("GET" <> "/realtime" <> show time))
+    x <-
+        makeRequest $
+        Mex.orderGetOrders (Mex.Accept Mex.MimeJSON)
+    _ <- updateLeverage XBTUSD (Mex.Leverage 3)
     liftIO $ do
         print x
         _ <-
@@ -89,7 +122,9 @@ app conn = do
                 , toJSON time
                 , (toJSON . show) sig
                 ]
-        _ <- forkIO $ forever $ do getMessage conn config
+        _ <-
+            forkIO $
+            forever $ do getMessage conn config >>= print
         _ <-
             forkIO $
             sendMessage
@@ -110,7 +145,7 @@ main = do
     (pubPath:privPath:_) <- getArgs
     pub <- T.readFile pubPath
     priv <- readFile privPath
-    logCxt <- initLogContext
+    logCxt <- Mex.initLogContext
     let config =
             BitMEXWrapperConfig
             { environment = TestNet
@@ -119,7 +154,8 @@ main = do
             , manager = Just mgr
             , publicKey = pub
             , privateKey = priv
-            , logExecContext = runDefaultLogExecWithContext
+            , logExecContext =
+                  Mex.runDefaultLogExecWithContext
             , logContext = logCxt
             }
     connect config app
