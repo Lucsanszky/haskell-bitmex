@@ -571,7 +571,6 @@ data RespQuote = RespQuote
 
 instance FromJSON RespQuote
 
--- TODO: Investigate the missing fields
 data RespSettlement = RespSettlement
     { timestamp      :: !DateTime -- ^ /Required/ "timestamp"
     , symbol         :: !Symbol -- ^ /Required/ "symbol"
