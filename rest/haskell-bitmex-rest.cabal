@@ -4,7 +4,7 @@ synopsis:       Auto-generated bitmex API Client
 description:    .
                 Client library for calling the bitmex API based on http-client.
                 .
-                host: 
+                host:
                 .
                 base path: https://localhost/api/v1
                 .
@@ -15,10 +15,9 @@ description:    .
                 OpenAPI-Specification: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md
                 .
 category:       Web
-homepage:       https://github.com/swagger-api/swagger-codegen#readme
-author:         Author Name Here
-maintainer:     author.name@email.com
-copyright:      YEAR - AUTHOR
+homepage:       https://github.com/swagger-api/swagger-codegen#readme, https://github.com/Lucsanszky/haskell-bitmex/tree/master/rest
+author:         Daniel Lucsanszky
+maintainer:     dan.lucsanszky@gmail.com
 license:        UnspecifiedLicense
 build-type:     Simple
 cabal-version:  >= 1.10
