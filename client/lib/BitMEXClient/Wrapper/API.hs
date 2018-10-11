@@ -68,6 +68,10 @@ import qualified Data.Text.Lazy.Encoding       as LT
     )
 import           Data.Vector                   (fromList)
 
+------------------------------------------------------------
+-- HELPERS
+
+-- | Create a signature for the request.
 sign ::
        (ByteArrayAccess a)
     => a
@@ -99,9 +103,16 @@ makeRESTConfig = do
         , configValidateAuthMethods = True
         }
 
+-- | Convenience function to generate a timestamp
+-- for the signature of the request.
 makeTimestamp :: (RealFrac a) => a -> Int
 makeTimestamp = floor . (* 1000000)
 
+------------------------------------------------------------
+-- REST
+
+-- | Prepare, authenticate and dispatch a request
+-- via the auto-generated BitMEX REST API.
 makeRequest ::
        ( Produces req accept
        , MimeUnrender accept res
@@ -160,10 +171,16 @@ makeRequest req@BitMEXRequest {..} = do
                 Just x -> return x
     liftIO $ dispatchMime mgr config new
 
+------------------------------------------------------------
+-- WebSocket
+
+-- | Establish connection to the BitMEX WebSocket API,
+-- authenticate the user and subscribe to the provided topics.
 withConnectAndSubscribe ::
        BitMEXWrapperConfig
     -> [Topic Symbol]
-    -> ClientApp a -> IO a
+    -> ClientApp a
+    -> IO a
 withConnectAndSubscribe config@BitMEXWrapperConfig {..} ts app = do
     let base = (drop 8 . show) environment
         path =
@@ -190,6 +207,7 @@ withConnectAndSubscribe config@BitMEXWrapperConfig {..} ts app = do
             sendMessage c Subscribe ts
             app c
 
+-- | Establish connection to the BitMEX WebSocket API.
 connect :: BitMEXWrapperConfig -> BitMEXApp () -> IO ()
 connect initConfig@BitMEXWrapperConfig {..} app = do
     let base = (drop 8 . show) environment
@@ -204,6 +222,7 @@ connect initConfig@BitMEXWrapperConfig {..} app = do
         runSecureClient base 443 (LBC.unpack path) $ \conn -> do
             runReaderT (run (app conn)) config
 
+-- | Receive a message from the WebSocket connection and parse it.
 getMessage ::
        Connection
     -> BitMEXWrapperConfig
@@ -245,6 +264,7 @@ getMessage conn config = do
         _log "WebSocket Error" levelError $
         (LT.toStrict . LT.decodeUtf8) msg
 
+-- | Send a message to the WebSocket connection.
 sendMessage ::
        (ToJSON a) => Connection -> Command -> [a] -> IO ()
 sendMessage conn comm topics =

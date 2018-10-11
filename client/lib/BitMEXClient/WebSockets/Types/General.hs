@@ -107,10 +107,10 @@ instance FromJSON ExecutionInstruction
 instance ToJSON ExecutionInstruction
 
 data ContingencyType
-    = OCO
-    | OTO
-    | OUOA
-    | OUOP
+    = OCO -- ^ One Cancels the Other
+    | OTO -- ^ One Triggers the Other
+    | OUOA -- ^ One Updates the Other Absoulute
+    | OUOP -- ^ One Updates the Other Proportional
     deriving (Eq, Generic)
 
 instance Show ContingencyType where

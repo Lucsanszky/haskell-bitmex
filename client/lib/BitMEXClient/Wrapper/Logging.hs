@@ -13,6 +13,7 @@ import           BitMEXClient.CustomPrelude
 import           BitMEXClient.Wrapper.Types
 import           Data.Text                  (Text)
 
+-- | Add a logging environment and an executor to a BitMEXWrapperConfig.
 withLoggingBitMEXWrapper :: LogContext -> BitMEXWrapperConfig -> BitMEXWrapperConfig
 withLoggingBitMEXWrapper context config =
     config
@@ -20,6 +21,7 @@ withLoggingBitMEXWrapper context config =
     , logContext = context
     }
 
+-- | Add a logging environment and an executor to a BitMEXConfig.
 withLoggingBitMEXConfig :: LogContext -> BitMEXConfig -> BitMEXConfig
 withLoggingBitMEXConfig context config =
     config
@@ -27,11 +29,15 @@ withLoggingBitMEXConfig context config =
     , configLogContext = context
     }
 
+-- | Run the BitMEXWrapperConfig's executor on the config's
+-- log environment.
 runConfigLog ::
        MonadIO m => BitMEXWrapperConfig -> LogExec m
 runConfigLog config =
     logExecContext config (logContext config)
 
+-- | Run the BitMEXWrapperConfig's executor on the config's
+-- log environment with exceptions.
 runConfigLogWithExceptions ::
        (MonadCatch m, MonadIO m)
     => Text
