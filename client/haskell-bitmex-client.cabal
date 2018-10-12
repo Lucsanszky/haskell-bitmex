@@ -24,7 +24,6 @@ library
                     , BitMEXClient.Wrapper.Types
   other-modules: BitMEXClient.CustomPrelude
   ghc-options: -Wall
-               -O2
                -funbox-strict-fields
                -fwarn-unused-imports
                -Wcompat
