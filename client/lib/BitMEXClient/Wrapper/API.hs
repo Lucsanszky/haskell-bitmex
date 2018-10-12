@@ -27,9 +27,6 @@ import           BitMEX
     )
 import           BitMEX.Logging
 import           BitMEXClient.CustomPrelude
-import qualified BitMEXClient.CustomPrelude    as CP
-    ( String
-    )
 import           BitMEXClient.WebSockets.Types
     ( Command (..)
     , Message (..)
@@ -56,10 +53,7 @@ import qualified Data.ByteString.Lazy.Char8    as LBC
     ( pack
     , unpack
     )
-import qualified Data.Text                     as T
-    ( Text
-    , pack
-    )
+import qualified Data.Text                     as T (pack)
 import qualified Data.Text.Lazy                as LT
     ( toStrict
     )
