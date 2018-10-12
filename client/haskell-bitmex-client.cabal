@@ -7,6 +7,7 @@ license-file:        LICENSE
 author:              Lucsanszky
 maintainer:          dan.lucsanszky@gmail.com
 category:            Web
+homepage:            https://github.com/Lucsanszky/haskell-bitmex/tree/master/client
 build-type:          Simple
 extra-source-files:  ChangeLog.md
                      README.md
