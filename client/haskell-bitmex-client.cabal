@@ -1,29 +1,14 @@
 name:                haskell-bitmex-client
-
 version:             0.1.0.0
-
--- synopsis:
-
--- description:
-
 synopsis:            Complete BitMEX Client
 description:         A complete BitMEX client library including the WebSocket API and a wrapper around the auto-generated REST API (http://hackage.haskell.org/package/haskell-bitmex-rest).
 license:             BSD3
-
 license-file:        LICENSE
-
 author:              Lucsanszky
-
 maintainer:          dan.lucsanszky@gmail.com
-
--- copyright:
-
 category:            Web
-
 build-type:          Simple
-
 extra-source-files:  ChangeLog.md
-
 cabal-version:       >=1.10
 
 library
@@ -37,11 +22,7 @@ library
                     , BitMEXClient.Wrapper.API
                     , BitMEXClient.Wrapper.Logging
                     , BitMEXClient.Wrapper.Types
-
   other-modules: BitMEXClient.CustomPrelude
-
-  -- other-extensions:
-
   ghc-options: -Wall
                -O2
                -funbox-strict-fields
@@ -50,7 +31,6 @@ library
                -Wincomplete-record-updates
                -Wincomplete-uni-patterns
                -Wredundant-constraints
-
   build-depends:       base >=4.10 && <4.11
                      , mtl >=2.2.1
                      , aeson >=1.0 && <2.0
@@ -71,11 +51,8 @@ library
                      , vector >=0.10.9 && <0.13
                      , websockets >= 0.12
                      , wuss >= 1.1
-
   hs-source-dirs:      lib
-
   default-language:    Haskell2010
-
   default-extensions:  DeriveGeneric
                        DuplicateRecordFields
                        GeneralizedNewtypeDeriving
@@ -100,23 +77,4 @@ executable example
                      , text >=0.11 && <1.3
                      , time >=1.5 && <1.9
                      , websockets >= 0.12
-
   default-language:    Haskell2010
-
-benchmark bench-api
-  hs-source-dirs:      benchmarks
-  type:                exitcode-stdio-1.0
-  main-is:             Benchmark.hs
-  build-depends:       criterion
-                     , base >= 4.10
-                     , bytestring >= 0.10
-                     , http-client-tls >= 0.3
-                     , http-client >= 0.5
-                     , text >= 1.2
-                     , haskell-bitmex-rest >= 0.1
-                     , haskell-bitmex-client >= 0.1
-                     , mtl >= 2.2.1
-                     , aeson >= 1.2
-
-  default-extensions:  NoImplicitPrelude
-                       OverloadedStrings
