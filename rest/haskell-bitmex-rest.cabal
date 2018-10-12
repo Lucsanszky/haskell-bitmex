@@ -16,9 +16,10 @@ description:    .
                 .
 category:       Web
 homepage:       https://github.com/swagger-api/swagger-codegen#readme, https://github.com/Lucsanszky/haskell-bitmex/tree/master/rest
-author:         Daniel Lucsanszky
+author:         Lucsanszky
 maintainer:     dan.lucsanszky@gmail.com
-license:        UnspecifiedLicense
+license:        BSD3
+license-file:   LICENSE
 build-type:     Simple
 cabal-version:  >= 1.10
 
