@@ -1,5 +1,5 @@
 name:                haskell-bitmex-client
-version:             0.1.0.0
+version:             0.1.0.1
 synopsis:            Complete BitMEX Client
 description:         A complete BitMEX client library including the WebSocket API and a wrapper around the auto-generated REST API (haskell-bitmex-rest).
 license:             BSD3
