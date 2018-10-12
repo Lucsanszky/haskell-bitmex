@@ -31,6 +31,7 @@ import           BitMEXClient
     , makeTimestamp
     , sendMessage
     , sign
+    , withConnectAndSubscribe
     )
 import           Control.Concurrent      (forkIO)
 import           Control.Exception
@@ -107,6 +108,7 @@ app conn = do
     pub <- R.asks publicKey
     time <- liftIO $ makeTimestamp <$> getPOSIXTime
     sig <- sign (pack ("GET" <> "/realtime" <> show time))
+    -- Example usage of makeRequest
     x <-
         makeRequest $
         Mex.orderGetOrders (Mex.Accept Mex.MimeJSON)
@@ -158,4 +160,9 @@ main = do
                   Mex.runDefaultLogExecWithContext
             , logContext = logCxt
             }
+    -- Example usage of withConnectAndSubscribe
+    withConnectAndSubscribe config [Margin] $ \c -> do
+        getMessage c config >>= print
+        sendClose c ("Connection closed" :: Text)
+    -- Example usage of connect
     connect config app
