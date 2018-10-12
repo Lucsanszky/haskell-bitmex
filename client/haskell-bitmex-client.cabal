@@ -31,7 +31,7 @@ library
                -Wincomplete-record-updates
                -Wincomplete-uni-patterns
                -Wredundant-constraints
-  build-depends:       base >=4.10 && <4.11
+  build-depends:       base >=4.7 && <5.0
                      , mtl >=2.2.1
                      , aeson >=1.0 && <2.0
                      , bytestring >=0.10.0 && <0.11
@@ -65,7 +65,7 @@ library
 executable example
   hs-source-dirs:      example
   main-is:             Example.hs
-  build-depends:       base >=4.10 && <4.11
+  build-depends:       base >=4.7 && <5.0
                      , mtl >=2.2.1
                      , aeson >=1.0 && <2.0
                      , bytestring >=0.10.0 && <0.11
