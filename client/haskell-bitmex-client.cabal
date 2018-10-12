@@ -6,6 +6,8 @@ version:             0.1.0.0
 
 -- description:
 
+synopsis:            Complete BitMEX Client
+description:         A complete BitMEX client library including the WebSocket API and a wrapper around the auto-generated REST API (http://hackage.haskell.org/package/haskell-bitmex-rest).
 license:             BSD3
 
 license-file:        LICENSE
