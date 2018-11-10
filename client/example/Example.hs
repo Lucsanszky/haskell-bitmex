@@ -45,10 +45,14 @@ import           Data.Aeson
     )
 import           Data.Aeson
 import           Data.ByteString         (readFile)
-import           Data.ByteString.Char8   (pack)
+import           Data.ByteString.Char8   (pack, takeWhile)
+import           Data.Char               (isSpace)
 import           Data.Monoid
 import           Data.Text               (Text, null)
-import qualified Data.Text               as T (pack)
+import qualified Data.Text               as T
+    ( pack
+    , stripEnd
+    )
 import qualified Data.Text.IO            as T
     ( getLine
     , readFile
@@ -69,6 +73,7 @@ import           Prelude
     , IO
     , Maybe (..)
     , mempty
+    , not
     , print
     , return
     , show
@@ -154,8 +159,8 @@ main = do
             , pathREST = Just "/api/v1"
             , pathWS = Just "/realtime"
             , manager = Just mgr
-            , publicKey = pub
-            , privateKey = priv
+            , publicKey = T.stripEnd pub
+            , privateKey = takeWhile (not . isSpace) priv
             , logExecContext =
                   Mex.runDefaultLogExecWithContext
             , logContext = logCxt
