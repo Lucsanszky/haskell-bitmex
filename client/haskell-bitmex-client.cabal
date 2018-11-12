@@ -32,11 +32,12 @@ library
                -Wincomplete-record-updates
                -Wincomplete-uni-patterns
                -Wredundant-constraints
-  build-depends:       base >=4.7 && <5.0
+  build-depends:       base >=4.7
                      , mtl >=2.2.1
                      , aeson >=1.0 && <2.0
                      , bytestring >=0.10.0 && <0.11
                      , bytestring-conversion >= 0.3
+                     , capability >=0.1 && <0.2
                      , cryptonite >= 0.25
                      , http-client >=0.5 && <0.6
                      , http-client-tls >= 0.3
@@ -54,22 +55,30 @@ library
                      , wuss >= 1.1
   hs-source-dirs:      lib
   default-language:    Haskell2010
-  default-extensions:  DeriveGeneric
+  default-extensions:  DataKinds
+                       DeriveGeneric
+                       DerivingVia
                        DuplicateRecordFields
+                       FlexibleContexts
                        GeneralizedNewtypeDeriving
+                       KindSignatures
                        MultiParamTypeClasses
                        NoImplicitPrelude
                        OverloadedStrings
                        RankNTypes
                        RecordWildCards
+                       ScopedTypeVariables
+                       TypeApplications
+                       TypeInType
 
 executable example
   hs-source-dirs:      example
   main-is:             Example.hs
-  build-depends:       base >=4.7 && <5.0
+  build-depends:       base >=4.7
                      , mtl >=2.2.1
                      , aeson >=1.0 && <2.0
                      , bytestring >=0.10.0 && <0.11
+                     , capability >=0.1 && <0.2
                      , haskell-bitmex-rest
                      , haskell-bitmex-client
                      , http-client >=0.5 && <0.6

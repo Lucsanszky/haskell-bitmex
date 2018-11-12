@@ -1,4 +1,7 @@
+{-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Main where
 
@@ -6,6 +9,7 @@ import qualified BitMEX                  as Mex
     ( Accept (..)
     , ContentType (..)
     , Leverage (..)
+    , LogContext
     , MimeJSON (..)
     , MimeResult
     , Position
@@ -33,10 +37,11 @@ import           BitMEXClient
     , sign
     , withConnectAndSubscribe
     )
+import           Capability.Reader
 import           Control.Concurrent      (forkIO)
 import           Control.Exception
 import           Control.Monad           (forever, unless)
-import           Control.Monad.Reader    (liftIO)
+import           Control.Monad.Reader    (MonadIO, liftIO)
 import qualified Control.Monad.Reader    as R (ask, asks)
 import           Data.Aeson
     ( Value (String)
@@ -44,8 +49,10 @@ import           Data.Aeson
     , toJSON
     )
 import           Data.Aeson
+import qualified Data.ByteString as BS (ByteString)
 import           Data.ByteString         (readFile)
 import           Data.ByteString.Char8   (pack, takeWhile)
+import qualified Data.ByteString.Lazy    as LBS (ByteString)
 import           Data.Char               (isSpace)
 import           Data.Monoid
 import           Data.Text               (Text, null)
@@ -58,8 +65,13 @@ import qualified Data.Text.IO            as T
     , readFile
     )
 import           Data.Time.Clock.POSIX   (getPOSIXTime)
-import           Katip
-import           Network.HTTP.Client     (newManager)
+import           Katip                   hiding
+    ( Environment
+    )
+import           Network.HTTP.Client
+    ( Manager
+    , newManager
+    )
 import           Network.HTTP.Client.TLS
     ( tlsManagerSettings
     )
@@ -67,6 +79,7 @@ import           Network.WebSockets
     ( receiveData
     , sendClose
     , sendTextData
+    , Connection
     )
 import           Prelude
     ( Bool (True)
@@ -89,9 +102,17 @@ import           System.Environment      (getArgs)
 import           System.IO               (stdout)
 
 updateLeverage ::
-       Symbol
+       ( HasReader "environment" Environment m
+       , HasReader "pathREST" (Maybe LBS.ByteString) m
+       , HasReader "publicKey" Text m
+       , HasReader "privateKey" BS.ByteString m
+       , HasReader "manager" (Maybe Manager) m
+       , HasReader "logContext" Mex.LogContext m
+       , MonadIO m
+       )
+    => Symbol
     -> Mex.Leverage
-    -> BitMEXReader (Mex.MimeResult Mex.Position)
+    -> m (Mex.MimeResult Mex.Position)
 updateLeverage sym lev = do
     let leverageTemplate =
             Mex.positionUpdateLeverage
@@ -107,10 +128,20 @@ updateLeverage sym lev = do
             "}"
     makeRequest leverageRequest
 
-app :: BitMEXApp ()
+app ::
+       ( HasReader "environment" Environment m
+       , HasReader "pathREST" (Maybe LBS.ByteString) m
+       , HasReader "manager" (Maybe Manager) m
+       , HasReader "publicKey" Text m
+       , HasReader "privateKey" BS.ByteString m
+       , HasReader "logContext" Mex.LogContext m
+       , HasReader "config" BitMEXWrapperConfig m
+       , MonadIO m
+       )
+    => Connection -> m ()
 app conn = do
-    config <- R.ask
-    pub <- R.asks publicKey
+    config <- ask @"config"
+    pub <- ask  @"publicKey"
     time <- liftIO $ makeTimestamp <$> getPOSIXTime
     sig <- sign (pack ("GET" <> "/realtime" <> show time))
     -- Example usage of makeRequest
@@ -161,8 +192,6 @@ main = do
             , manager = Just mgr
             , publicKey = T.stripEnd pub
             , privateKey = takeWhile (not . isSpace) priv
-            , logExecContext =
-                  Mex.runDefaultLogExecWithContext
             , logContext = logCxt
             }
     -- Example usage of withConnectAndSubscribe

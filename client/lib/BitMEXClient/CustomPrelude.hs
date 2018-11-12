@@ -2,15 +2,14 @@ module BitMEXClient.CustomPrelude
     ( module X
     ) where
 
+import           Capability.Reader       as X
 import           Control.Exception.Safe  as X (MonadCatch)
 import           Control.Monad           as X (fail)
 import           Control.Monad.Reader    as X
     ( Monad
     , MonadIO
-    , MonadReader
     , MonadTrans
     , ReaderT
-    , asks
     , liftIO
     , runReaderT
     )
@@ -39,9 +38,10 @@ import           Data.Aeson              as X
     , (.:?)
     )
 import           Data.Char               as X (toLower)
+import           Data.Coerce             as X (coerce)
 import           Data.Monoid             as X ((<>))
 import           Data.Time.Clock.POSIX   as X (getPOSIXTime)
-import           GHC.Generics            as X
+import           GHC.Generics            as X (Generic)
 import           Lens.Micro              as X ((.~), (^.))
 import           Network.HTTP.Client     as X
     ( Manager
