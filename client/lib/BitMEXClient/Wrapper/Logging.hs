@@ -17,16 +17,14 @@ import           Data.Text                  (Text)
 withLoggingBitMEXWrapper :: LogContext -> BitMEXWrapperConfig -> BitMEXWrapperConfig
 withLoggingBitMEXWrapper context config =
     config
-    { logExecContext = runDefaultLogExecWithContext
-    , logContext = context
+    { logContext = context
     }
 
 -- | Add a logging environment and an executor to a BitMEXConfig.
 withLoggingBitMEXConfig :: LogContext -> BitMEXConfig -> BitMEXConfig
 withLoggingBitMEXConfig context config =
     config
-    { configLogExecWithContext = runDefaultLogExecWithContext
-    , configLogContext = context
+    { configLogContext = context
     }
 
 -- | Run the BitMEXWrapperConfig's executor on the config's
@@ -34,7 +32,7 @@ withLoggingBitMEXConfig context config =
 runConfigLog ::
        MonadIO m => BitMEXWrapperConfig -> LogExec m
 runConfigLog config =
-    logExecContext config (logContext config)
+    runDefaultLogExecWithContext (logContext config)
 
 -- | Run the BitMEXWrapperConfig's executor on the config's
 -- log environment with exceptions.
