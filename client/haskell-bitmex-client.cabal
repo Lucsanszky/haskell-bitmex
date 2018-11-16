@@ -24,6 +24,7 @@ library
                     , BitMEXClient.Wrapper.API
                     , BitMEXClient.Wrapper.Logging
                     , BitMEXClient.Wrapper.Types
+                    , BitMEXClient.Wrapper.Util
   other-modules: BitMEXClient.CustomPrelude
   ghc-options: -Wall
                -funbox-strict-fields
