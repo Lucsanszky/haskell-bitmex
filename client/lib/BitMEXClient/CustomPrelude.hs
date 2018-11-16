@@ -37,6 +37,9 @@ import           Data.Aeson              as X
     , withObject
     , (.:?)
     )
+import           Data.ByteArray          as X
+    ( ByteArrayAccess
+    )
 import           Data.Char               as X (toLower)
 import           Data.Coerce             as X (coerce)
 import           Data.Monoid             as X ((<>))

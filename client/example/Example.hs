@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeApplications  #-}
 
 module Main where
 
@@ -22,7 +22,9 @@ import qualified BitMEX                  as Mex
     , _setBodyLBS
     )
 import           BitMEXClient
-    ( BitMEXApp
+    ( APIKeys (..)
+    , Authenticator (..)
+    , BitMEXApp
     , BitMEXReader
     , BitMEXWrapperConfig (..)
     , Command (..)
@@ -33,6 +35,8 @@ import           BitMEXClient
     , getMessage
     , makeRequest
     , makeTimestamp
+    , makeTimestamp
+    , run
     , sendMessage
     , sign
     , withConnectAndSubscribe
@@ -49,8 +53,8 @@ import           Data.Aeson
     , toJSON
     )
 import           Data.Aeson
-import qualified Data.ByteString as BS (ByteString)
 import           Data.ByteString         (readFile)
+import qualified Data.ByteString         as BS (ByteString)
 import           Data.ByteString.Char8   (pack, takeWhile)
 import qualified Data.ByteString.Lazy    as LBS (ByteString)
 import           Data.Char               (isSpace)
@@ -76,10 +80,10 @@ import           Network.HTTP.Client.TLS
     ( tlsManagerSettings
     )
 import           Network.WebSockets
-    ( receiveData
+    ( Connection
+    , receiveData
     , sendClose
     , sendTextData
-    , Connection
     )
 import           Prelude
     ( Bool (True)
@@ -102,12 +106,11 @@ import           System.Environment      (getArgs)
 import           System.IO               (stdout)
 
 updateLeverage ::
-       ( HasReader "environment" Environment m
-       , HasReader "pathREST" (Maybe LBS.ByteString) m
-       , HasReader "publicKey" Text m
-       , HasReader "privateKey" BS.ByteString m
-       , HasReader "manager" (Maybe Manager) m
+       ( Authenticator m
+       , HasReader "environment" Environment m
        , HasReader "logContext" Mex.LogContext m
+       , HasReader "manager" (Maybe Manager) m
+       , HasReader "pathREST" (Maybe LBS.ByteString) m
        , MonadIO m
        )
     => Symbol
@@ -128,22 +131,19 @@ updateLeverage sym lev = do
             "}"
     makeRequest leverageRequest
 
-app ::
-       ( HasReader "environment" Environment m
-       , HasReader "pathREST" (Maybe LBS.ByteString) m
-       , HasReader "manager" (Maybe Manager) m
-       , HasReader "publicKey" Text m
-       , HasReader "privateKey" BS.ByteString m
-       , HasReader "logContext" Mex.LogContext m
+app :: ( Authenticator m
        , HasReader "config" BitMEXWrapperConfig m
+       , HasReader "environment" Environment m
+       , HasReader "logContext" Mex.LogContext m
+       , HasReader "manager" (Maybe Manager) m
+       , HasReader "pathREST" (Maybe LBS.ByteString) m
        , MonadIO m
        )
-    => Connection -> m ()
+    => Connection
+    -> m ()
 app conn = do
     config <- ask @"config"
-    pub <- ask  @"publicKey"
     time <- liftIO $ makeTimestamp <$> getPOSIXTime
-    sig <- sign (pack ("GET" <> "/realtime" <> show time))
     -- Example usage of makeRequest
     x <-
         makeRequest $
@@ -153,13 +153,8 @@ app conn = do
         print x
         _ <-
             forkIO $
-            sendMessage
-                conn
-                AuthKey
-                [ String pub
-                , toJSON time
-                , (toJSON . show) sig
-                ]
+            run (authWSMessage time) config >>=
+            sendMessage conn AuthKey
         _ <-
             forkIO $
             forever $ do getMessage conn config >>= print
@@ -184,14 +179,18 @@ main = do
     pub <- T.readFile pubPath
     priv <- readFile privPath
     logCxt <- Mex.initLogContext
+    let apiKeys =
+            APIKeys
+            { publicKey = T.stripEnd pub
+            , privateKey = takeWhile (not . isSpace) priv
+            }
     let config =
             BitMEXWrapperConfig
             { environment = TestNet
             , pathREST = Just "/api/v1"
             , pathWS = Just "/realtime"
             , manager = Just mgr
-            , publicKey = T.stripEnd pub
-            , privateKey = takeWhile (not . isSpace) priv
+            , apiKeys = apiKeys
             , logContext = logCxt
             }
     -- Example usage of withConnectAndSubscribe
