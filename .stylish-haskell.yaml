@@ -141,7 +141,7 @@ steps:
   - tabs:
   #     # Number of spaces to use for each tab. Default: 8, as specified by the
   #     # Haskell report.
-      spaces: 4 
+      spaces: 4
 
   # Remove trailing whitespace
   - trailing_whitespace: {}
@@ -168,8 +168,18 @@ newline: native
 #
 # No language extensions are enabled by default.
 language_extensions:
+  - DataKinds
+  - DeriveGeneric
+  - DerivingVia
+  - DuplicateRecordFields
+  - FlexibleContexts
   - GeneralizedNewtypeDeriving
+  - KindSignatures
   - MultiParamTypeClasses
   - NoImplicitPrelude
   - OverloadedStrings
+  - RankNTypes
   - RecordWildCards
+  - ScopedTypeVariables
+  - TypeApplications
+  - TypeInType
