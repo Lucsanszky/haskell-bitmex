@@ -56,7 +56,7 @@ instance (HasReader "apiKeys" APIKeys m, MonadIO m) =>
     authRESTConfig config msg =
         coerce @(m BitMEXConfig) $ do
             APIKeys {..} <- ask @"apiKeys"
-            let sig = sign privateKey msg :: Digest SHA256
+            let sig = sign privateKey msg
             return $
                 config `addAuthMethod`
                 AuthApiKeyApiSignature ((T.pack . show) sig) `addAuthMethod`
@@ -68,7 +68,7 @@ instance (HasReader "apiKeys" APIKeys m, MonadIO m) =>
             let msg =
                     BC.pack
                         ("GET" <> "/realtime" <> show time)
-                sig = sign privateKey msg :: Digest SHA256
+                sig = sign privateKey msg
             return
                 [ String publicKey
                 , toJSON time
