@@ -75,6 +75,13 @@ library
 executable example
   hs-source-dirs:      example
   main-is:             Example.hs
+  ghc-options: -Wall
+               -funbox-strict-fields
+               -fwarn-unused-imports
+               -Wcompat
+               -Wincomplete-record-updates
+               -Wincomplete-uni-patterns
+               -Wredundant-constraints
   build-depends:       base >=4.7
                      , mtl >=2.2.1
                      , aeson >=1.0 && <2.0
