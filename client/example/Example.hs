@@ -6,62 +6,21 @@
 module Main where
 
 import qualified BitMEX                  as Mex
-    ( Accept (..)
-    , ContentType (..)
-    , Leverage (..)
-    , LogContext
-    , MimeJSON (..)
-    , MimeResult
-    , Position
-    , Symbol (..)
-    , initLogContext
-    , orderGetOrders
-    , positionUpdateLeverage
-    , runDefaultLogExecWithContext
-    , stdoutLoggingContext
-    , _setBodyLBS
-    )
 import           BitMEXClient
-    ( APIKeys (..)
-    , Authenticator (..)
-    , BitMEXApp
-    , BitMEXReader
-    , BitMEXWrapperConfig (..)
-    , Command (..)
-    , Environment (..)
-    , Symbol (..)
-    , Topic (..)
-    , connect
-    , getMessage
-    , makeRequest
-    , makeTimestamp
-    , makeTimestamp
-    , run
-    , sendMessage
-    , sign
-    , withConnectAndSubscribe
-    )
-import           Capability.Reader
+import           Capability.Reader       (HasReader, ask)
 import           Control.Concurrent      (forkIO)
-import           Control.Exception
 import           Control.Monad           (forever, unless)
 import           Control.Monad.Reader    (MonadIO, liftIO)
-import qualified Control.Monad.Reader    as R (ask, asks)
-import           Data.Aeson
-    ( Value (String)
-    , decode
-    , toJSON
-    )
-import           Data.Aeson
-import           Data.ByteString         (readFile)
-import qualified Data.ByteString         as BS (ByteString)
-import           Data.ByteString.Char8   (pack, takeWhile)
+import           Data.Aeson              (encode)
+import qualified Data.ByteString         as BS (readFile)
+import qualified Data.ByteString.Char8   as BC (takeWhile)
 import qualified Data.ByteString.Lazy    as LBS (ByteString)
 import           Data.Char               (isSpace)
-import           Data.Monoid
-import           Data.Text               (Text, null)
+import           Data.Monoid             ((<>))
+import           Data.Text               (Text)
 import qualified Data.Text               as T
-    ( pack
+    ( null
+    , pack
     , stripEnd
     )
 import qualified Data.Text.IO            as T
@@ -69,9 +28,6 @@ import qualified Data.Text.IO            as T
     , readFile
     )
 import           Data.Time.Clock.POSIX   (getPOSIXTime)
-import           Katip                   hiding
-    ( Environment
-    )
 import           Network.HTTP.Client
     ( Manager
     , newManager
@@ -81,29 +37,10 @@ import           Network.HTTP.Client.TLS
     )
 import           Network.WebSockets
     ( Connection
-    , receiveData
     , sendClose
     , sendTextData
     )
-import           Prelude
-    ( Bool (True)
-    , IO
-    , Maybe (..)
-    , mempty
-    , not
-    , print
-    , return
-    , show
-    , ($)
-    , (++)
-    , (.)
-    , (<$>)
-    , (=<<)
-    , (>>)
-    , (>>=)
-    )
 import           System.Environment      (getArgs)
-import           System.IO               (stdout)
 
 updateLeverage ::
        ( Authenticator m
@@ -169,7 +106,7 @@ app conn = do
   where
     loop =
         T.getLine >>= \line ->
-            unless (null line) $
+            unless (T.null line) $
             sendTextData conn line >> loop
 
 main :: IO ()
@@ -177,12 +114,12 @@ main = do
     mgr <- newManager tlsManagerSettings
     (pubPath:privPath:_) <- getArgs
     pub <- T.readFile pubPath
-    priv <- readFile privPath
+    priv <- BS.readFile privPath
     logCxt <- Mex.initLogContext
-    let apiKeys =
+    let keys =
             APIKeys
             { publicKey = T.stripEnd pub
-            , privateKey = takeWhile (not . isSpace) priv
+            , privateKey = BC.takeWhile (not . isSpace) priv
             }
     let config =
             BitMEXWrapperConfig
@@ -190,7 +127,7 @@ main = do
             , pathREST = Just "/api/v1"
             , pathWS = Just "/realtime"
             , manager = Just mgr
-            , apiKeys = apiKeys
+            , apiKeys = keys
             , logContext = logCxt
             }
     -- Example usage of withConnectAndSubscribe
