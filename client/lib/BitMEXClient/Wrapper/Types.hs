@@ -33,11 +33,28 @@ import qualified Data.Text                  as T (pack)
 data Environment
     = MainNet
     | TestNet
-    deriving (Eq)
+    deriving Eq
 
 instance Show Environment where
     show MainNet = "https://www.bitmex.com"
     show TestNet = "https://testnet.bitmex.com"
+
+data APIKeys = APIKeys
+    { publicKey  :: !Text
+    , privateKey :: !BS.ByteString
+    } deriving Generic
+
+data BitMEXWrapperConfig = BitMEXWrapperConfig
+    { environment :: !Environment
+    , pathREST    :: !(Maybe LBS.ByteString)
+    , pathWS      :: !(Maybe LBS.ByteString)
+    , manager     :: !(Maybe Manager)
+    , apiKeys     :: !APIKeys
+    , logContext  :: !LogContext
+    } deriving Generic
+
+------------------------------------------------------------
+-- AUTHENTICATOR CAPABILITY
 
 class Monad m => Authenticator m where
     authRESTConfig ::
@@ -51,7 +68,7 @@ newtype AuthReader m a =
     AuthReader (m a)
     deriving (Functor, Applicative, Monad)
 
-instance (HasReader "apiKeys" APIKeys m, MonadIO m) =>
+instance (HasReader "apiKeys" APIKeys m) =>
          Authenticator (AuthReader m) where
     authRESTConfig config msg =
         coerce @(m BitMEXConfig) $ do
@@ -75,19 +92,8 @@ instance (HasReader "apiKeys" APIKeys m, MonadIO m) =>
                 , (toJSON . show) sig
                 ]
 
-data APIKeys = APIKeys
-    { publicKey  :: !Text
-    , privateKey :: !BS.ByteString
-    } deriving (Generic)
-
-data BitMEXWrapperConfig = BitMEXWrapperConfig
-    { environment :: !Environment
-    , pathREST    :: !(Maybe LBS.ByteString)
-    , pathWS      :: !(Maybe LBS.ByteString)
-    , manager     :: !(Maybe Manager)
-    , apiKeys     :: !APIKeys
-    , logContext  :: !LogContext
-    } deriving (Generic)
+------------------------------------------------------------
+-- BITMEXREADER MONAD STACK
 
 newtype BitMEXReader a = BitMEXReader
     (ReaderT BitMEXWrapperConfig IO a)
@@ -126,5 +132,8 @@ newtype BitMEXReader a = BitMEXReader
 
 run :: BitMEXReader a -> BitMEXWrapperConfig -> IO a
 run (BitMEXReader m) = runReaderT m
+
+------------------------------------------------------------
+-- TYPE ALIASES
 
 type BitMEXApp a = Connection -> BitMEXReader a
