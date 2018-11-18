@@ -1,56 +1,26 @@
+{-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications  #-}
 
 module Main where
 
 import qualified BitMEX                  as Mex
-    ( Accept (..)
-    , ContentType (..)
-    , Leverage (..)
-    , MimeJSON (..)
-    , MimeResult
-    , Position
-    , Symbol (..)
-    , initLogContext
-    , orderGetOrders
-    , positionUpdateLeverage
-    , runDefaultLogExecWithContext
-    , stdoutLoggingContext
-    , _setBodyLBS
-    )
 import           BitMEXClient
-    ( BitMEXApp
-    , BitMEXReader
-    , BitMEXWrapperConfig (..)
-    , Command (..)
-    , Environment (..)
-    , Symbol (..)
-    , Topic (..)
-    , connect
-    , getMessage
-    , makeRequest
-    , makeTimestamp
-    , sendMessage
-    , sign
-    , withConnectAndSubscribe
-    )
+import           Capability.Reader       (HasReader, ask)
 import           Control.Concurrent      (forkIO)
-import           Control.Exception
 import           Control.Monad           (forever, unless)
-import           Control.Monad.Reader    (liftIO)
-import qualified Control.Monad.Reader    as R (ask, asks)
-import           Data.Aeson
-    ( Value (String)
-    , decode
-    , toJSON
-    )
-import           Data.Aeson
-import           Data.ByteString         (readFile)
-import           Data.ByteString.Char8   (pack, takeWhile)
+import           Control.Monad.Reader    (MonadIO, liftIO)
+import           Data.Aeson              (encode)
+import qualified Data.ByteString         as BS (readFile)
+import qualified Data.ByteString.Char8   as BC (takeWhile)
+import qualified Data.ByteString.Lazy    as LBS (ByteString)
 import           Data.Char               (isSpace)
-import           Data.Monoid
-import           Data.Text               (Text, null)
+import           Data.Monoid             ((<>))
+import           Data.Text               (Text)
 import qualified Data.Text               as T
-    ( pack
+    ( null
+    , pack
     , stripEnd
     )
 import qualified Data.Text.IO            as T
@@ -58,40 +28,31 @@ import qualified Data.Text.IO            as T
     , readFile
     )
 import           Data.Time.Clock.POSIX   (getPOSIXTime)
-import           Katip
-import           Network.HTTP.Client     (newManager)
+import           Network.HTTP.Client
+    ( Manager
+    , newManager
+    )
 import           Network.HTTP.Client.TLS
     ( tlsManagerSettings
     )
 import           Network.WebSockets
-    ( receiveData
+    ( Connection
     , sendClose
     , sendTextData
     )
-import           Prelude
-    ( Bool (True)
-    , IO
-    , Maybe (..)
-    , mempty
-    , not
-    , print
-    , return
-    , show
-    , ($)
-    , (++)
-    , (.)
-    , (<$>)
-    , (=<<)
-    , (>>)
-    , (>>=)
-    )
 import           System.Environment      (getArgs)
-import           System.IO               (stdout)
 
 updateLeverage ::
-       Symbol
+       ( Authenticator m
+       , HasReader "environment" Environment m
+       , HasReader "logContext" Mex.LogContext m
+       , HasReader "manager" (Maybe Manager) m
+       , HasReader "pathREST" (Maybe LBS.ByteString) m
+       , MonadIO m
+       )
+    => Symbol
     -> Mex.Leverage
-    -> BitMEXReader (Mex.MimeResult Mex.Position)
+    -> m (Mex.MimeResult Mex.Position)
 updateLeverage sym lev = do
     let leverageTemplate =
             Mex.positionUpdateLeverage
@@ -107,12 +68,19 @@ updateLeverage sym lev = do
             "}"
     makeRequest leverageRequest
 
-app :: BitMEXApp ()
+app :: ( Authenticator m
+       , HasReader "config" BitMEXWrapperConfig m
+       , HasReader "environment" Environment m
+       , HasReader "logContext" Mex.LogContext m
+       , HasReader "manager" (Maybe Manager) m
+       , HasReader "pathREST" (Maybe LBS.ByteString) m
+       , MonadIO m
+       )
+    => Connection
+    -> m ()
 app conn = do
-    config <- R.ask
-    pub <- R.asks publicKey
+    config <- ask @"config"
     time <- liftIO $ makeTimestamp <$> getPOSIXTime
-    sig <- sign (pack ("GET" <> "/realtime" <> show time))
     -- Example usage of makeRequest
     x <-
         makeRequest $
@@ -122,13 +90,8 @@ app conn = do
         print x
         _ <-
             forkIO $
-            sendMessage
-                conn
-                AuthKey
-                [ String pub
-                , toJSON time
-                , (toJSON . show) sig
-                ]
+            run (authWSMessage time) config >>=
+            sendMessage conn AuthKey
         _ <-
             forkIO $
             forever $ do getMessage conn config >>= print
@@ -143,7 +106,7 @@ app conn = do
   where
     loop =
         T.getLine >>= \line ->
-            unless (null line) $
+            unless (T.null line) $
             sendTextData conn line >> loop
 
 main :: IO ()
@@ -151,18 +114,20 @@ main = do
     mgr <- newManager tlsManagerSettings
     (pubPath:privPath:_) <- getArgs
     pub <- T.readFile pubPath
-    priv <- readFile privPath
+    priv <- BS.readFile privPath
     logCxt <- Mex.initLogContext
+    let keys =
+            APIKeys
+            { publicKey = T.stripEnd pub
+            , privateKey = BC.takeWhile (not . isSpace) priv
+            }
     let config =
             BitMEXWrapperConfig
             { environment = TestNet
             , pathREST = Just "/api/v1"
             , pathWS = Just "/realtime"
             , manager = Just mgr
-            , publicKey = T.stripEnd pub
-            , privateKey = takeWhile (not . isSpace) priv
-            , logExecContext =
-                  Mex.runDefaultLogExecWithContext
+            , apiKeys = keys
             , logContext = logCxt
             }
     -- Example usage of withConnectAndSubscribe

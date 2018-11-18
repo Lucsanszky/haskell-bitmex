@@ -2,24 +2,19 @@ module BitMEXClient.Wrapper.API
     ( makeRequest
     , connect
     , withConnectAndSubscribe
-    , sign
     , makeTimestamp
     , getMessage
     , sendMessage
     ) where
 
 import           BitMEX
-    ( AuthApiKeyApiKey (..)
-    , AuthApiKeyApiNonce (..)
-    , AuthApiKeyApiSignature (..)
-    , BitMEXConfig (..)
+    ( BitMEXConfig (..)
     , BitMEXRequest (..)
     , MimeResult
     , MimeType
     , MimeUnrender
     , ParamBody (..)
     , Produces
-    , addAuthMethod
     , dispatchMime
     , paramsBodyL
     , paramsQueryL
@@ -36,9 +31,7 @@ import           BitMEXClient.WebSockets.Types
     )
 import           BitMEXClient.Wrapper.Logging
 import           BitMEXClient.Wrapper.Types
-import           Data.ByteArray
-    ( ByteArrayAccess
-    )
+import           BitMEXClient.Wrapper.Util
 import qualified Data.ByteString.Char8         as BC
     ( pack
     , unpack
@@ -47,13 +40,13 @@ import           Data.ByteString.Conversion
     ( toByteString'
     )
 import qualified Data.ByteString.Lazy          as LBS
-    ( append
+    ( ByteString
+    , append
     )
 import qualified Data.ByteString.Lazy.Char8    as LBC
     ( pack
     , unpack
     )
-import qualified Data.Text                     as T (pack)
 import qualified Data.Text.Lazy                as LT
     ( toStrict
     )
@@ -63,70 +56,60 @@ import qualified Data.Text.Lazy.Encoding       as LT
 import           Data.Vector                   (fromList)
 
 ------------------------------------------------------------
--- HELPERS
+-- REST
 
--- | Create a signature for the request.
-sign ::
-       (ByteArrayAccess a)
-    => a
-    -> BitMEXReader (Digest SHA256)
-sign body = do
-    secret <- asks privateKey
-    return . hmacGetDigest . hmac secret $ body
-
-makeRESTConfig :: BitMEXReader BitMEXConfig
+makeRESTConfig ::
+       ( HasReader "environment" Environment m
+       , HasReader "logContext" LogContext m
+       , HasReader "pathREST" (Maybe LBS.ByteString) m
+       )
+    => m BitMEXConfig
 makeRESTConfig = do
-    env <- asks environment
-    logCxt <- asks logContext
+    env <- ask @"environment"
+    logCxt <- ask @"logContext"
     path <-
-        asks pathREST >>= \p ->
+        ask @"pathREST" >>= \p ->
             return $
             case p of
                 Nothing -> "/api/v1"
                 Just x  -> x
     let base = (LBC.pack . show) env
-        logExecContext = asks logExecContext
     return
         BitMEXConfig
         { configHost = LBS.append base path
         , configUserAgent =
               "swagger-haskell-http-client/1.0.0"
-        , configLogExecWithContext = logExecContext
+        , configLogExecWithContext = runDefaultLogExecWithContext
         , configLogContext = logCxt
         , configAuthMethods = []
         , configValidateAuthMethods = True
         }
 
--- | Convenience function to generate a timestamp
--- for the signature of the request.
-makeTimestamp :: (RealFrac a) => a -> Int
-makeTimestamp = floor . (* 1000000)
-
-------------------------------------------------------------
--- REST
-
 -- | Prepare, authenticate and dispatch a request
 -- via the auto-generated BitMEX REST API.
 makeRequest ::
-       ( Produces req accept
-       , MimeUnrender accept res
-       , MimeType contentType
-       )
-    => BitMEXRequest req contentType res accept
-    -> BitMEXReader (MimeResult res)
+      ( Produces req accept
+      , MimeUnrender accept res
+      , MimeType contentType
+      , Authenticator m
+      , HasReader "environment" Environment m
+      , HasReader "logContext" LogContext m
+      , HasReader "manager" (Maybe Manager) m
+      , HasReader "pathREST" (Maybe LBS.ByteString) m
+      , MonadIO m
+      )
+   => BitMEXRequest req contentType res accept
+   -> m (MimeResult res)
 makeRequest req@BitMEXRequest {..} = do
-    pub <- asks publicKey
-    logCxt <- asks logContext
+    logCxt <- ask @"logContext"
     time <- liftIO $ makeTimestamp <$> getPOSIXTime
     config0 <-
         makeRESTConfig >>=
         liftIO . return . withLoggingBitMEXConfig logCxt
     let verb = filter (/= '"') $ show rMethod
-    let query = rParams ^. paramsQueryL
-    sig <-
-        case rParams ^. paramsBodyL of
+        query = rParams ^. paramsQueryL
+        msg = case rParams ^. paramsBodyL of
             ParamBodyBL lbs ->
-                sign
                     (BC.pack
                          (verb <> "/api/v1" <>
                           (LBC.unpack . head) rUrlPath <>
@@ -134,7 +117,6 @@ makeRequest req@BitMEXRequest {..} = do
                           show time <>
                           LBC.unpack lbs))
             ParamBodyB bs ->
-                sign
                     (BC.pack
                          (verb <> "/api/v1" <>
                           (LBC.unpack . head) rUrlPath <>
@@ -142,7 +124,6 @@ makeRequest req@BitMEXRequest {..} = do
                           show time <>
                           BC.unpack bs))
             _ ->
-                sign
                     (BC.pack
                          (verb <> "/api/v1" <>
                           (LBC.unpack . head) rUrlPath <>
@@ -152,13 +133,9 @@ makeRequest req@BitMEXRequest {..} = do
             setHeader
                 req
                 [("api-expires", toByteString' time)]
-        config =
-            config0 `addAuthMethod`
-            AuthApiKeyApiSignature ((T.pack . show) sig) `addAuthMethod`
-            AuthApiKeyApiNonce "" `addAuthMethod`
-            AuthApiKeyApiKey pub
+    config <- authRESTConfig config0 msg
     mgr <-
-        asks manager >>= \m ->
+        ask @"manager" >>= \m ->
             case m of
                 Nothing ->
                     liftIO $ newManager tlsManagerSettings
@@ -176,6 +153,7 @@ withConnectAndSubscribe ::
     -> ClientApp a
     -> IO a
 withConnectAndSubscribe config@BitMEXWrapperConfig {..} ts app = do
+    time <- makeTimestamp <$> getPOSIXTime
     let base = (drop 8 . show) environment
         path =
             case pathWS of
@@ -183,21 +161,7 @@ withConnectAndSubscribe config@BitMEXWrapperConfig {..} ts app = do
                 Just x  -> x
     withSocketsDo $
         runSecureClient base 443 (LBC.unpack path) $ \c -> do
-            time <- makeTimestamp <$> getPOSIXTime
-            sig <-
-                runReaderT
-                    (run (sign
-                              (BC.pack
-                                   ("GET" ++
-                                    "/realtime" ++ show time))))
-                    config
-            sendMessage
-                c
-                AuthKey
-                [ String publicKey
-                , toJSON time
-                , (toJSON . show) sig
-                ]
+            run (authWSMessage time) config >>= sendMessage c AuthKey
             sendMessage c Subscribe ts
             app c
 
@@ -214,7 +178,7 @@ connect initConfig@BitMEXWrapperConfig {..} app = do
         withLoggingBitMEXWrapper logContext initConfig
     withSocketsDo $
         runSecureClient base 443 (LBC.unpack path) $ \conn -> do
-            runReaderT (run (app conn)) config
+            run (app conn) config
 
 -- | Receive a message from the WebSocket connection and parse it.
 getMessage ::

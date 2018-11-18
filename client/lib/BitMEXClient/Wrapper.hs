@@ -5,3 +5,4 @@ module BitMEXClient.Wrapper
 import           BitMEXClient.Wrapper.API     as X
 import           BitMEXClient.Wrapper.Logging as X
 import           BitMEXClient.Wrapper.Types   as X
+import           BitMEXClient.Wrapper.Util    as X
