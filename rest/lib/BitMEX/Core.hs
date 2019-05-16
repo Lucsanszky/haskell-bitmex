@@ -1,7 +1,7 @@
 {-
    BitMEX API
 
-   ## REST API for the BitMEX Trading Platform  [View Changelog](/app/apiChangelog)    #### Getting Started   ##### Fetching Data  All REST endpoints are documented below. You can try out any query right from this interface.  Most table queries accept `count`, `start`, and `reverse` params. Set `reverse=true` to get rows newest-first.  Additional documentation regarding filters, timestamps, and authentication is available in [the main API documentation](https://www.bitmex.com/app/restAPI).  *All* table data is available via the [Websocket](/app/wsAPI). We highly recommend using the socket if you want to have the quickest possible data without being subject to ratelimits.  ##### Return Types  By default, all data is returned as JSON. Send `?_format=csv` to get CSV data or `?_format=xml` to get XML data.  ##### Trade Data Queries  *This is only a small subset of what is available, to get you started.*  Fill in the parameters and click the `Try it out!` button to try any of these queries.  * [Pricing Data](#!/Quote/Quote_get)  * [Trade Data](#!/Trade/Trade_get)  * [OrderBook Data](#!/OrderBook/OrderBook_getL2)  * [Settlement Data](#!/Settlement/Settlement_get)  * [Exchange Statistics](#!/Stats/Stats_history)  Every function of the BitMEX.com platform is exposed here and documented. Many more functions are available.  ##### Swagger Specification  [⇩ Download Swagger JSON](swagger.json)    ## All API Endpoints  Click to expand a section. 
+   ## REST API for the BitMEX Trading Platform  [View Changelog](/app/apiChangelog)    #### Getting Started   ##### Fetching Data  All REST endpoints are documented below. You can try out any query right from this interface.  Most table queries accept `count`, `start`, and `reverse` params. Set `reverse=true` to get rows newest-first.  Additional documentation regarding filters, timestamps, and authentication is available in [the main API documentation](https://www.bitmex.com/app/restAPI).  *All* table data is available via the [Websocket](/app/wsAPI). We highly recommend using the socket if you want to have the quickest possible data without being subject to ratelimits.  ##### Return Types  By default, all data is returned as JSON. Send `?_format=csv` to get CSV data or `?_format=xml` to get XML data.  ##### Trade Data Queries  *This is only a small subset of what is available, to get you started.*  Fill in the parameters and click the `Try it out!` button to try any of these queries.  * [Pricing Data](#!/Quote/Quote_get)  * [Trade Data](#!/Trade/Trade_get)  * [OrderBook Data](#!/OrderBook/OrderBook_getL2)  * [Settlement Data](#!/Settlement/Settlement_get)  * [Exchange Statistics](#!/Stats/Stats_history)  Every function of the BitMEX.com platform is exposed here and documented. Many more functions are available.  ##### Swagger Specification  [⇩ Download Swagger JSON](swagger.json)    ## All API Endpoints  Click to expand a section.
 
    OpenAPI spec version: 2.0
    BitMEX API API version: 1.2.0
@@ -70,7 +70,7 @@ import Prelude (($), (.), (<$>), (<*>), Maybe(..), Bool(..), Char, String, fmap,
 
 -- * BitMEXConfig
 
--- | 
+-- |
 data BitMEXConfig = BitMEXConfig
   { configHost  :: BCL.ByteString -- ^ host supplied in the Request
   , configUserAgent :: Text -- ^ user-agent supplied in the Request
@@ -108,7 +108,7 @@ newConfig = do
         , configLogContext = logCxt
         , configAuthMethods = []
         , configValidateAuthMethods = True
-        }  
+        }
 
 -- | updates config use AuthMethod on matching requests
 addAuthMethod :: AuthMethod auth => BitMEXConfig -> auth -> BitMEXConfig
@@ -130,7 +130,7 @@ withStderrLogging p = do
 -- | updates the config to disable logging
 withNoLogging :: BitMEXConfig -> BitMEXConfig
 withNoLogging p = p { configLogExecWithContext =  runNullLogExec}
- 
+
 -- * BitMEXRequest
 
 -- | Represents a request.
@@ -229,7 +229,7 @@ data ParamBody
 
 -- ** BitMEXRequest Utils
 
-_mkRequest :: NH.Method -- ^ Method 
+_mkRequest :: NH.Method -- ^ Method
           -> [BCL.ByteString] -- ^ Endpoint
           -> BitMEXRequest req contentType res accept -- ^ req: Request Type, res: Response Type
 _mkRequest m u = BitMEXRequest m u _mkParams []
@@ -254,18 +254,18 @@ removeHeader req header =
 
 _setContentTypeHeader :: forall req contentType res accept. MimeType contentType => BitMEXRequest req contentType res accept -> BitMEXRequest req contentType res accept
 _setContentTypeHeader req =
-    case mimeType (P.Proxy :: P.Proxy contentType) of 
+    case mimeType (P.Proxy :: P.Proxy contentType) of
         Just m -> req `setHeader` [("content-type", BC.pack $ P.show m)]
         Nothing -> req `removeHeader` ["content-type"]
 
 _setAcceptHeader :: forall req contentType res accept. MimeType accept => BitMEXRequest req contentType res accept -> BitMEXRequest req contentType res accept
 _setAcceptHeader req =
-    case mimeType (P.Proxy :: P.Proxy accept) of 
+    case mimeType (P.Proxy :: P.Proxy accept) of
         Just m -> req `setHeader` [("accept", BC.pack $ P.show m)]
         Nothing -> req `removeHeader` ["accept"]
 
 setQuery :: BitMEXRequest req contentType res accept -> [NH.QueryItem] -> BitMEXRequest req contentType res accept
-setQuery req query = 
+setQuery req query =
   req &
   L.over
     (rParamsL . paramsQueryL)
@@ -274,25 +274,25 @@ setQuery req query =
     cifst = CI.mk . P.fst
 
 addForm :: BitMEXRequest req contentType res accept -> WH.Form -> BitMEXRequest req contentType res accept
-addForm req newform = 
+addForm req newform =
     let form = case paramsBody (rParams req) of
             ParamBodyFormUrlEncoded _form -> _form
             _ -> mempty
     in req & L.set (rParamsL . paramsBodyL) (ParamBodyFormUrlEncoded (newform <> form))
 
 _addMultiFormPart :: BitMEXRequest req contentType res accept -> NH.Part -> BitMEXRequest req contentType res accept
-_addMultiFormPart req newpart = 
+_addMultiFormPart req newpart =
     let parts = case paramsBody (rParams req) of
             ParamBodyMultipartFormData _parts -> _parts
             _ -> []
     in req & L.set (rParamsL . paramsBodyL) (ParamBodyMultipartFormData (newpart : parts))
 
 _setBodyBS :: BitMEXRequest req contentType res accept -> B.ByteString -> BitMEXRequest req contentType res accept
-_setBodyBS req body = 
+_setBodyBS req body =
     req & L.set (rParamsL . paramsBodyL) (ParamBodyB body)
 
 _setBodyLBS :: BitMEXRequest req contentType res accept -> BL.ByteString -> BitMEXRequest req contentType res accept
-_setBodyLBS req body = 
+_setBodyLBS req body =
     req & L.set (rParamsL . paramsBodyL) (ParamBodyBL body)
 
 _hasAuthType :: AuthMethod authMethod => BitMEXRequest req contentType res accept -> P.Proxy authMethod -> BitMEXRequest req contentType res accept
@@ -361,7 +361,7 @@ _toCollA' c encode one xs = case c of
     {-# INLINE go #-}
     {-# INLINE expandList #-}
     {-# INLINE combine #-}
-  
+
 -- * AuthMethods
 
 -- | Provides a method to apply auth methods to requests
@@ -392,7 +392,7 @@ _applyAuthMethods req config@(BitMEXConfig {configAuthMethods = as}) =
   foldlM go req as
   where
     go r (AnyAuthMethod a) = applyAuthMethod config a r
-  
+
 -- * Utils
 
 -- | Removes Null fields.  (OpenAPI-Specification 2.0 does not allow Null in JSON)
@@ -486,7 +486,7 @@ _showDate =
 
 -- * Byte/Binary Formatting
 
-  
+
 -- | base64 encoded characters
 newtype ByteArray = ByteArray { unByteArray :: BL.ByteString }
   deriving (P.Eq,P.Data,P.Ord,P.Typeable,NF.NFData)

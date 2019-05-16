@@ -1,7 +1,7 @@
 {-
    BitMEX API
 
-   ## REST API for the BitMEX Trading Platform  [View Changelog](/app/apiChangelog)    #### Getting Started   ##### Fetching Data  All REST endpoints are documented below. You can try out any query right from this interface.  Most table queries accept `count`, `start`, and `reverse` params. Set `reverse=true` to get rows newest-first.  Additional documentation regarding filters, timestamps, and authentication is available in [the main API documentation](https://www.bitmex.com/app/restAPI).  *All* table data is available via the [Websocket](/app/wsAPI). We highly recommend using the socket if you want to have the quickest possible data without being subject to ratelimits.  ##### Return Types  By default, all data is returned as JSON. Send `?_format=csv` to get CSV data or `?_format=xml` to get XML data.  ##### Trade Data Queries  *This is only a small subset of what is available, to get you started.*  Fill in the parameters and click the `Try it out!` button to try any of these queries.  * [Pricing Data](#!/Quote/Quote_get)  * [Trade Data](#!/Trade/Trade_get)  * [OrderBook Data](#!/OrderBook/OrderBook_getL2)  * [Settlement Data](#!/Settlement/Settlement_get)  * [Exchange Statistics](#!/Stats/Stats_history)  Every function of the BitMEX.com platform is exposed here and documented. Many more functions are available.  ##### Swagger Specification  [⇩ Download Swagger JSON](swagger.json)    ## All API Endpoints  Click to expand a section. 
+   ## REST API for the BitMEX Trading Platform  [View Changelog](/app/apiChangelog)    #### Getting Started   ##### Fetching Data  All REST endpoints are documented below. You can try out any query right from this interface.  Most table queries accept `count`, `start`, and `reverse` params. Set `reverse=true` to get rows newest-first.  Additional documentation regarding filters, timestamps, and authentication is available in [the main API documentation](https://www.bitmex.com/app/restAPI).  *All* table data is available via the [Websocket](/app/wsAPI). We highly recommend using the socket if you want to have the quickest possible data without being subject to ratelimits.  ##### Return Types  By default, all data is returned as JSON. Send `?_format=csv` to get CSV data or `?_format=xml` to get XML data.  ##### Trade Data Queries  *This is only a small subset of what is available, to get you started.*  Fill in the parameters and click the `Try it out!` button to try any of these queries.  * [Pricing Data](#!/Quote/Quote_get)  * [Trade Data](#!/Trade/Trade_get)  * [OrderBook Data](#!/OrderBook/OrderBook_getL2)  * [Settlement Data](#!/Settlement/Settlement_get)  * [Exchange Statistics](#!/Stats/Stats_history)  Every function of the BitMEX.com platform is exposed here and documented. Many more functions are available.  ##### Swagger Specification  [⇩ Download Swagger JSON](swagger.json)    ## All API Endpoints  Click to expand a section.
 
    OpenAPI spec version: 2.0
    BitMEX API API version: 1.2.0
@@ -73,12 +73,12 @@ import qualified Prelude as P
 -- *** aPIKeyDisable
 
 -- | @POST \/apiKey\/disable@
--- 
+--
 -- Disable an API Key.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-aPIKeyDisable 
+--
+aPIKeyDisable
   :: (Consumes APIKeyDisable contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -91,7 +91,7 @@ aPIKeyDisable _  _ (ApiKeyId apiKeyId) =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("apiKeyID", apiKeyId)
 
-data APIKeyDisable  
+data APIKeyDisable
 
 -- | @application/json@
 instance Consumes APIKeyDisable MimeJSON
@@ -113,12 +113,12 @@ instance Produces APIKeyDisable MimeTextjavascript
 -- *** aPIKeyEnable
 
 -- | @POST \/apiKey\/enable@
--- 
+--
 -- Enable an API Key.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-aPIKeyEnable 
+--
+aPIKeyEnable
   :: (Consumes APIKeyEnable contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -131,7 +131,7 @@ aPIKeyEnable _  _ (ApiKeyId apiKeyId) =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("apiKeyID", apiKeyId)
 
-data APIKeyEnable  
+data APIKeyEnable
 
 -- | @application/json@
 instance Consumes APIKeyEnable MimeJSON
@@ -153,12 +153,12 @@ instance Produces APIKeyEnable MimeTextjavascript
 -- *** aPIKeyGet
 
 -- | @GET \/apiKey@
--- 
+--
 -- Get your API Keys.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-aPIKeyGet 
+--
+aPIKeyGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest APIKeyGet MimeNoContent [APIKey] accept
 aPIKeyGet  _ =
@@ -167,7 +167,7 @@ aPIKeyGet  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data APIKeyGet  
+data APIKeyGet
 
 -- | /Optional Param/ "reverse" - If true, will sort results newest first.
 instance HasOptionalParam APIKeyGet Reverse where
@@ -194,14 +194,14 @@ instance Produces APIKeyGet MimeTextjavascript
 -- *** aPIKeyNew
 
 -- | @POST \/apiKey@
--- 
+--
 -- Create a new API Key.
--- 
+--
 -- API Keys can also be created via [this Python script](https://github.com/BitMEX/market-maker/blob/master/generate-api-key.py) See the [API Key Documentation](/app/apiKeys) for more information on capabilities.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-aPIKeyNew 
+--
+aPIKeyNew
   :: (Consumes APIKeyNew contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -212,7 +212,7 @@ aPIKeyNew _  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data APIKeyNew  
+data APIKeyNew
 
 -- | /Optional Param/ "name" - Key name. This name is for reference only.
 instance HasOptionalParam APIKeyNew Name where
@@ -259,12 +259,12 @@ instance Produces APIKeyNew MimeTextjavascript
 -- *** aPIKeyRemove
 
 -- | @DELETE \/apiKey@
--- 
+--
 -- Remove an API Key.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-aPIKeyRemove 
+--
+aPIKeyRemove
   :: (Consumes APIKeyRemove contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -277,7 +277,7 @@ aPIKeyRemove _  _ (ApiKeyId apiKeyId) =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("apiKeyID", apiKeyId)
 
-data APIKeyRemove  
+data APIKeyRemove
 
 -- | @application/json@
 instance Consumes APIKeyRemove MimeJSON
@@ -301,16 +301,16 @@ instance Produces APIKeyRemove MimeTextjavascript
 -- *** announcementGet
 
 -- | @GET \/announcement@
--- 
+--
 -- Get site announcements.
--- 
-announcementGet 
+--
+announcementGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest AnnouncementGet MimeNoContent [Announcement] accept
 announcementGet  _ =
   _mkRequest "GET" ["/announcement"]
 
-data AnnouncementGet  
+data AnnouncementGet
 
 -- | /Optional Param/ "columns" - Array of column names to fetch. If omitted, will return all columns.
 instance HasOptionalParam AnnouncementGet Columns where
@@ -337,12 +337,12 @@ instance Produces AnnouncementGet MimeTextjavascript
 -- *** announcementGetUrgent
 
 -- | @GET \/announcement\/urgent@
--- 
+--
 -- Get urgent (banner) announcements.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-announcementGetUrgent 
+--
+announcementGetUrgent
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest AnnouncementGetUrgent MimeNoContent [Announcement] accept
 announcementGetUrgent  _ =
@@ -351,7 +351,7 @@ announcementGetUrgent  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data AnnouncementGetUrgent  
+data AnnouncementGetUrgent
 
 -- | @application/json@
 instance Consumes AnnouncementGetUrgent MimeJSON
@@ -375,16 +375,16 @@ instance Produces AnnouncementGetUrgent MimeTextjavascript
 -- *** chatGet
 
 -- | @GET \/chat@
--- 
+--
 -- Get chat messages.
--- 
-chatGet 
+--
+chatGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest ChatGet MimeNoContent [Chat] accept
 chatGet  _ =
   _mkRequest "GET" ["/chat"]
 
-data ChatGet  
+data ChatGet
 
 -- | /Optional Param/ "count" - Number of results to fetch.
 instance HasOptionalParam ChatGet Count where
@@ -426,16 +426,16 @@ instance Produces ChatGet MimeTextjavascript
 -- *** chatGetChannels
 
 -- | @GET \/chat\/channels@
--- 
+--
 -- Get available channels.
--- 
-chatGetChannels 
+--
+chatGetChannels
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest ChatGetChannels MimeNoContent [ChatChannels] accept
 chatGetChannels  _ =
   _mkRequest "GET" ["/chat/channels"]
 
-data ChatGetChannels  
+data ChatGetChannels
 
 -- | @application/json@
 instance Consumes ChatGetChannels MimeJSON
@@ -457,18 +457,18 @@ instance Produces ChatGetChannels MimeTextjavascript
 -- *** chatGetConnected
 
 -- | @GET \/chat\/connected@
--- 
+--
 -- Get connected users.
--- 
+--
 -- Returns an array with browser users in the first position and API users (bots) in the second position.
--- 
-chatGetConnected 
+--
+chatGetConnected
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest ChatGetConnected MimeNoContent ConnectedUsers accept
 chatGetConnected  _ =
   _mkRequest "GET" ["/chat/connected"]
 
-data ChatGetConnected  
+data ChatGetConnected
 
 -- | @application/json@
 instance Consumes ChatGetConnected MimeJSON
@@ -490,12 +490,12 @@ instance Produces ChatGetConnected MimeTextjavascript
 -- *** chatNew
 
 -- | @POST \/chat@
--- 
+--
 -- Send a chat message.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-chatNew 
+--
+chatNew
   :: (Consumes ChatNew contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -508,7 +508,7 @@ chatNew _  _ (Message message) =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("message", message)
 
-data ChatNew  
+data ChatNew
 
 -- | /Optional Param/ "channelID" - Channel to post to. Default 1 (English).
 instance HasOptionalParam ChatNew ChannelId where
@@ -537,14 +537,14 @@ instance Produces ChatNew MimeTextjavascript
 -- *** executionGet
 
 -- | @GET \/execution@
--- 
+--
 -- Get all raw executions for your account.
--- 
--- This returns all raw transactions, which includes order opening and cancelation, and order status changes. It can be quite noisy. More focused information is available at `/execution/tradeHistory`.  You may also use the `filter` param to target your query. Specify an array as a filter value, such as `{\"execType\": [\"Settlement\", \"Trade\"]}` to filter on multiple values.  See [the FIX Spec](http://www.onixs.biz/fix-dictionary/5.0.SP2/msgType_8_8.html) for explanations of these fields. 
--- 
+--
+-- This returns all raw transactions, which includes order opening and cancelation, and order status changes. It can be quite noisy. More focused information is available at `/execution/tradeHistory`.  You may also use the `filter` param to target your query. Specify an array as a filter value, such as `{\"execType\": [\"Settlement\", \"Trade\"]}` to filter on multiple values.  See [the FIX Spec](http://www.onixs.biz/fix-dictionary/5.0.SP2/msgType_8_8.html) for explanations of these fields.
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-executionGet 
+--
+executionGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest ExecutionGet MimeNoContent [Execution] accept
 executionGet  _ =
@@ -553,7 +553,7 @@ executionGet  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data ExecutionGet  
+data ExecutionGet
 
 -- | /Optional Param/ "symbol" - Instrument symbol. Send a bare series (e.g. XBU) to get data for the nearest expiring contract in that series.  You can also send a timeframe, e.g. `XBU:monthly`. Timeframes are `daily`, `weekly`, `monthly`, `quarterly`, and `biquarterly`.
 instance HasOptionalParam ExecutionGet Symbol where
@@ -615,12 +615,12 @@ instance Produces ExecutionGet MimeTextjavascript
 -- *** executionGetTradeHistory
 
 -- | @GET \/execution\/tradeHistory@
--- 
+--
 -- Get all balance-affecting executions. This includes each trade, insurance charge, and settlement.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-executionGetTradeHistory 
+--
+executionGetTradeHistory
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest ExecutionGetTradeHistory MimeNoContent [Execution] accept
 executionGetTradeHistory  _ =
@@ -629,7 +629,7 @@ executionGetTradeHistory  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data ExecutionGetTradeHistory  
+data ExecutionGetTradeHistory
 
 -- | /Optional Param/ "symbol" - Instrument symbol. Send a bare series (e.g. XBU) to get data for the nearest expiring contract in that series.  You can also send a timeframe, e.g. `XBU:monthly`. Timeframes are `daily`, `weekly`, `monthly`, `quarterly`, and `biquarterly`.
 instance HasOptionalParam ExecutionGetTradeHistory Symbol where
@@ -693,16 +693,16 @@ instance Produces ExecutionGetTradeHistory MimeTextjavascript
 -- *** fundingGet
 
 -- | @GET \/funding@
--- 
+--
 -- Get funding history.
--- 
-fundingGet 
+--
+fundingGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest FundingGet MimeNoContent [Funding] accept
 fundingGet  _ =
   _mkRequest "GET" ["/funding"]
 
-data FundingGet  
+data FundingGet
 
 -- | /Optional Param/ "symbol" - Instrument symbol. Send a bare series (e.g. XBU) to get data for the nearest expiring contract in that series.  You can also send a timeframe, e.g. `XBU:monthly`. Timeframes are `daily`, `weekly`, `monthly`, `quarterly`, and `biquarterly`.
 instance HasOptionalParam FundingGet Symbol where
@@ -766,18 +766,18 @@ instance Produces FundingGet MimeTextjavascript
 -- *** instrumentGet
 
 -- | @GET \/instrument@
--- 
+--
 -- Get instruments.
--- 
+--
 -- This returns all instruments and indices, including those that have settled or are unlisted. Use this endpoint if you want to query for individual instruments or use a complex filter. Use `/instrument/active` to return active instruments, or use a filter like `{\"state\": \"Open\"}`.
--- 
-instrumentGet 
+--
+instrumentGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest InstrumentGet MimeNoContent [Instrument] accept
 instrumentGet  _ =
   _mkRequest "GET" ["/instrument"]
 
-data InstrumentGet  
+data InstrumentGet
 
 -- | /Optional Param/ "symbol" - Instrument symbol. Send a bare series (e.g. XBU) to get data for the nearest expiring contract in that series.  You can also send a timeframe, e.g. `XBU:monthly`. Timeframes are `daily`, `weekly`, `monthly`, `quarterly`, and `biquarterly`.
 instance HasOptionalParam InstrumentGet Symbol where
@@ -839,16 +839,16 @@ instance Produces InstrumentGet MimeTextjavascript
 -- *** instrumentGetActive
 
 -- | @GET \/instrument\/active@
--- 
+--
 -- Get all active instruments and instruments that have expired in <24hrs.
--- 
-instrumentGetActive 
+--
+instrumentGetActive
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest InstrumentGetActive MimeNoContent [Instrument] accept
 instrumentGetActive  _ =
   _mkRequest "GET" ["/instrument/active"]
 
-data InstrumentGetActive  
+data InstrumentGetActive
 
 -- | @application/json@
 instance Consumes InstrumentGetActive MimeJSON
@@ -870,16 +870,16 @@ instance Produces InstrumentGetActive MimeTextjavascript
 -- *** instrumentGetActiveAndIndices
 
 -- | @GET \/instrument\/activeAndIndices@
--- 
+--
 -- Helper method. Gets all active instruments and all indices. This is a join of the result of /indices and /active.
--- 
-instrumentGetActiveAndIndices 
+--
+instrumentGetActiveAndIndices
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest InstrumentGetActiveAndIndices MimeNoContent [Instrument] accept
 instrumentGetActiveAndIndices  _ =
   _mkRequest "GET" ["/instrument/activeAndIndices"]
 
-data InstrumentGetActiveAndIndices  
+data InstrumentGetActiveAndIndices
 
 -- | @application/json@
 instance Consumes InstrumentGetActiveAndIndices MimeJSON
@@ -901,18 +901,18 @@ instance Produces InstrumentGetActiveAndIndices MimeTextjavascript
 -- *** instrumentGetActiveIntervals
 
 -- | @GET \/instrument\/activeIntervals@
--- 
+--
 -- Return all active contract series and interval pairs.
--- 
+--
 -- This endpoint is useful for determining which pairs are live. It returns two arrays of   strings. The first is intervals, such as `[\"BVOL:daily\", \"BVOL:weekly\", \"XBU:daily\", \"XBU:monthly\", ...]`. These identifiers are usable in any query's `symbol` param. The second array is the current resolution of these intervals. Results are mapped at the same index.
--- 
-instrumentGetActiveIntervals 
+--
+instrumentGetActiveIntervals
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest InstrumentGetActiveIntervals MimeNoContent InstrumentInterval accept
 instrumentGetActiveIntervals  _ =
   _mkRequest "GET" ["/instrument/activeIntervals"]
 
-data InstrumentGetActiveIntervals  
+data InstrumentGetActiveIntervals
 
 -- | @application/json@
 instance Consumes InstrumentGetActiveIntervals MimeJSON
@@ -934,18 +934,18 @@ instance Produces InstrumentGetActiveIntervals MimeTextjavascript
 -- *** instrumentGetCompositeIndex
 
 -- | @GET \/instrument\/compositeIndex@
--- 
+--
 -- Show constituent parts of an index.
--- 
--- Composite indices are built from multiple external price sources.  Use this endpoint to get the underlying prices of an index. For example, send a `symbol` of `.XBT` to get the ticks and weights of the constituent exchanges that build the \".XBT\" index.  A tick with reference `\"BMI\"` and weight `null` is the composite index tick. 
--- 
-instrumentGetCompositeIndex 
+--
+-- Composite indices are built from multiple external price sources.  Use this endpoint to get the underlying prices of an index. For example, send a `symbol` of `.XBT` to get the ticks and weights of the constituent exchanges that build the \".XBT\" index.  A tick with reference `\"BMI\"` and weight `null` is the composite index tick.
+--
+instrumentGetCompositeIndex
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest InstrumentGetCompositeIndex MimeNoContent [IndexComposite] accept
 instrumentGetCompositeIndex  _ =
   _mkRequest "GET" ["/instrument/compositeIndex"]
 
-data InstrumentGetCompositeIndex  
+data InstrumentGetCompositeIndex
 instance HasOptionalParam InstrumentGetCompositeIndex Account where
   applyOptionalParam req (Account xs) =
     req `setQuery` toQuery ("account", Just xs)
@@ -1010,16 +1010,16 @@ instance Produces InstrumentGetCompositeIndex MimeTextjavascript
 -- *** instrumentGetIndices
 
 -- | @GET \/instrument\/indices@
--- 
+--
 -- Get all price indices.
--- 
-instrumentGetIndices 
+--
+instrumentGetIndices
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest InstrumentGetIndices MimeNoContent [Instrument] accept
 instrumentGetIndices  _ =
   _mkRequest "GET" ["/instrument/indices"]
 
-data InstrumentGetIndices  
+data InstrumentGetIndices
 
 -- | @application/json@
 instance Consumes InstrumentGetIndices MimeJSON
@@ -1043,16 +1043,16 @@ instance Produces InstrumentGetIndices MimeTextjavascript
 -- *** insuranceGet
 
 -- | @GET \/insurance@
--- 
+--
 -- Get insurance fund history.
--- 
-insuranceGet 
+--
+insuranceGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest InsuranceGet MimeNoContent [Insurance] accept
 insuranceGet  _ =
   _mkRequest "GET" ["/insurance"]
 
-data InsuranceGet  
+data InsuranceGet
 
 -- | /Optional Param/ "symbol" - Instrument symbol. Send a bare series (e.g. XBU) to get data for the nearest expiring contract in that series.  You can also send a timeframe, e.g. `XBU:monthly`. Timeframes are `daily`, `weekly`, `monthly`, `quarterly`, and `biquarterly`.
 instance HasOptionalParam InsuranceGet Symbol where
@@ -1116,16 +1116,16 @@ instance Produces InsuranceGet MimeTextjavascript
 -- *** leaderboardGet
 
 -- | @GET \/leaderboard@
--- 
+--
 -- Get current leaderboard.
--- 
-leaderboardGet 
+--
+leaderboardGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest LeaderboardGet MimeNoContent [Leaderboard] accept
 leaderboardGet  _ =
   _mkRequest "GET" ["/leaderboard"]
 
-data LeaderboardGet  
+data LeaderboardGet
 
 -- | /Optional Param/ "method" - Ranking type. Options: \"notional\", \"ROE\"
 instance HasOptionalParam LeaderboardGet Method where
@@ -1154,16 +1154,16 @@ instance Produces LeaderboardGet MimeTextjavascript
 -- *** liquidationGet
 
 -- | @GET \/liquidation@
--- 
+--
 -- Get liquidation orders.
--- 
-liquidationGet 
+--
+liquidationGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest LiquidationGet MimeNoContent [Liquidation] accept
 liquidationGet  _ =
   _mkRequest "GET" ["/liquidation"]
 
-data LiquidationGet  
+data LiquidationGet
 
 -- | /Optional Param/ "symbol" - Instrument symbol. Send a bare series (e.g. XBU) to get data for the nearest expiring contract in that series.  You can also send a timeframe, e.g. `XBU:monthly`. Timeframes are `daily`, `weekly`, `monthly`, `quarterly`, and `biquarterly`.
 instance HasOptionalParam LiquidationGet Symbol where
@@ -1227,14 +1227,14 @@ instance Produces LiquidationGet MimeTextjavascript
 -- *** notificationGet
 
 -- | @GET \/notification@
--- 
+--
 -- Get your current notifications.
--- 
+--
 -- This is an upcoming feature and currently does not return data.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-notificationGet 
+--
+notificationGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest NotificationGet MimeNoContent [Notification] accept
 notificationGet  _ =
@@ -1243,7 +1243,7 @@ notificationGet  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data NotificationGet  
+data NotificationGet
 
 -- | @application/json@
 instance Consumes NotificationGet MimeJSON
@@ -1267,14 +1267,14 @@ instance Produces NotificationGet MimeTextjavascript
 -- *** orderAmend
 
 -- | @PUT \/order@
--- 
+--
 -- Amend the quantity or price of an open order.
--- 
--- Send an `orderID` or `origClOrdID` to identify the order you wish to amend.  Both order quantity and price can be amended. Only one `qty` field can be used to amend.  Use the `leavesQty` field to specify how much of the order you wish to remain open. This can be useful if you want to adjust your position's delta by a certain amount, regardless of how much of the order has already filled.  Use the `simpleOrderQty` and `simpleLeavesQty` fields to specify order size in Bitcoin, rather than contracts. These fields will round up to the nearest contract.  Like order placement, amending can be done in bulk. Simply send a request to `PUT /api/v1/order/bulk` with a JSON body of the shape: `{\"orders\": [{...}, {...}]}`, each object containing the fields used in this endpoint. 
--- 
+--
+-- Send an `orderID` or `origClOrdID` to identify the order you wish to amend.  Both order quantity and price can be amended. Only one `qty` field can be used to amend.  Use the `leavesQty` field to specify how much of the order you wish to remain open. This can be useful if you want to adjust your position's delta by a certain amount, regardless of how much of the order has already filled.  Use the `simpleOrderQty` and `simpleLeavesQty` fields to specify order size in Bitcoin, rather than contracts. These fields will round up to the nearest contract.  Like order placement, amending can be done in bulk. Simply send a request to `PUT /api/v1/order/bulk` with a JSON body of the shape: `{\"orders\": [{...}, {...}]}`, each object containing the fields used in this endpoint.
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-orderAmend 
+--
+orderAmend
   :: (Consumes OrderAmend contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -1285,7 +1285,7 @@ orderAmend _  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data OrderAmend  
+data OrderAmend
 
 -- | /Optional Param/ "orderID" - Order ID
 instance HasOptionalParam OrderAmend OrderId where
@@ -1362,14 +1362,14 @@ instance Produces OrderAmend MimeTextjavascript
 -- *** orderAmendBulk
 
 -- | @PUT \/order\/bulk@
--- 
+--
 -- Amend multiple orders for the same symbol.
--- 
+--
 -- Similar to POST /amend, but with multiple orders. `application/json` only. Ratelimited at 50%.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-orderAmendBulk 
+--
+orderAmendBulk
   :: (Consumes OrderAmendBulk contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -1380,7 +1380,7 @@ orderAmendBulk _  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data OrderAmendBulk  
+data OrderAmendBulk
 
 -- | /Optional Param/ "orders" - An array of orders.
 instance HasOptionalParam OrderAmendBulk Orders where
@@ -1407,14 +1407,14 @@ instance Produces OrderAmendBulk MimeTextjavascript
 -- *** orderCancel
 
 -- | @DELETE \/order@
--- 
+--
 -- Cancel order(s). Send multiple order IDs to cancel in bulk.
--- 
+--
 -- Either an orderID or a clOrdID must be provided.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-orderCancel 
+--
+orderCancel
   :: (Consumes OrderCancel contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -1425,7 +1425,7 @@ orderCancel _  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data OrderCancel  
+data OrderCancel
 
 -- | /Optional Param/ "orderID" - Order ID(s).
 instance HasOptionalParam OrderCancel OrderId where
@@ -1462,12 +1462,12 @@ instance Produces OrderCancel MimeTextjavascript
 -- *** orderCancelAll
 
 -- | @DELETE \/order\/all@
--- 
+--
 -- Cancels all of your orders.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-orderCancelAll 
+--
+orderCancelAll
   :: (Consumes OrderCancelAll contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -1478,7 +1478,7 @@ orderCancelAll _  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data OrderCancelAll  
+data OrderCancelAll
 
 -- | /Optional Param/ "symbol" - Optional symbol. If provided, only cancels orders for that symbol.
 instance HasOptionalParam OrderCancelAll Symbol where
@@ -1515,18 +1515,18 @@ instance Produces OrderCancelAll MimeTextjavascript
 -- *** orderCancelAllAfter
 
 -- | @POST \/order\/cancelAllAfter@
--- 
+--
 -- Automatically cancel all your orders after a specified timeout.
--- 
--- Useful as a dead-man's switch to ensure your orders are canceled in case of an outage. If called repeatedly, the existing offset will be canceled and a new one will be inserted in its place.  Example usage: call this route at 15s intervals with an offset of 60000 (60s). If this route is not called within 60 seconds, all your orders will be automatically canceled.  This is also available via [WebSocket](https://www.bitmex.com/app/wsAPI#dead-man-s-switch-auto-cancel-). 
--- 
+--
+-- Useful as a dead-man's switch to ensure your orders are canceled in case of an outage. If called repeatedly, the existing offset will be canceled and a new one will be inserted in its place.  Example usage: call this route at 15s intervals with an offset of 60000 (60s). If this route is not called within 60 seconds, all your orders will be automatically canceled.  This is also available via [WebSocket](https://www.bitmex.com/app/wsAPI#dead-man-s-switch-auto-cancel-).
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-orderCancelAllAfter 
+--
+orderCancelAllAfter
   :: (Consumes OrderCancelAllAfter contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
-  -> Timeout -- ^ "timeout" -  Timeout in ms. Set to 0 to cancel this timer. 
+  -> Timeout -- ^ "timeout" -  Timeout in ms. Set to 0 to cancel this timer.
   -> BitMEXRequest OrderCancelAllAfter contentType A.Value accept
 orderCancelAllAfter _  _ (Timeout timeout) =
   _mkRequest "POST" ["/order/cancelAllAfter"]
@@ -1535,7 +1535,7 @@ orderCancelAllAfter _  _ (Timeout timeout) =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("timeout", timeout)
 
-data OrderCancelAllAfter  
+data OrderCancelAllAfter
 
 -- | @application/json@
 instance Consumes OrderCancelAllAfter MimeJSON
@@ -1557,14 +1557,14 @@ instance Produces OrderCancelAllAfter MimeTextjavascript
 -- *** orderClosePosition
 
 -- | @POST \/order\/closePosition@
--- 
+--
 -- Close a position. [Deprecated, use POST /order with execInst: 'Close']
--- 
+--
 -- If no `price` is specified, a market order will be submitted to close the whole of your position. This will also close all other open orders in this symbol.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-orderClosePosition 
+--
+orderClosePosition
   :: (Consumes OrderClosePosition contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -1577,7 +1577,7 @@ orderClosePosition _  _ (Symbol symbol) =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("symbol", symbol)
 
-data OrderClosePosition  
+data OrderClosePosition
 
 -- | /Optional Param/ "price" - Optional limit price.
 instance HasOptionalParam OrderClosePosition Price where
@@ -1604,14 +1604,14 @@ instance Produces OrderClosePosition MimeTextjavascript
 -- *** orderGetOrders
 
 -- | @GET \/order@
--- 
+--
 -- Get your orders.
--- 
+--
 -- To get open orders only, send {\"open\": true} in the filter param.  See <a href=\"http://www.onixs.biz/fix-dictionary/5.0.SP2/msgType_D_68.html\">the FIX Spec</a> for explanations of these fields.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-orderGetOrders 
+--
+orderGetOrders
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest OrderGetOrders MimeNoContent [Order] accept
 orderGetOrders  _ =
@@ -1620,7 +1620,7 @@ orderGetOrders  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data OrderGetOrders  
+data OrderGetOrders
 
 -- | /Optional Param/ "symbol" - Instrument symbol. Send a bare series (e.g. XBU) to get data for the nearest expiring contract in that series.  You can also send a timeframe, e.g. `XBU:monthly`. Timeframes are `daily`, `weekly`, `monthly`, `quarterly`, and `biquarterly`.
 instance HasOptionalParam OrderGetOrders Symbol where
@@ -1682,14 +1682,14 @@ instance Produces OrderGetOrders MimeTextjavascript
 -- *** orderNew
 
 -- | @POST \/order@
--- 
+--
 -- Create a new order.
--- 
--- ## Placing Orders  This endpoint is used for placing orders. See individual fields below for more details on their use.  #### Order Types  All orders require a `symbol`. All other fields are optional except when otherwise specified.  These are the valid `ordType`s:  * **Limit**: The default order type. Specify an `orderQty` and `price`. * **Market**: A traditional Market order. A Market order will execute until filled or your bankruptcy price is reached, at   which point it will cancel. * **MarketWithLeftOverAsLimit**: A market order that, after eating through the order book as far as   permitted by available margin, will become a limit order. The difference between this type and `Market` only   affects the behavior in thin books. Upon reaching the deepest possible price, if there is quantity left over,   a `Market` order will cancel the remaining quantity. `MarketWithLeftOverAsLimit` will keep the remaining   quantity in the books as a `Limit`. * **Stop**: A Stop Market order. Specify an `orderQty` and `stopPx`. When the `stopPx` is reached, the order will be entered   into the book.   * On sell orders, the order will trigger if the triggering price is lower than the `stopPx`. On buys, higher.   * Note: Stop orders do not consume margin until triggered. Be sure that the required margin is available in your     account so that it may trigger fully.   * `Close` Stops don't require an `orderQty`. See Execution Instructions below. * **StopLimit**: Like a Stop Market, but enters a Limit order instead of a Market order. Specify an `orderQty`, `stopPx`,   and `price`. * **MarketIfTouched**: Similar to a Stop, but triggers are done in the opposite direction. Useful for Take Profit orders. * **LimitIfTouched**: As above; use for Take Profit Limit orders.  #### Execution Instructions  The following `execInst`s are supported. If using multiple, separate with a comma (e.g. `LastPrice,Close`).  * **ParticipateDoNotInitiate**: Also known as a Post-Only order. If this order would have executed on placement,   it will cancel instead. * **AllOrNone**: Valid only for hidden orders (`displayQty: 0`). Use to only execute if the entire order would fill. * **MarkPrice, LastPrice, IndexPrice**: Used by stop and if-touched orders to determine the triggering price.   Use only one. By default, `'MarkPrice'` is used. Also used for Pegged orders to define the value of `'LastPeg'`. * **ReduceOnly**: A `'ReduceOnly'` order can only reduce your position, not increase it. If you have a `'ReduceOnly'`   limit order that rests in the order book while the position is reduced by other orders, then its order quantity will   be amended down or canceled. If there are multiple `'ReduceOnly'` orders the least agresssive will be amended first. * **Close**: `'Close'` implies `'ReduceOnly'`. A `'Close'` order will cancel other active limit orders with the same side   and symbol if the open quantity exceeds the current position. This is useful for stops: by canceling these orders, a   `'Close'` Stop is ensured to have the margin required to execute, and can only execute up to the full size of your   position. If not specified, a `'Close'` order has an `orderQty` equal to your current position's size.  #### Linked Orders  Linked Orders are an advanced capability. It is very powerful, but its use requires careful coding and testing. Please follow this document carefully and use the [Testnet Exchange](https://testnet.bitmex.com) while developing.  BitMEX offers four advanced Linked Order types:  * **OCO**: *One Cancels the Other*. A very flexible version of the standard Stop / Take Profit technique.   Multiple orders may be linked together using a single `clOrdLinkID`. Send a `contingencyType` of   `OneCancelsTheOther` on the orders. The first order that fully or partially executes (or activates   for `Stop` orders) will cancel all other orders with the same `clOrdLinkID`. * **OTO**: *One Triggers the Other*. Send a `contingencyType` of `'OneTriggersTheOther'` on the primary order and   then subsequent orders with the same `clOrdLinkID` will be not be triggered until the primary order fully executes. * **OUOA**: *One Updates the Other Absolute*. Send a `contingencyType` of `'OneUpdatesTheOtherAbsolute'` on the orders. Then   as one order has a execution, other orders with the same `clOrdLinkID` will have their order quantity amended   down by the execution quantity. * **OUOP**: *One Updates the Other Proportional*. Send a `contingencyType` of `'OneUpdatesTheOtherProportional'` on the orders. Then   as one order has a execution, other orders with the same `clOrdLinkID` will have their order quantity reduced proportionally   by the fill percentage.  #### Trailing Stops  You may use `pegPriceType` of `'TrailingStopPeg'` to create Trailing Stops. The pegged `stopPx` will move as the market moves away from the peg, and freeze as the market moves toward it.  To use, combine with `pegOffsetValue` to set the `stopPx` of your order. The peg is set to the triggering price specified in the `execInst` (default `'MarkPrice'`). Use a negative offset for stop-sell and buy-if-touched orders.  Requires `ordType`: `'Stop', 'StopLimit', 'MarketIfTouched', 'LimitIfTouched'`.  #### Simple Quantities  Send a `simpleOrderQty` instead of an `orderQty` to create an order denominated in the underlying currency. This is useful for opening up a position with 1 XBT of exposure without having to calculate how many contracts it is.  #### Rate Limits  See the [Bulk Order Documentation](#!/Order/Order_newBulk) if you need to place multiple orders at the same time. Bulk orders require fewer risk checks in the trading engine and thus are ratelimited at **1/10** the normal rate.  You can also improve your reactivity to market movements while staying under your ratelimit by using the [Amend](#!/Order/Order_amend) and [Amend Bulk](#!/Order/Order_amendBulk) endpoints. This allows you to stay in the market and avoids the cancel/replace cycle.  #### Tracking Your Orders  If you want to keep track of order IDs yourself, set a unique `clOrdID` per order. This `clOrdID` will come back as a property on the order and any related executions (including on the WebSocket), and can be used to get or cancel the order. Max length is 36 characters. 
--- 
+--
+-- ## Placing Orders  This endpoint is used for placing orders. See individual fields below for more details on their use.  #### Order Types  All orders require a `symbol`. All other fields are optional except when otherwise specified.  These are the valid `ordType`s:  * **Limit**: The default order type. Specify an `orderQty` and `price`. * **Market**: A traditional Market order. A Market order will execute until filled or your bankruptcy price is reached, at   which point it will cancel. * **MarketWithLeftOverAsLimit**: A market order that, after eating through the order book as far as   permitted by available margin, will become a limit order. The difference between this type and `Market` only   affects the behavior in thin books. Upon reaching the deepest possible price, if there is quantity left over,   a `Market` order will cancel the remaining quantity. `MarketWithLeftOverAsLimit` will keep the remaining   quantity in the books as a `Limit`. * **Stop**: A Stop Market order. Specify an `orderQty` and `stopPx`. When the `stopPx` is reached, the order will be entered   into the book.   * On sell orders, the order will trigger if the triggering price is lower than the `stopPx`. On buys, higher.   * Note: Stop orders do not consume margin until triggered. Be sure that the required margin is available in your     account so that it may trigger fully.   * `Close` Stops don't require an `orderQty`. See Execution Instructions below. * **StopLimit**: Like a Stop Market, but enters a Limit order instead of a Market order. Specify an `orderQty`, `stopPx`,   and `price`. * **MarketIfTouched**: Similar to a Stop, but triggers are done in the opposite direction. Useful for Take Profit orders. * **LimitIfTouched**: As above; use for Take Profit Limit orders.  #### Execution Instructions  The following `execInst`s are supported. If using multiple, separate with a comma (e.g. `LastPrice,Close`).  * **ParticipateDoNotInitiate**: Also known as a Post-Only order. If this order would have executed on placement,   it will cancel instead. * **AllOrNone**: Valid only for hidden orders (`displayQty: 0`). Use to only execute if the entire order would fill. * **MarkPrice, LastPrice, IndexPrice**: Used by stop and if-touched orders to determine the triggering price.   Use only one. By default, `'MarkPrice'` is used. Also used for Pegged orders to define the value of `'LastPeg'`. * **ReduceOnly**: A `'ReduceOnly'` order can only reduce your position, not increase it. If you have a `'ReduceOnly'`   limit order that rests in the order book while the position is reduced by other orders, then its order quantity will   be amended down or canceled. If there are multiple `'ReduceOnly'` orders the least agresssive will be amended first. * **Close**: `'Close'` implies `'ReduceOnly'`. A `'Close'` order will cancel other active limit orders with the same side   and symbol if the open quantity exceeds the current position. This is useful for stops: by canceling these orders, a   `'Close'` Stop is ensured to have the margin required to execute, and can only execute up to the full size of your   position. If not specified, a `'Close'` order has an `orderQty` equal to your current position's size.  #### Linked Orders  Linked Orders are an advanced capability. It is very powerful, but its use requires careful coding and testing. Please follow this document carefully and use the [Testnet Exchange](https://testnet.bitmex.com) while developing.  BitMEX offers four advanced Linked Order types:  * **OCO**: *One Cancels the Other*. A very flexible version of the standard Stop / Take Profit technique.   Multiple orders may be linked together using a single `clOrdLinkID`. Send a `contingencyType` of   `OneCancelsTheOther` on the orders. The first order that fully or partially executes (or activates   for `Stop` orders) will cancel all other orders with the same `clOrdLinkID`. * **OTO**: *One Triggers the Other*. Send a `contingencyType` of `'OneTriggersTheOther'` on the primary order and   then subsequent orders with the same `clOrdLinkID` will be not be triggered until the primary order fully executes. * **OUOA**: *One Updates the Other Absolute*. Send a `contingencyType` of `'OneUpdatesTheOtherAbsolute'` on the orders. Then   as one order has a execution, other orders with the same `clOrdLinkID` will have their order quantity amended   down by the execution quantity. * **OUOP**: *One Updates the Other Proportional*. Send a `contingencyType` of `'OneUpdatesTheOtherProportional'` on the orders. Then   as one order has a execution, other orders with the same `clOrdLinkID` will have their order quantity reduced proportionally   by the fill percentage.  #### Trailing Stops  You may use `pegPriceType` of `'TrailingStopPeg'` to create Trailing Stops. The pegged `stopPx` will move as the market moves away from the peg, and freeze as the market moves toward it.  To use, combine with `pegOffsetValue` to set the `stopPx` of your order. The peg is set to the triggering price specified in the `execInst` (default `'MarkPrice'`). Use a negative offset for stop-sell and buy-if-touched orders.  Requires `ordType`: `'Stop', 'StopLimit', 'MarketIfTouched', 'LimitIfTouched'`.  #### Simple Quantities  Send a `simpleOrderQty` instead of an `orderQty` to create an order denominated in the underlying currency. This is useful for opening up a position with 1 XBT of exposure without having to calculate how many contracts it is.  #### Rate Limits  See the [Bulk Order Documentation](#!/Order/Order_newBulk) if you need to place multiple orders at the same time. Bulk orders require fewer risk checks in the trading engine and thus are ratelimited at **1/10** the normal rate.  You can also improve your reactivity to market movements while staying under your ratelimit by using the [Amend](#!/Order/Order_amend) and [Amend Bulk](#!/Order/Order_amendBulk) endpoints. This allows you to stay in the market and avoids the cancel/replace cycle.  #### Tracking Your Orders  If you want to keep track of order IDs yourself, set a unique `clOrdID` per order. This `clOrdID` will come back as a property on the order and any related executions (including on the WebSocket), and can be used to get or cancel the order. Max length is 36 characters.
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-orderNew 
+--
+orderNew
   :: (Consumes OrderNew contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -1702,7 +1702,7 @@ orderNew _  _ (Symbol symbol) =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("symbol", symbol)
 
-data OrderNew  
+data OrderNew
 
 -- | /Optional Param/ "side" - Order side. Valid options: Buy, Sell. Defaults to 'Buy' unless `orderQty` or `simpleOrderQty` is negative.
 instance HasOptionalParam OrderNew Side where
@@ -1814,14 +1814,14 @@ instance Produces OrderNew MimeTextjavascript
 -- *** orderNewBulk
 
 -- | @POST \/order\/bulk@
--- 
+--
 -- Create multiple new orders for the same symbol.
--- 
--- This endpoint is used for placing bulk orders. Valid order types are Market, Limit, Stop, StopLimit, MarketIfTouched, LimitIfTouched, MarketWithLeftOverAsLimit, and Pegged.  Each individual order object in the array should have the same properties as an individual POST /order call.  This endpoint is much faster for getting many orders into the book at once. Because it reduces load on BitMEX systems, this endpoint is ratelimited at `ceil(0.1 * orders)`. Submitting 10 orders via a bulk order call will only count as 1 request, 15 as 2, 32 as 4, and so on.  For now, only `application/json` is supported on this endpoint. 
--- 
+--
+-- This endpoint is used for placing bulk orders. Valid order types are Market, Limit, Stop, StopLimit, MarketIfTouched, LimitIfTouched, MarketWithLeftOverAsLimit, and Pegged.  Each individual order object in the array should have the same properties as an individual POST /order call.  This endpoint is much faster for getting many orders into the book at once. Because it reduces load on BitMEX systems, this endpoint is ratelimited at `ceil(0.1 * orders)`. Submitting 10 orders via a bulk order call will only count as 1 request, 15 as 2, 32 as 4, and so on.  For now, only `application/json` is supported on this endpoint.
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-orderNewBulk 
+--
+orderNewBulk
   :: (Consumes OrderNewBulk contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -1832,7 +1832,7 @@ orderNewBulk _  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data OrderNewBulk  
+data OrderNewBulk
 
 -- | /Optional Param/ "orders" - An array of orders.
 instance HasOptionalParam OrderNewBulk Orders where
@@ -1861,10 +1861,10 @@ instance Produces OrderNewBulk MimeTextjavascript
 -- *** orderBookGet
 
 -- | @GET \/orderBook@
--- 
+--
 -- Get current orderbook [deprecated, use /orderBook/L2].
--- 
-orderBookGet 
+--
+orderBookGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> Symbol -- ^ "symbol" -  Instrument symbol. Send a series (e.g. XBT) to get data for the nearest contract in that series.
   -> BitMEXRequest OrderBookGet MimeNoContent [OrderBook] accept
@@ -1872,7 +1872,7 @@ orderBookGet  _ (Symbol symbol) =
   _mkRequest "GET" ["/orderBook"]
     `setQuery` toQuery ("symbol", Just symbol)
 
-data OrderBookGet  
+data OrderBookGet
 
 -- | /Optional Param/ "depth" - Orderbook depth.
 instance HasOptionalParam OrderBookGet Depth where
@@ -1899,10 +1899,10 @@ instance Produces OrderBookGet MimeTextjavascript
 -- *** orderBookGetL2
 
 -- | @GET \/orderBook\/L2@
--- 
+--
 -- Get current orderbook in vertical format.
--- 
-orderBookGetL2 
+--
+orderBookGetL2
   :: Accept accept -- ^ request accept ('MimeType')
   -> Symbol -- ^ "symbol" -  Instrument symbol. Send a series (e.g. XBT) to get data for the nearest contract in that series.
   -> BitMEXRequest OrderBookGetL2 MimeNoContent [OrderBookL2] accept
@@ -1910,7 +1910,7 @@ orderBookGetL2  _ (Symbol symbol) =
   _mkRequest "GET" ["/orderBook/L2"]
     `setQuery` toQuery ("symbol", Just symbol)
 
-data OrderBookGetL2  
+data OrderBookGetL2
 
 -- | /Optional Param/ "depth" - Orderbook depth per side. Send 0 for full depth.
 instance HasOptionalParam OrderBookGetL2 Depth where
@@ -1939,14 +1939,14 @@ instance Produces OrderBookGetL2 MimeTextjavascript
 -- *** positionGet
 
 -- | @GET \/position@
--- 
+--
 -- Get your positions.
--- 
+--
 -- See <a href=\"http://www.onixs.biz/fix-dictionary/5.0.SP2/msgType_AP_6580.html\">the FIX Spec</a> for explanations of these fields.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-positionGet 
+--
+positionGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest PositionGet MimeNoContent [Position] accept
 positionGet  _ =
@@ -1955,7 +1955,7 @@ positionGet  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data PositionGet  
+data PositionGet
 
 -- | /Optional Param/ "filter" - Table filter. For example, send {\"symbol\": \"XBTUSD\"}.
 instance HasOptionalParam PositionGet Filter where
@@ -1992,14 +1992,14 @@ instance Produces PositionGet MimeTextjavascript
 -- *** positionIsolateMargin
 
 -- | @POST \/position\/isolate@
--- 
+--
 -- Enable isolated margin or cross margin per-position.
--- 
+--
 -- Users can switch isolate margin per-position. This function allows switching margin isolation (aka fixed margin) on and off.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-positionIsolateMargin 
+--
+positionIsolateMargin
   :: (Consumes PositionIsolateMargin contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -2012,7 +2012,7 @@ positionIsolateMargin _  _ (Symbol symbol) =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("symbol", symbol)
 
-data PositionIsolateMargin  
+data PositionIsolateMargin
 
 -- | /Optional Param/ "enabled" - True for isolated margin, false for cross margin.
 instance HasOptionalParam PositionIsolateMargin Enabled where
@@ -2039,14 +2039,14 @@ instance Produces PositionIsolateMargin MimeTextjavascript
 -- *** positionTransferIsolatedMargin
 
 -- | @POST \/position\/transferMargin@
--- 
+--
 -- Transfer equity in or out of a position.
--- 
+--
 -- When margin is isolated on a position, use this function to add or remove margin from the position. Note that you cannot remove margin below the initial margin threshold.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-positionTransferIsolatedMargin 
+--
+positionTransferIsolatedMargin
   :: (Consumes PositionTransferIsolatedMargin contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -2061,7 +2061,7 @@ positionTransferIsolatedMargin _  _ (Symbol symbol) (Amount amount) =
     `addForm` toForm ("symbol", symbol)
     `addForm` toForm ("amount", amount)
 
-data PositionTransferIsolatedMargin  
+data PositionTransferIsolatedMargin
 
 -- | @application/json@
 instance Consumes PositionTransferIsolatedMargin MimeJSON
@@ -2083,14 +2083,14 @@ instance Produces PositionTransferIsolatedMargin MimeTextjavascript
 -- *** positionUpdateLeverage
 
 -- | @POST \/position\/leverage@
--- 
+--
 -- Choose leverage for a position.
--- 
+--
 -- Users can choose an isolated leverage. This will automatically enable isolated margin.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-positionUpdateLeverage 
+--
+positionUpdateLeverage
   :: (Consumes PositionUpdateLeverage contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -2105,7 +2105,7 @@ positionUpdateLeverage _  _ (Symbol symbol) (Leverage leverage) =
     `addForm` toForm ("symbol", symbol)
     `addForm` toForm ("leverage", leverage)
 
-data PositionUpdateLeverage  
+data PositionUpdateLeverage
 
 -- | @application/json@
 instance Consumes PositionUpdateLeverage MimeJSON
@@ -2127,14 +2127,14 @@ instance Produces PositionUpdateLeverage MimeTextjavascript
 -- *** positionUpdateRiskLimit
 
 -- | @POST \/position\/riskLimit@
--- 
+--
 -- Update your risk limit.
--- 
+--
 -- Risk Limits limit the size of positions you can trade at various margin levels. Larger positions require more margin. Please see the Risk Limit documentation for more details.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-positionUpdateRiskLimit 
+--
+positionUpdateRiskLimit
   :: (Consumes PositionUpdateRiskLimit contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -2149,7 +2149,7 @@ positionUpdateRiskLimit _  _ (Symbol symbol) (RiskLimit riskLimit) =
     `addForm` toForm ("symbol", symbol)
     `addForm` toForm ("riskLimit", riskLimit)
 
-data PositionUpdateRiskLimit  
+data PositionUpdateRiskLimit
 
 -- | @application/json@
 instance Consumes PositionUpdateRiskLimit MimeJSON
@@ -2173,16 +2173,16 @@ instance Produces PositionUpdateRiskLimit MimeTextjavascript
 -- *** quoteGet
 
 -- | @GET \/quote@
--- 
+--
 -- Get Quotes.
--- 
-quoteGet 
+--
+quoteGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest QuoteGet MimeNoContent [Quote] accept
 quoteGet  _ =
   _mkRequest "GET" ["/quote"]
 
-data QuoteGet  
+data QuoteGet
 
 -- | /Optional Param/ "symbol" - Instrument symbol. Send a bare series (e.g. XBU) to get data for the nearest expiring contract in that series.  You can also send a timeframe, e.g. `XBU:monthly`. Timeframes are `daily`, `weekly`, `monthly`, `quarterly`, and `biquarterly`.
 instance HasOptionalParam QuoteGet Symbol where
@@ -2244,16 +2244,16 @@ instance Produces QuoteGet MimeTextjavascript
 -- *** quoteGetBucketed
 
 -- | @GET \/quote\/bucketed@
--- 
+--
 -- Get previous quotes in time buckets.
--- 
-quoteGetBucketed 
+--
+quoteGetBucketed
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest QuoteGetBucketed MimeNoContent [Quote] accept
 quoteGetBucketed  _ =
   _mkRequest "GET" ["/quote/bucketed"]
 
-data QuoteGetBucketed  
+data QuoteGetBucketed
 
 -- | /Optional Param/ "binSize" - Time interval to bucket by. Available options: [1m,5m,1h,1d].
 instance HasOptionalParam QuoteGetBucketed BinSize where
@@ -2327,16 +2327,16 @@ instance Produces QuoteGetBucketed MimeTextjavascript
 -- *** schemaGet
 
 -- | @GET \/schema@
--- 
+--
 -- Get model schemata for data objects returned by this API.
--- 
-schemaGet 
+--
+schemaGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest SchemaGet MimeNoContent A.Value accept
 schemaGet  _ =
   _mkRequest "GET" ["/schema"]
 
-data SchemaGet  
+data SchemaGet
 
 -- | /Optional Param/ "model" - Optional model filter. If omitted, will return all models.
 instance HasOptionalParam SchemaGet Model where
@@ -2363,16 +2363,16 @@ instance Produces SchemaGet MimeTextjavascript
 -- *** schemaWebsocketHelp
 
 -- | @GET \/schema\/websocketHelp@
--- 
+--
 -- Returns help text & subject list for websocket usage.
--- 
-schemaWebsocketHelp 
+--
+schemaWebsocketHelp
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest SchemaWebsocketHelp MimeNoContent A.Value accept
 schemaWebsocketHelp  _ =
   _mkRequest "GET" ["/schema/websocketHelp"]
 
-data SchemaWebsocketHelp  
+data SchemaWebsocketHelp
 
 -- | @application/json@
 instance Consumes SchemaWebsocketHelp MimeJSON
@@ -2396,16 +2396,16 @@ instance Produces SchemaWebsocketHelp MimeTextjavascript
 -- *** settlementGet
 
 -- | @GET \/settlement@
--- 
+--
 -- Get settlement history.
--- 
-settlementGet 
+--
+settlementGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest SettlementGet MimeNoContent [Settlement] accept
 settlementGet  _ =
   _mkRequest "GET" ["/settlement"]
 
-data SettlementGet  
+data SettlementGet
 
 -- | /Optional Param/ "symbol" - Instrument symbol. Send a bare series (e.g. XBU) to get data for the nearest expiring contract in that series.  You can also send a timeframe, e.g. `XBU:monthly`. Timeframes are `daily`, `weekly`, `monthly`, `quarterly`, and `biquarterly`.
 instance HasOptionalParam SettlementGet Symbol where
@@ -2469,16 +2469,16 @@ instance Produces SettlementGet MimeTextjavascript
 -- *** statsGet
 
 -- | @GET \/stats@
--- 
+--
 -- Get exchange-wide and per-series turnover and volume statistics.
--- 
-statsGet 
+--
+statsGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest StatsGet MimeNoContent [Stats] accept
 statsGet  _ =
   _mkRequest "GET" ["/stats"]
 
-data StatsGet  
+data StatsGet
 
 -- | @application/json@
 instance Consumes StatsGet MimeJSON
@@ -2500,16 +2500,16 @@ instance Produces StatsGet MimeTextjavascript
 -- *** statsHistory2
 
 -- | @GET \/stats\/history@
--- 
+--
 -- Get historical exchange-wide and per-series turnover and volume statistics.
--- 
-statsHistory2 
+--
+statsHistory2
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest StatsHistory2 MimeNoContent [StatsHistory] accept
 statsHistory2  _ =
   _mkRequest "GET" ["/stats/history"]
 
-data StatsHistory2  
+data StatsHistory2
 
 -- | @application/json@
 instance Consumes StatsHistory2 MimeJSON
@@ -2531,16 +2531,16 @@ instance Produces StatsHistory2 MimeTextjavascript
 -- *** statsHistoryUSD
 
 -- | @GET \/stats\/historyUSD@
--- 
+--
 -- Get a summary of exchange statistics in USD.
--- 
-statsHistoryUSD 
+--
+statsHistoryUSD
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest StatsHistoryUSD MimeNoContent [StatsUSD] accept
 statsHistoryUSD  _ =
   _mkRequest "GET" ["/stats/historyUSD"]
 
-data StatsHistoryUSD  
+data StatsHistoryUSD
 
 -- | @application/json@
 instance Consumes StatsHistoryUSD MimeJSON
@@ -2564,18 +2564,18 @@ instance Produces StatsHistoryUSD MimeTextjavascript
 -- *** tradeGet
 
 -- | @GET \/trade@
--- 
+--
 -- Get Trades.
--- 
+--
 -- Please note that indices (symbols starting with `.`) post trades at intervals to the trade feed. These have a `size` of 0 and are used only to indicate a changing price.  See [the FIX Spec](http://www.onixs.biz/fix-dictionary/5.0.SP2/msgType_AE_6569.html) for explanations of these fields.
--- 
-tradeGet 
+--
+tradeGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest TradeGet MimeNoContent [Trade] accept
 tradeGet  _ =
   _mkRequest "GET" ["/trade"]
 
-data TradeGet  
+data TradeGet
 
 -- | /Optional Param/ "symbol" - Instrument symbol. Send a bare series (e.g. XBU) to get data for the nearest expiring contract in that series.  You can also send a timeframe, e.g. `XBU:monthly`. Timeframes are `daily`, `weekly`, `monthly`, `quarterly`, and `biquarterly`.
 instance HasOptionalParam TradeGet Symbol where
@@ -2637,16 +2637,16 @@ instance Produces TradeGet MimeTextjavascript
 -- *** tradeGetBucketed
 
 -- | @GET \/trade\/bucketed@
--- 
+--
 -- Get previous trades in time buckets.
--- 
-tradeGetBucketed 
+--
+tradeGetBucketed
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest TradeGetBucketed MimeNoContent [TradeBin] accept
 tradeGetBucketed  _ =
   _mkRequest "GET" ["/trade/bucketed"]
 
-data TradeGetBucketed  
+data TradeGetBucketed
 
 -- | /Optional Param/ "binSize" - Time interval to bucket by. Available options: [1m,5m,1h,1d].
 instance HasOptionalParam TradeGetBucketed BinSize where
@@ -2720,10 +2720,10 @@ instance Produces TradeGetBucketed MimeTextjavascript
 -- *** userCancelWithdrawal
 
 -- | @POST \/user\/cancelWithdrawal@
--- 
+--
 -- Cancel a withdrawal.
--- 
-userCancelWithdrawal 
+--
+userCancelWithdrawal
   :: (Consumes UserCancelWithdrawal contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -2733,7 +2733,7 @@ userCancelWithdrawal _  _ (Token token) =
   _mkRequest "POST" ["/user/cancelWithdrawal"]
     `addForm` toForm ("token", token)
 
-data UserCancelWithdrawal  
+data UserCancelWithdrawal
 
 -- | @application/json@
 instance Consumes UserCancelWithdrawal MimeJSON
@@ -2755,18 +2755,18 @@ instance Produces UserCancelWithdrawal MimeTextjavascript
 -- *** userCheckReferralCode
 
 -- | @GET \/user\/checkReferralCode@
--- 
+--
 -- Check if a referral code is valid.
--- 
+--
 -- If the code is valid, responds with the referral code's discount (e.g. `0.1` for 10%). Otherwise, will return a 404.
--- 
-userCheckReferralCode 
+--
+userCheckReferralCode
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest UserCheckReferralCode MimeNoContent Double accept
 userCheckReferralCode  _ =
   _mkRequest "GET" ["/user/checkReferralCode"]
 
-data UserCheckReferralCode  
+data UserCheckReferralCode
 instance HasOptionalParam UserCheckReferralCode ReferralCode where
   applyOptionalParam req (ReferralCode xs) =
     req `setQuery` toQuery ("referralCode", Just xs)
@@ -2791,10 +2791,10 @@ instance Produces UserCheckReferralCode MimeTextjavascript
 -- *** userConfirm
 
 -- | @POST \/user\/confirmEmail@
--- 
+--
 -- Confirm your email address with a token.
--- 
-userConfirm 
+--
+userConfirm
   :: (Consumes UserConfirm contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -2804,7 +2804,7 @@ userConfirm _  _ (Token token) =
   _mkRequest "POST" ["/user/confirmEmail"]
     `addForm` toForm ("token", token)
 
-data UserConfirm  
+data UserConfirm
 
 -- | @application/json@
 instance Consumes UserConfirm MimeJSON
@@ -2826,12 +2826,12 @@ instance Produces UserConfirm MimeTextjavascript
 -- *** userConfirmEnableTFA
 
 -- | @POST \/user\/confirmEnableTFA@
--- 
+--
 -- Confirm two-factor auth for this account. If using a Yubikey, simply send a token to this endpoint.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-userConfirmEnableTFA 
+--
+userConfirmEnableTFA
   :: (Consumes UserConfirmEnableTFA contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -2844,7 +2844,7 @@ userConfirmEnableTFA _  _ (Token token) =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("token", token)
 
-data UserConfirmEnableTFA  
+data UserConfirmEnableTFA
 
 -- | /Optional Param/ "type" - Two-factor auth type. Supported types: 'GA' (Google Authenticator), 'Yubikey'
 instance HasOptionalParam UserConfirmEnableTFA ParamType where
@@ -2871,10 +2871,10 @@ instance Produces UserConfirmEnableTFA MimeTextjavascript
 -- *** userConfirmWithdrawal
 
 -- | @POST \/user\/confirmWithdrawal@
--- 
+--
 -- Confirm a withdrawal.
--- 
-userConfirmWithdrawal 
+--
+userConfirmWithdrawal
   :: (Consumes UserConfirmWithdrawal contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -2884,7 +2884,7 @@ userConfirmWithdrawal _  _ (Token token) =
   _mkRequest "POST" ["/user/confirmWithdrawal"]
     `addForm` toForm ("token", token)
 
-data UserConfirmWithdrawal  
+data UserConfirmWithdrawal
 
 -- | @application/json@
 instance Consumes UserConfirmWithdrawal MimeJSON
@@ -2906,12 +2906,12 @@ instance Produces UserConfirmWithdrawal MimeTextjavascript
 -- *** userDisableTFA
 
 -- | @POST \/user\/disableTFA@
--- 
+--
 -- Disable two-factor auth for this account.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-userDisableTFA 
+--
+userDisableTFA
   :: (Consumes UserDisableTFA contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -2924,7 +2924,7 @@ userDisableTFA _  _ (Token token) =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("token", token)
 
-data UserDisableTFA  
+data UserDisableTFA
 
 -- | /Optional Param/ "type" - Two-factor auth type. Supported types: 'GA' (Google Authenticator)
 instance HasOptionalParam UserDisableTFA ParamType where
@@ -2951,12 +2951,12 @@ instance Produces UserDisableTFA MimeTextjavascript
 -- *** userGet
 
 -- | @GET \/user@
--- 
+--
 -- Get your user model.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-userGet 
+--
+userGet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest UserGet MimeNoContent User accept
 userGet  _ =
@@ -2965,7 +2965,7 @@ userGet  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data UserGet  
+data UserGet
 
 -- | @application/json@
 instance Consumes UserGet MimeJSON
@@ -2987,12 +2987,12 @@ instance Produces UserGet MimeTextjavascript
 -- *** userGetAffiliateStatus
 
 -- | @GET \/user\/affiliateStatus@
--- 
+--
 -- Get your current affiliate/referral status.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-userGetAffiliateStatus 
+--
+userGetAffiliateStatus
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest UserGetAffiliateStatus MimeNoContent Affiliate accept
 userGetAffiliateStatus  _ =
@@ -3001,7 +3001,7 @@ userGetAffiliateStatus  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data UserGetAffiliateStatus  
+data UserGetAffiliateStatus
 
 -- | @application/json@
 instance Consumes UserGetAffiliateStatus MimeJSON
@@ -3023,12 +3023,12 @@ instance Produces UserGetAffiliateStatus MimeTextjavascript
 -- *** userGetCommission
 
 -- | @GET \/user\/commission@
--- 
+--
 -- Get your account's commission status.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-userGetCommission 
+--
+userGetCommission
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest UserGetCommission MimeNoContent [UserCommission] accept
 userGetCommission  _ =
@@ -3037,7 +3037,7 @@ userGetCommission  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data UserGetCommission  
+data UserGetCommission
 
 -- | @application/json@
 instance Consumes UserGetCommission MimeJSON
@@ -3059,12 +3059,12 @@ instance Produces UserGetCommission MimeTextjavascript
 -- *** userGetDepositAddress
 
 -- | @GET \/user\/depositAddress@
--- 
+--
 -- Get a deposit address.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-userGetDepositAddress 
+--
+userGetDepositAddress
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest UserGetDepositAddress MimeNoContent Text accept
 userGetDepositAddress  _ =
@@ -3073,7 +3073,7 @@ userGetDepositAddress  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data UserGetDepositAddress  
+data UserGetDepositAddress
 instance HasOptionalParam UserGetDepositAddress Currency where
   applyOptionalParam req (Currency xs) =
     req `setQuery` toQuery ("currency", Just xs)
@@ -3098,12 +3098,12 @@ instance Produces UserGetDepositAddress MimeTextjavascript
 -- *** userGetMargin
 
 -- | @GET \/user\/margin@
--- 
+--
 -- Get your account's margin status. Send a currency of \"all\" to receive an array of all supported currencies.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-userGetMargin 
+--
+userGetMargin
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest UserGetMargin MimeNoContent Margin accept
 userGetMargin  _ =
@@ -3112,7 +3112,7 @@ userGetMargin  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data UserGetMargin  
+data UserGetMargin
 instance HasOptionalParam UserGetMargin Currency where
   applyOptionalParam req (Currency xs) =
     req `setQuery` toQuery ("currency", Just xs)
@@ -3137,12 +3137,12 @@ instance Produces UserGetMargin MimeTextjavascript
 -- *** userGetWallet
 
 -- | @GET \/user\/wallet@
--- 
+--
 -- Get your current wallet information.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-userGetWallet 
+--
+userGetWallet
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest UserGetWallet MimeNoContent Wallet accept
 userGetWallet  _ =
@@ -3151,7 +3151,7 @@ userGetWallet  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data UserGetWallet  
+data UserGetWallet
 instance HasOptionalParam UserGetWallet Currency where
   applyOptionalParam req (Currency xs) =
     req `setQuery` toQuery ("currency", Just xs)
@@ -3176,12 +3176,12 @@ instance Produces UserGetWallet MimeTextjavascript
 -- *** userGetWalletHistory
 
 -- | @GET \/user\/walletHistory@
--- 
+--
 -- Get a history of all of your wallet transactions (deposits, withdrawals, PNL).
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-userGetWalletHistory 
+--
+userGetWalletHistory
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest UserGetWalletHistory MimeNoContent [Transaction] accept
 userGetWalletHistory  _ =
@@ -3190,7 +3190,7 @@ userGetWalletHistory  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data UserGetWalletHistory  
+data UserGetWalletHistory
 instance HasOptionalParam UserGetWalletHistory Currency where
   applyOptionalParam req (Currency xs) =
     req `setQuery` toQuery ("currency", Just xs)
@@ -3215,12 +3215,12 @@ instance Produces UserGetWalletHistory MimeTextjavascript
 -- *** userGetWalletSummary
 
 -- | @GET \/user\/walletSummary@
--- 
+--
 -- Get a summary of all of your wallet transactions (deposits, withdrawals, PNL).
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-userGetWalletSummary 
+--
+userGetWalletSummary
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest UserGetWalletSummary MimeNoContent [Transaction] accept
 userGetWalletSummary  _ =
@@ -3229,7 +3229,7 @@ userGetWalletSummary  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data UserGetWalletSummary  
+data UserGetWalletSummary
 instance HasOptionalParam UserGetWalletSummary Currency where
   applyOptionalParam req (Currency xs) =
     req `setQuery` toQuery ("currency", Just xs)
@@ -3254,18 +3254,18 @@ instance Produces UserGetWalletSummary MimeTextjavascript
 -- *** userLogout
 
 -- | @POST \/user\/logout@
--- 
+--
 -- Log out of BitMEX.
--- 
+--
 -- Note: Has 'Produces' instances, but no response schema
--- 
-userLogout 
+--
+userLogout
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest UserLogout MimeNoContent res accept
 userLogout  _ =
   _mkRequest "POST" ["/user/logout"]
 
-data UserLogout  
+data UserLogout
 
 -- | @application/json@
 instance Consumes UserLogout MimeJSON
@@ -3287,12 +3287,12 @@ instance Produces UserLogout MimeTextjavascript
 -- *** userLogoutAll
 
 -- | @POST \/user\/logoutAll@
--- 
+--
 -- Log all systems out of BitMEX. This will revoke all of your account's access tokens, logging you out on all devices.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-userLogoutAll 
+--
+userLogoutAll
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest UserLogoutAll MimeNoContent Double accept
 userLogoutAll  _ =
@@ -3301,7 +3301,7 @@ userLogoutAll  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data UserLogoutAll  
+data UserLogoutAll
 
 -- | @application/json@
 instance Consumes UserLogoutAll MimeJSON
@@ -3323,18 +3323,18 @@ instance Produces UserLogoutAll MimeTextjavascript
 -- *** userMinWithdrawalFee
 
 -- | @GET \/user\/minWithdrawalFee@
--- 
+--
 -- Get the minimum withdrawal fee for a currency.
--- 
+--
 -- This is changed based on network conditions to ensure timely withdrawals. During network congestion, this may be high. The fee is returned in the same currency.
--- 
-userMinWithdrawalFee 
+--
+userMinWithdrawalFee
   :: Accept accept -- ^ request accept ('MimeType')
   -> BitMEXRequest UserMinWithdrawalFee MimeNoContent A.Value accept
 userMinWithdrawalFee  _ =
   _mkRequest "GET" ["/user/minWithdrawalFee"]
 
-data UserMinWithdrawalFee  
+data UserMinWithdrawalFee
 instance HasOptionalParam UserMinWithdrawalFee Currency where
   applyOptionalParam req (Currency xs) =
     req `setQuery` toQuery ("currency", Just xs)
@@ -3359,14 +3359,14 @@ instance Produces UserMinWithdrawalFee MimeTextjavascript
 -- *** userRequestEnableTFA
 
 -- | @POST \/user\/requestEnableTFA@
--- 
+--
 -- Get secret key for setting up two-factor auth.
--- 
+--
 -- Use /confirmEnableTFA directly for Yubikeys. This fails if TFA is already enabled.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-userRequestEnableTFA 
+--
+userRequestEnableTFA
   :: (Consumes UserRequestEnableTFA contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -3377,7 +3377,7 @@ userRequestEnableTFA _  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data UserRequestEnableTFA  
+data UserRequestEnableTFA
 
 -- | /Optional Param/ "type" - Two-factor auth type. Supported types: 'GA' (Google Authenticator)
 instance HasOptionalParam UserRequestEnableTFA ParamType where
@@ -3404,14 +3404,14 @@ instance Produces UserRequestEnableTFA MimeTextjavascript
 -- *** userRequestWithdrawal
 
 -- | @POST \/user\/requestWithdrawal@
--- 
+--
 -- Request a withdrawal to an external wallet.
--- 
+--
 -- This will send a confirmation email to the email address on record, unless requested via an API Key with the `withdraw` permission.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-userRequestWithdrawal 
+--
+userRequestWithdrawal
   :: (Consumes UserRequestWithdrawal contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -3428,7 +3428,7 @@ userRequestWithdrawal _  _ (Currency currency) (Amount amount) (Address address)
     `addForm` toForm ("amount", amount)
     `addForm` toForm ("address", address)
 
-data UserRequestWithdrawal  
+data UserRequestWithdrawal
 
 -- | /Optional Param/ "otpToken" - 2FA token. Required if 2FA is enabled on your account.
 instance HasOptionalParam UserRequestWithdrawal OtpToken where
@@ -3460,12 +3460,12 @@ instance Produces UserRequestWithdrawal MimeTextjavascript
 -- *** userSavePreferences
 
 -- | @POST \/user\/preferences@
--- 
+--
 -- Save user preferences.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-userSavePreferences 
+--
+userSavePreferences
   :: (Consumes UserSavePreferences contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -3478,7 +3478,7 @@ userSavePreferences _  _ (Prefs prefs) =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("prefs", prefs)
 
-data UserSavePreferences  
+data UserSavePreferences
 
 -- | /Optional Param/ "overwrite" - If true, will overwrite all existing preferences.
 instance HasOptionalParam UserSavePreferences Overwrite where
@@ -3505,12 +3505,12 @@ instance Produces UserSavePreferences MimeTextjavascript
 -- *** userUpdate
 
 -- | @PUT \/user@
--- 
+--
 -- Update your password, name, and other attributes.
--- 
+--
 -- AuthMethod: 'AuthApiKeyApiKey', 'AuthApiKeyApiNonce', 'AuthApiKeyApiSignature'
--- 
-userUpdate 
+--
+userUpdate
   :: (Consumes UserUpdate contentType)
   => ContentType contentType -- ^ request content-type ('MimeType')
   -> Accept accept -- ^ request accept ('MimeType')
@@ -3521,7 +3521,7 @@ userUpdate _  _ =
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
-data UserUpdate  
+data UserUpdate
 instance HasOptionalParam UserUpdate Firstname where
   applyOptionalParam req (Firstname xs) =
     req `addForm` toForm ("firstname", xs)

@@ -1,7 +1,7 @@
 {-
    BitMEX API
 
-   ## REST API for the BitMEX Trading Platform  [View Changelog](/app/apiChangelog)    #### Getting Started   ##### Fetching Data  All REST endpoints are documented below. You can try out any query right from this interface.  Most table queries accept `count`, `start`, and `reverse` params. Set `reverse=true` to get rows newest-first.  Additional documentation regarding filters, timestamps, and authentication is available in [the main API documentation](https://www.bitmex.com/app/restAPI).  *All* table data is available via the [Websocket](/app/wsAPI). We highly recommend using the socket if you want to have the quickest possible data without being subject to ratelimits.  ##### Return Types  By default, all data is returned as JSON. Send `?_format=csv` to get CSV data or `?_format=xml` to get XML data.  ##### Trade Data Queries  *This is only a small subset of what is available, to get you started.*  Fill in the parameters and click the `Try it out!` button to try any of these queries.  * [Pricing Data](#!/Quote/Quote_get)  * [Trade Data](#!/Trade/Trade_get)  * [OrderBook Data](#!/OrderBook/OrderBook_getL2)  * [Settlement Data](#!/Settlement/Settlement_get)  * [Exchange Statistics](#!/Stats/Stats_history)  Every function of the BitMEX.com platform is exposed here and documented. Many more functions are available.  ##### Swagger Specification  [⇩ Download Swagger JSON](swagger.json)    ## All API Endpoints  Click to expand a section. 
+   ## REST API for the BitMEX Trading Platform  [View Changelog](/app/apiChangelog)    #### Getting Started   ##### Fetching Data  All REST endpoints are documented below. You can try out any query right from this interface.  Most table queries accept `count`, `start`, and `reverse` params. Set `reverse=true` to get rows newest-first.  Additional documentation regarding filters, timestamps, and authentication is available in [the main API documentation](https://www.bitmex.com/app/restAPI).  *All* table data is available via the [Websocket](/app/wsAPI). We highly recommend using the socket if you want to have the quickest possible data without being subject to ratelimits.  ##### Return Types  By default, all data is returned as JSON. Send `?_format=csv` to get CSV data or `?_format=xml` to get XML data.  ##### Trade Data Queries  *This is only a small subset of what is available, to get you started.*  Fill in the parameters and click the `Try it out!` button to try any of these queries.  * [Pricing Data](#!/Quote/Quote_get)  * [Trade Data](#!/Trade/Trade_get)  * [OrderBook Data](#!/OrderBook/OrderBook_getL2)  * [Settlement Data](#!/Settlement/Settlement_get)  * [Exchange Statistics](#!/Stats/Stats_history)  Every function of the BitMEX.com platform is exposed here and documented. Many more functions are available.  ##### Swagger Specification  [⇩ Download Swagger JSON](swagger.json)    ## All API Endpoints  Click to expand a section.
 
    OpenAPI spec version: 2.0
    BitMEX API API version: 1.2.0
@@ -109,11 +109,11 @@ instance A.ToJSON APIKey where
 
 -- | Construct a value of type 'APIKey' (by applying it's required fields, if any)
 mkAPIKey
-  :: Text -- ^ 'aPIKeyId' 
-  -> Text -- ^ 'aPIKeySecret' 
-  -> Text -- ^ 'aPIKeyName' 
-  -> Double -- ^ 'aPIKeyNonce' 
-  -> Double -- ^ 'aPIKeyUserId' 
+  :: Text -- ^ 'aPIKeyId'
+  -> Text -- ^ 'aPIKeySecret'
+  -> Text -- ^ 'aPIKeyName'
+  -> Double -- ^ 'aPIKeyNonce'
+  -> Double -- ^ 'aPIKeyUserId'
   -> APIKey
 mkAPIKey aPIKeyId aPIKeySecret aPIKeyName aPIKeyNonce aPIKeyUserId =
   APIKey
@@ -159,7 +159,7 @@ instance A.ToJSON AccessToken where
 
 -- | Construct a value of type 'AccessToken' (by applying it's required fields, if any)
 mkAccessToken
-  :: Text -- ^ 'accessTokenId' 
+  :: Text -- ^ 'accessTokenId'
   -> AccessToken
 mkAccessToken accessTokenId =
   AccessToken
@@ -233,8 +233,8 @@ instance A.ToJSON Affiliate where
 
 -- | Construct a value of type 'Affiliate' (by applying it's required fields, if any)
 mkAffiliate
-  :: Double -- ^ 'affiliateAccount' 
-  -> Text -- ^ 'affiliateCurrency' 
+  :: Double -- ^ 'affiliateAccount'
+  -> Text -- ^ 'affiliateCurrency'
   -> Affiliate
 mkAffiliate affiliateAccount affiliateCurrency =
   Affiliate
@@ -290,7 +290,7 @@ instance A.ToJSON Announcement where
 
 -- | Construct a value of type 'Announcement' (by applying it's required fields, if any)
 mkAnnouncement
-  :: Double -- ^ 'announcementId' 
+  :: Double -- ^ 'announcementId'
   -> Announcement
 mkAnnouncement announcementId =
   Announcement
@@ -342,10 +342,10 @@ instance A.ToJSON Chat where
 
 -- | Construct a value of type 'Chat' (by applying it's required fields, if any)
 mkChat
-  :: DateTime -- ^ 'chatDate' 
-  -> Text -- ^ 'chatUser' 
-  -> Text -- ^ 'chatMessage' 
-  -> Text -- ^ 'chatHtml' 
+  :: DateTime -- ^ 'chatDate'
+  -> Text -- ^ 'chatUser'
+  -> Text -- ^ 'chatMessage'
+  -> Text -- ^ 'chatHtml'
   -> Chat
 mkChat chatDate chatUser chatMessage chatHtml =
   Chat
@@ -383,7 +383,7 @@ instance A.ToJSON ChatChannels where
 
 -- | Construct a value of type 'ChatChannels' (by applying it's required fields, if any)
 mkChatChannels
-  :: Text -- ^ 'chatChannelsName' 
+  :: Text -- ^ 'chatChannelsName'
   -> ChatChannels
 mkChatChannels chatChannelsName =
   ChatChannels
@@ -445,7 +445,7 @@ instance A.ToJSON Error where
 
 -- | Construct a value of type 'Error' (by applying it's required fields, if any)
 mkError
-  :: ErrorError -- ^ 'errorError' 
+  :: ErrorError -- ^ 'errorError'
   -> Error
 mkError errorError =
   Error
@@ -645,7 +645,7 @@ instance A.ToJSON Execution where
 
 -- | Construct a value of type 'Execution' (by applying it's required fields, if any)
 mkExecution
-  :: Text -- ^ 'executionExecId' 
+  :: Text -- ^ 'executionExecId'
   -> Execution
 mkExecution executionExecId =
   Execution
@@ -733,8 +733,8 @@ instance A.ToJSON Funding where
 
 -- | Construct a value of type 'Funding' (by applying it's required fields, if any)
 mkFunding
-  :: DateTime -- ^ 'fundingTimestamp' 
-  -> Text -- ^ 'fundingSymbol' 
+  :: DateTime -- ^ 'fundingTimestamp'
+  -> Text -- ^ 'fundingSymbol'
   -> Funding
 mkFunding fundingTimestamp fundingSymbol =
   Funding
@@ -785,7 +785,7 @@ instance A.ToJSON IndexComposite where
 
 -- | Construct a value of type 'IndexComposite' (by applying it's required fields, if any)
 mkIndexComposite
-  :: DateTime -- ^ 'indexCompositeTimestamp' 
+  :: DateTime -- ^ 'indexCompositeTimestamp'
   -> IndexComposite
 mkIndexComposite indexCompositeTimestamp =
   IndexComposite
@@ -1134,7 +1134,7 @@ instance A.ToJSON Instrument where
 
 -- | Construct a value of type 'Instrument' (by applying it's required fields, if any)
 mkInstrument
-  :: Text -- ^ 'instrumentSymbol' 
+  :: Text -- ^ 'instrumentSymbol'
   -> Instrument
 mkInstrument instrumentSymbol =
   Instrument
@@ -1261,8 +1261,8 @@ instance A.ToJSON InstrumentInterval where
 
 -- | Construct a value of type 'InstrumentInterval' (by applying it's required fields, if any)
 mkInstrumentInterval
-  :: [Text] -- ^ 'instrumentIntervalIntervals' 
-  -> [Text] -- ^ 'instrumentIntervalSymbols' 
+  :: [Text] -- ^ 'instrumentIntervalIntervals'
+  -> [Text] -- ^ 'instrumentIntervalSymbols'
   -> InstrumentInterval
 mkInstrumentInterval instrumentIntervalIntervals instrumentIntervalSymbols =
   InstrumentInterval
@@ -1299,8 +1299,8 @@ instance A.ToJSON Insurance where
 
 -- | Construct a value of type 'Insurance' (by applying it's required fields, if any)
 mkInsurance
-  :: Text -- ^ 'insuranceCurrency' 
-  -> DateTime -- ^ 'insuranceTimestamp' 
+  :: Text -- ^ 'insuranceCurrency'
+  -> DateTime -- ^ 'insuranceTimestamp'
   -> Insurance
 mkInsurance insuranceCurrency insuranceTimestamp =
   Insurance
@@ -1341,7 +1341,7 @@ instance A.ToJSON Leaderboard where
 
 -- | Construct a value of type 'Leaderboard' (by applying it's required fields, if any)
 mkLeaderboard
-  :: Text -- ^ 'leaderboardName' 
+  :: Text -- ^ 'leaderboardName'
   -> Leaderboard
 mkLeaderboard leaderboardName =
   Leaderboard
@@ -1386,7 +1386,7 @@ instance A.ToJSON Liquidation where
 
 -- | Construct a value of type 'Liquidation' (by applying it's required fields, if any)
 mkLiquidation
-  :: Text -- ^ 'liquidationOrderId' 
+  :: Text -- ^ 'liquidationOrderId'
   -> Liquidation
 mkLiquidation liquidationOrderId =
   Liquidation
@@ -1539,8 +1539,8 @@ instance A.ToJSON Margin where
 
 -- | Construct a value of type 'Margin' (by applying it's required fields, if any)
 mkMargin
-  :: Double -- ^ 'marginAccount' 
-  -> Text -- ^ 'marginCurrency' 
+  :: Double -- ^ 'marginAccount'
+  -> Text -- ^ 'marginCurrency'
   -> Margin
 mkMargin marginAccount marginCurrency =
   Margin
@@ -1637,10 +1637,10 @@ instance A.ToJSON Notification where
 
 -- | Construct a value of type 'Notification' (by applying it's required fields, if any)
 mkNotification
-  :: DateTime -- ^ 'notificationDate' 
-  -> Text -- ^ 'notificationTitle' 
-  -> Text -- ^ 'notificationBody' 
-  -> Double -- ^ 'notificationTtl' 
+  :: DateTime -- ^ 'notificationDate'
+  -> Text -- ^ 'notificationTitle'
+  -> Text -- ^ 'notificationBody'
+  -> Double -- ^ 'notificationTtl'
   -> Notification
 mkNotification notificationDate notificationTitle notificationBody notificationTtl =
   Notification
@@ -1775,7 +1775,7 @@ instance A.ToJSON Order where
 
 -- | Construct a value of type 'Order' (by applying it's required fields, if any)
 mkOrder
-  :: Text -- ^ 'orderOrderId' 
+  :: Text -- ^ 'orderOrderId'
   -> Order
 mkOrder orderOrderId =
   Order
@@ -1855,8 +1855,8 @@ instance A.ToJSON OrderBook where
 
 -- | Construct a value of type 'OrderBook' (by applying it's required fields, if any)
 mkOrderBook
-  :: Text -- ^ 'orderBookSymbol' 
-  -> Double -- ^ 'orderBookLevel' 
+  :: Text -- ^ 'orderBookSymbol'
+  -> Double -- ^ 'orderBookLevel'
   -> OrderBook
 mkOrderBook orderBookSymbol orderBookLevel =
   OrderBook
@@ -1903,9 +1903,9 @@ instance A.ToJSON OrderBookL2 where
 
 -- | Construct a value of type 'OrderBookL2' (by applying it's required fields, if any)
 mkOrderBookL2
-  :: Text -- ^ 'orderBookL2Symbol' 
-  -> Double -- ^ 'orderBookL2Id' 
-  -> Text -- ^ 'orderBookL2Side' 
+  :: Text -- ^ 'orderBookL2Symbol'
+  -> Double -- ^ 'orderBookL2Id'
+  -> Text -- ^ 'orderBookL2Side'
   -> OrderBookL2
 mkOrderBookL2 orderBookL2Symbol orderBookL2Id orderBookL2Side =
   OrderBookL2
@@ -2209,9 +2209,9 @@ instance A.ToJSON Position where
 
 -- | Construct a value of type 'Position' (by applying it's required fields, if any)
 mkPosition
-  :: Double -- ^ 'positionAccount' 
-  -> Text -- ^ 'positionSymbol' 
-  -> Text -- ^ 'positionCurrency' 
+  :: Double -- ^ 'positionAccount'
+  -> Text -- ^ 'positionSymbol'
+  -> Text -- ^ 'positionCurrency'
   -> Position
 mkPosition positionAccount positionSymbol positionCurrency =
   Position
@@ -2346,8 +2346,8 @@ instance A.ToJSON Quote where
 
 -- | Construct a value of type 'Quote' (by applying it's required fields, if any)
 mkQuote
-  :: DateTime -- ^ 'quoteTimestamp' 
-  -> Text -- ^ 'quoteSymbol' 
+  :: DateTime -- ^ 'quoteTimestamp'
+  -> Text -- ^ 'quoteSymbol'
   -> Quote
 mkQuote quoteTimestamp quoteSymbol =
   Quote
@@ -2400,8 +2400,8 @@ instance A.ToJSON Settlement where
 
 -- | Construct a value of type 'Settlement' (by applying it's required fields, if any)
 mkSettlement
-  :: DateTime -- ^ 'settlementTimestamp' 
-  -> Text -- ^ 'settlementSymbol' 
+  :: DateTime -- ^ 'settlementTimestamp'
+  -> Text -- ^ 'settlementSymbol'
   -> Settlement
 mkSettlement settlementTimestamp settlementSymbol =
   Settlement
@@ -2452,7 +2452,7 @@ instance A.ToJSON Stats where
 
 -- | Construct a value of type 'Stats' (by applying it's required fields, if any)
 mkStats
-  :: Text -- ^ 'statsRootSymbol' 
+  :: Text -- ^ 'statsRootSymbol'
   -> Stats
 mkStats statsRootSymbol =
   Stats
@@ -2498,8 +2498,8 @@ instance A.ToJSON StatsHistory where
 
 -- | Construct a value of type 'StatsHistory' (by applying it's required fields, if any)
 mkStatsHistory
-  :: DateTime -- ^ 'statsHistoryDate' 
-  -> Text -- ^ 'statsHistoryRootSymbol' 
+  :: DateTime -- ^ 'statsHistoryDate'
+  -> Text -- ^ 'statsHistoryRootSymbol'
   -> StatsHistory
 mkStatsHistory statsHistoryDate statsHistoryRootSymbol =
   StatsHistory
@@ -2547,7 +2547,7 @@ instance A.ToJSON StatsUSD where
 
 -- | Construct a value of type 'StatsUSD' (by applying it's required fields, if any)
 mkStatsUSD
-  :: Text -- ^ 'statsUSDRootSymbol' 
+  :: Text -- ^ 'statsUSDRootSymbol'
   -> StatsUSD
 mkStatsUSD statsUSDRootSymbol =
   StatsUSD
@@ -2609,8 +2609,8 @@ instance A.ToJSON Trade where
 
 -- | Construct a value of type 'Trade' (by applying it's required fields, if any)
 mkTrade
-  :: DateTime -- ^ 'tradeTimestamp' 
-  -> Text -- ^ 'tradeSymbol' 
+  :: DateTime -- ^ 'tradeTimestamp'
+  -> Text -- ^ 'tradeSymbol'
   -> Trade
 mkTrade tradeTimestamp tradeSymbol =
   Trade
@@ -2684,8 +2684,8 @@ instance A.ToJSON TradeBin where
 
 -- | Construct a value of type 'TradeBin' (by applying it's required fields, if any)
 mkTradeBin
-  :: DateTime -- ^ 'tradeBinTimestamp' 
-  -> Text -- ^ 'tradeBinSymbol' 
+  :: DateTime -- ^ 'tradeBinTimestamp'
+  -> Text -- ^ 'tradeBinSymbol'
   -> TradeBin
 mkTradeBin tradeBinTimestamp tradeBinSymbol =
   TradeBin
@@ -2759,7 +2759,7 @@ instance A.ToJSON Transaction where
 
 -- | Construct a value of type 'Transaction' (by applying it's required fields, if any)
 mkTransaction
-  :: Text -- ^ 'transactionTransactId' 
+  :: Text -- ^ 'transactionTransactId'
   -> Transaction
 mkTransaction transactionTransactId =
   Transaction
@@ -2839,8 +2839,8 @@ instance A.ToJSON User where
 
 -- | Construct a value of type 'User' (by applying it's required fields, if any)
 mkUser
-  :: Text -- ^ 'userUsername' 
-  -> Text -- ^ 'userEmail' 
+  :: Text -- ^ 'userUsername'
+  -> Text -- ^ 'userEmail'
   -> User
 mkUser userUsername userEmail =
   User
@@ -3118,8 +3118,8 @@ instance A.ToJSON Wallet where
 
 -- | Construct a value of type 'Wallet' (by applying it's required fields, if any)
 mkWallet
-  :: Double -- ^ 'walletAccount' 
-  -> Text -- ^ 'walletCurrency' 
+  :: Double -- ^ 'walletAccount'
+  -> Text -- ^ 'walletCurrency'
   -> Wallet
 mkWallet walletAccount walletCurrency =
   Wallet
@@ -3153,20 +3153,20 @@ mkWallet walletAccount walletCurrency =
 -- ** XAny
 -- | XAny
 data XAny = XAny
-  { 
+  {
   } deriving (P.Show, P.Eq, P.Typeable)
 
 -- | FromJSON XAny
 instance A.FromJSON XAny where
   parseJSON = A.withObject "XAny" $ \o ->
     pure XAny
-      
+
 
 -- | ToJSON XAny
 instance A.ToJSON XAny where
   toJSON XAny  =
    _omitNulls
-      [ 
+      [
       ]
 
 
@@ -3175,7 +3175,7 @@ mkXAny
   :: XAny
 mkXAny =
   XAny
-  { 
+  {
   }
 
 

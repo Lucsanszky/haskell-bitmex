@@ -1,4 +1,4 @@
-## Swagger Auto-Generated [http-client](https://www.stackage.org/lts-9.0/package/http-client-0.5.7.0) Bindings to `BitMEX` 
+## Swagger Auto-Generated [http-client](https://www.stackage.org/lts-9.0/package/http-client-0.5.7.0) Bindings to `BitMEX`
 
 The library in `lib` provides auto-generated-from-Swagger [http-client](https://www.stackage.org/lts-9.0/package/http-client-0.5.7.0) bindings to the BitMEX API.
 
@@ -17,7 +17,7 @@ stack haddock
 ```
 which will generate docs for this lib in the `docs` folder.
 
-To generate the docs in the normal location (to enable hyperlinks to external libs), remove 
+To generate the docs in the normal location (to enable hyperlinks to external libs), remove
 ```
 build:
   haddock-arguments:
@@ -38,7 +38,7 @@ to obtain and use the swagger-codegen cli tool lives at
 
 https://github.com/swagger-api/swagger-codegen
 
-The _language_ argument (`--lang`) passed to the cli tool used should be 
+The _language_ argument (`--lang`) passed to the cli tool used should be
 
 ```
 haskell-http-client
@@ -87,7 +87,7 @@ java -jar swagger-codegen-cli.jar config-help -l haskell-http-client
 
 ## Usage Notes
 
-### Example SwaggerPetstore Haddock documentation 
+### Example SwaggerPetstore Haddock documentation
 
 An example of the generated haddock documentation targeting the server http://petstore.swagger.io/ (SwaggerPetstore) can be found [here][2]
 
@@ -130,10 +130,10 @@ in GHCi or via the Haddocks.
 * optional non-body parameters are included by using  `applyOptionalParam`
 * optional body parameters are set by using  `setBodyParam`
 
-Example code generated for pretend _addFoo_ operation: 
+Example code generated for pretend _addFoo_ operation:
 
 ```haskell
-data AddFoo 	
+data AddFoo
 instance Consumes AddFoo MimeJSON
 instance Produces AddFoo MimeJSON
 instance Produces AddFoo MimeXML
@@ -176,14 +176,14 @@ the config, it will be applied to the request.
 
 ```haskell
 mgr <- newManager defaultManagerSettings
-config0 <- withStdoutLogging =<< newConfig 
+config0 <- withStdoutLogging =<< newConfig
 let config = config0
     `addAuthMethod` AuthOAuthFoo "secret-key"
 
-let addFooRequest = 
-  addFoo 
-    (ContentType MimeJSON) 
-    (Accept MimeXML) 
+let addFooRequest =
+  addFoo
+    (ContentType MimeJSON)
+    (Accept MimeXML)
     (ParamBar paramBar)
     (ParamQux paramQux)
     modelBaz
