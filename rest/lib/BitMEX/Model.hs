@@ -2963,6 +2963,12 @@ instance A.FromJSON UserPreferences where
 -- | ToJSON UserPreferences
 instance A.ToJSON UserPreferences where
   toJSON UserPreferences {..} =
+  -- FIX ME! _omitNulls is causing tests to fail on `orderBookBinning` and it is NOT clear if in
+  -- a /POST API call, completely removing an option is the same as having the option with a null value assigned.
+  -- The API seems to actually accept (with a 200 OK) whatever trash you give it. I am leaving this as is for now,
+  -- but if the APIs behavior is identical in both scenarios, then `Just null` should never be allowed and the
+  -- current type (Maybe A.Value) for the field orderBookBinning has too much room and should be changed
+  -- to forbid a `Just null`.
    _omitNulls
       [ "alertOnLiquidations" .= userPreferencesAlertOnLiquidations
       , "animationsEnabled" .= userPreferencesAnimationsEnabled
