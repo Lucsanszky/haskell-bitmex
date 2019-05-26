@@ -57,4 +57,4 @@ main =
       propMimeEq MimeJSON (Proxy :: Proxy UserPreferences)
       propMimeEq MimeJSON (Proxy :: Proxy Wallet)
       propMimeEq MimeJSON (Proxy :: Proxy XAny)
-      
+

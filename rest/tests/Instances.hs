@@ -71,7 +71,7 @@ instance Arbitrary A.Value where
       sizedObject n =
         liftM (A.object . map mapF) $
         replicateM n $ (,) <$> (arbitrary :: Gen String) <*> simpleAndArrays
-    
+
 -- | Checks if a given list has no duplicates in _O(n log n)_.
 hasNoDups
   :: (Ord a)
@@ -88,7 +88,7 @@ instance ApproxEq TI.Day where
   (=~) = (==)
 
 -- * Models
- 
+
 instance Arbitrary APIKey where
   arbitrary =
     APIKey
@@ -101,7 +101,7 @@ instance Arbitrary APIKey where
       <*> arbitrary -- aPIKeyEnabled :: Maybe Bool
       <*> arbitrary -- aPIKeyUserId :: Double
       <*> arbitrary -- aPIKeyCreated :: Maybe DateTime
-    
+
 instance Arbitrary AccessToken where
   arbitrary =
     AccessToken
@@ -109,7 +109,7 @@ instance Arbitrary AccessToken where
       <*> arbitrary -- accessTokenTtl :: Maybe Double
       <*> arbitrary -- accessTokenCreated :: Maybe DateTime
       <*> arbitrary -- accessTokenUserId :: Maybe Double
-    
+
 instance Arbitrary Affiliate where
   arbitrary =
     Affiliate
@@ -128,7 +128,7 @@ instance Arbitrary Affiliate where
       <*> arbitrary -- affiliatePendingPayout :: Maybe Double
       <*> arbitrary -- affiliateTimestamp :: Maybe DateTime
       <*> arbitrary -- affiliateReferrerAccount :: Maybe Double
-    
+
 instance Arbitrary Announcement where
   arbitrary =
     Announcement
@@ -137,7 +137,7 @@ instance Arbitrary Announcement where
       <*> arbitrary -- announcementTitle :: Maybe Text
       <*> arbitrary -- announcementContent :: Maybe Text
       <*> arbitrary -- announcementDate :: Maybe DateTime
-    
+
 instance Arbitrary Chat where
   arbitrary =
     Chat
@@ -148,30 +148,30 @@ instance Arbitrary Chat where
       <*> arbitrary -- chatHtml :: Text
       <*> arbitrary -- chatFromBot :: Maybe Bool
       <*> arbitrary -- chatChannelId :: Maybe Double
-    
+
 instance Arbitrary ChatChannels where
   arbitrary =
     ChatChannels
       <$> arbitrary -- chatChannelsId :: Maybe Double
       <*> arbitrary -- chatChannelsName :: Text
-    
+
 instance Arbitrary ConnectedUsers where
   arbitrary =
     ConnectedUsers
       <$> arbitrary -- connectedUsersUsers :: Maybe Double
       <*> arbitrary -- connectedUsersBots :: Maybe Double
-    
+
 instance Arbitrary Error where
   arbitrary =
     Error
       <$> arbitrary -- errorError :: ErrorError
-    
+
 instance Arbitrary ErrorError where
   arbitrary =
     ErrorError
       <$> arbitrary -- errorErrorMessage :: Maybe Text
       <*> arbitrary -- errorErrorName :: Maybe Text
-    
+
 instance Arbitrary Execution where
   arbitrary =
     Execution
@@ -222,7 +222,7 @@ instance Arbitrary Execution where
       <*> arbitrary -- executionForeignNotional :: Maybe Double
       <*> arbitrary -- executionTransactTime :: Maybe DateTime
       <*> arbitrary -- executionTimestamp :: Maybe DateTime
-    
+
 instance Arbitrary Funding where
   arbitrary =
     Funding
@@ -231,7 +231,7 @@ instance Arbitrary Funding where
       <*> arbitrary -- fundingFundingInterval :: Maybe DateTime
       <*> arbitrary -- fundingFundingRate :: Maybe Double
       <*> arbitrary -- fundingFundingRateDaily :: Maybe Double
-    
+
 instance Arbitrary IndexComposite where
   arbitrary =
     IndexComposite
@@ -242,12 +242,12 @@ instance Arbitrary IndexComposite where
       <*> arbitrary -- indexCompositeLastPrice :: Maybe Double
       <*> arbitrary -- indexCompositeWeight :: Maybe Double
       <*> arbitrary -- indexCompositeLogged :: Maybe DateTime
-    
+
 instance Arbitrary InlineResponse200 where
   arbitrary =
     InlineResponse200
       <$> arbitrary -- inlineResponse200Success :: Maybe Bool
-    
+
 instance Arbitrary Instrument where
   arbitrary =
     Instrument
@@ -347,20 +347,20 @@ instance Arbitrary Instrument where
       <*> arbitrary -- instrumentIndicativeSettlePrice :: Maybe Double
       <*> arbitrary -- instrumentSettledPrice :: Maybe Double
       <*> arbitrary -- instrumentTimestamp :: Maybe DateTime
-    
+
 instance Arbitrary InstrumentInterval where
   arbitrary =
     InstrumentInterval
       <$> arbitrary -- instrumentIntervalIntervals :: [Text]
       <*> arbitrary -- instrumentIntervalSymbols :: [Text]
-    
+
 instance Arbitrary Insurance where
   arbitrary =
     Insurance
       <$> arbitrary -- insuranceCurrency :: Text
       <*> arbitrary -- insuranceTimestamp :: DateTime
       <*> arbitrary -- insuranceWalletBalance :: Maybe Double
-    
+
 instance Arbitrary Leaderboard where
   arbitrary =
     Leaderboard
@@ -368,7 +368,7 @@ instance Arbitrary Leaderboard where
       <*> arbitrary -- leaderboardIsRealName :: Maybe Bool
       <*> arbitrary -- leaderboardIsMe :: Maybe Bool
       <*> arbitrary -- leaderboardProfit :: Maybe Double
-    
+
 instance Arbitrary Liquidation where
   arbitrary =
     Liquidation
@@ -377,7 +377,7 @@ instance Arbitrary Liquidation where
       <*> arbitrary -- liquidationSide :: Maybe Text
       <*> arbitrary -- liquidationPrice :: Maybe Double
       <*> arbitrary -- liquidationLeavesQty :: Maybe Double
-    
+
 instance Arbitrary Margin where
   arbitrary =
     Margin
@@ -422,7 +422,7 @@ instance Arbitrary Margin where
       <*> arbitrary -- marginTimestamp :: Maybe DateTime
       <*> arbitrary -- marginGrossLastValue :: Maybe Double
       <*> arbitrary -- marginCommission :: Maybe Double
-    
+
 instance Arbitrary Notification where
   arbitrary =
     Notification
@@ -436,7 +436,7 @@ instance Arbitrary Notification where
       <*> arbitrary -- notificationPersist :: Maybe Bool
       <*> arbitrary -- notificationWaitForVisibility :: Maybe Bool
       <*> arbitrary -- notificationSound :: Maybe Text
-    
+
 instance Arbitrary Order where
   arbitrary =
     Order
@@ -473,7 +473,7 @@ instance Arbitrary Order where
       <*> arbitrary -- orderText :: Maybe Text
       <*> arbitrary -- orderTransactTime :: Maybe DateTime
       <*> arbitrary -- orderTimestamp :: Maybe DateTime
-    
+
 instance Arbitrary OrderBook where
   arbitrary =
     OrderBook
@@ -484,7 +484,7 @@ instance Arbitrary OrderBook where
       <*> arbitrary -- orderBookAskPrice :: Maybe Double
       <*> arbitrary -- orderBookAskSize :: Maybe Double
       <*> arbitrary -- orderBookTimestamp :: Maybe DateTime
-    
+
 instance Arbitrary OrderBookL2 where
   arbitrary =
     OrderBookL2
@@ -493,7 +493,7 @@ instance Arbitrary OrderBookL2 where
       <*> arbitrary -- orderBookL2Side :: Text
       <*> arbitrary -- orderBookL2Size :: Maybe Double
       <*> arbitrary -- orderBookL2Price :: Maybe Double
-    
+
 instance Arbitrary Position where
   arbitrary =
     Position
@@ -588,7 +588,7 @@ instance Arbitrary Position where
       <*> arbitrary -- positionTimestamp :: Maybe DateTime
       <*> arbitrary -- positionLastPrice :: Maybe Double
       <*> arbitrary -- positionLastValue :: Maybe Double
-    
+
 instance Arbitrary Quote where
   arbitrary =
     Quote
@@ -598,7 +598,7 @@ instance Arbitrary Quote where
       <*> arbitrary -- quoteBidPrice :: Maybe Double
       <*> arbitrary -- quoteAskPrice :: Maybe Double
       <*> arbitrary -- quoteAskSize :: Maybe Double
-    
+
 instance Arbitrary Settlement where
   arbitrary =
     Settlement
@@ -609,7 +609,7 @@ instance Arbitrary Settlement where
       <*> arbitrary -- settlementBankrupt :: Maybe Double
       <*> arbitrary -- settlementTaxBase :: Maybe Double
       <*> arbitrary -- settlementTaxRate :: Maybe Double
-    
+
 instance Arbitrary Stats where
   arbitrary =
     Stats
@@ -619,7 +619,7 @@ instance Arbitrary Stats where
       <*> arbitrary -- statsTurnover24h :: Maybe Double
       <*> arbitrary -- statsOpenInterest :: Maybe Double
       <*> arbitrary -- statsOpenValue :: Maybe Double
-    
+
 instance Arbitrary StatsHistory where
   arbitrary =
     StatsHistory
@@ -628,7 +628,7 @@ instance Arbitrary StatsHistory where
       <*> arbitrary -- statsHistoryCurrency :: Maybe Text
       <*> arbitrary -- statsHistoryVolume :: Maybe Double
       <*> arbitrary -- statsHistoryTurnover :: Maybe Double
-    
+
 instance Arbitrary StatsUSD where
   arbitrary =
     StatsUSD
@@ -638,7 +638,7 @@ instance Arbitrary StatsUSD where
       <*> arbitrary -- statsUSDTurnover30d :: Maybe Double
       <*> arbitrary -- statsUSDTurnover365d :: Maybe Double
       <*> arbitrary -- statsUSDTurnover :: Maybe Double
-    
+
 instance Arbitrary Trade where
   arbitrary =
     Trade
@@ -652,7 +652,7 @@ instance Arbitrary Trade where
       <*> arbitrary -- tradeGrossValue :: Maybe Double
       <*> arbitrary -- tradeHomeNotional :: Maybe Double
       <*> arbitrary -- tradeForeignNotional :: Maybe Double
-    
+
 instance Arbitrary TradeBin where
   arbitrary =
     TradeBin
@@ -669,7 +669,7 @@ instance Arbitrary TradeBin where
       <*> arbitrary -- tradeBinTurnover :: Maybe Double
       <*> arbitrary -- tradeBinHomeNotional :: Maybe Double
       <*> arbitrary -- tradeBinForeignNotional :: Maybe Double
-    
+
 instance Arbitrary Transaction where
   arbitrary =
     Transaction
@@ -685,7 +685,7 @@ instance Arbitrary Transaction where
       <*> arbitrary -- transactionText :: Maybe Text
       <*> arbitrary -- transactionTransactTime :: Maybe DateTime
       <*> arbitrary -- transactionTimestamp :: Maybe DateTime
-    
+
 instance Arbitrary User where
   arbitrary =
     User
@@ -703,7 +703,7 @@ instance Arbitrary User where
       <*> arbitrary -- userAffiliateId :: Maybe Text
       <*> arbitrary -- userPgpPubKey :: Maybe Text
       <*> arbitrary -- userCountry :: Maybe Text
-    
+
 instance Arbitrary UserCommission where
   arbitrary =
     UserCommission
@@ -711,7 +711,7 @@ instance Arbitrary UserCommission where
       <*> arbitrary -- userCommissionTakerFee :: Maybe Double
       <*> arbitrary -- userCommissionSettlementFee :: Maybe Double
       <*> arbitrary -- userCommissionMaxFee :: Maybe Double
-    
+
 instance Arbitrary UserPreferences where
   arbitrary =
     UserPreferences
@@ -740,7 +740,7 @@ instance Arbitrary UserPreferences where
       <*> arbitrary -- userPreferencesTickerGroup :: Maybe Text
       <*> arbitrary -- userPreferencesTickerPinned :: Maybe Bool
       <*> arbitrary -- userPreferencesTradeLayout :: Maybe Text
-    
+
 instance Arbitrary Wallet where
   arbitrary =
     Wallet
@@ -769,12 +769,12 @@ instance Arbitrary Wallet where
       <*> arbitrary -- walletAddr :: Maybe Text
       <*> arbitrary -- walletScript :: Maybe Text
       <*> arbitrary -- walletWithdrawalLock :: Maybe [Text]
-    
+
 instance Arbitrary XAny where
   arbitrary =
-    
+
     pure XAny
-     
+
 
 
 

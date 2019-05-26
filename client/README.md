@@ -12,5 +12,5 @@ To run the example, just run `cabal new-run example [path/to/api/publickey] [pat
 The API is now using the [capability] library instead of plain old monad transformers.
 To better understand the motivation behind this, read the [blog post] about the library.
 
-[capability]: http://hackage.haskell.org/package/capability 
+[capability]: http://hackage.haskell.org/package/capability
 [blog post]: https://www.tweag.io/posts/2018-10-04-capability.html
