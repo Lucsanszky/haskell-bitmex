@@ -87,7 +87,6 @@ aPIKeyDisable
 aPIKeyDisable _  _ (ApiKeyId apiKeyId) =
   _mkRequest "POST" ["/apiKey/disable"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("apiKeyID", apiKeyId)
 
@@ -127,7 +126,6 @@ aPIKeyEnable
 aPIKeyEnable _  _ (ApiKeyId apiKeyId) =
   _mkRequest "POST" ["/apiKey/enable"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("apiKeyID", apiKeyId)
 
@@ -164,7 +162,6 @@ aPIKeyGet
 aPIKeyGet  _ =
   _mkRequest "GET" ["/apiKey"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data APIKeyGet
@@ -209,7 +206,6 @@ aPIKeyNew
 aPIKeyNew _  _ =
   _mkRequest "POST" ["/apiKey"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data APIKeyNew
@@ -273,7 +269,6 @@ aPIKeyRemove
 aPIKeyRemove _  _ (ApiKeyId apiKeyId) =
   _mkRequest "DELETE" ["/apiKey"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("apiKeyID", apiKeyId)
 
@@ -348,7 +343,6 @@ announcementGetUrgent
 announcementGetUrgent  _ =
   _mkRequest "GET" ["/announcement/urgent"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data AnnouncementGetUrgent
@@ -504,7 +498,6 @@ chatNew
 chatNew _  _ (Message message) =
   _mkRequest "POST" ["/chat"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("message", message)
 
@@ -550,7 +543,6 @@ executionGet
 executionGet  _ =
   _mkRequest "GET" ["/execution"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data ExecutionGet
@@ -626,7 +618,6 @@ executionGetTradeHistory
 executionGetTradeHistory  _ =
   _mkRequest "GET" ["/execution/tradeHistory"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data ExecutionGetTradeHistory
@@ -1240,7 +1231,6 @@ notificationGet
 notificationGet  _ =
   _mkRequest "GET" ["/notification"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data NotificationGet
@@ -1282,7 +1272,6 @@ orderAmend
 orderAmend _  _ =
   _mkRequest "PUT" ["/order"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data OrderAmend
@@ -1377,7 +1366,6 @@ orderAmendBulk
 orderAmendBulk _  _ =
   _mkRequest "PUT" ["/order/bulk"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data OrderAmendBulk
@@ -1422,7 +1410,6 @@ orderCancel
 orderCancel _  _ =
   _mkRequest "DELETE" ["/order"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data OrderCancel
@@ -1475,7 +1462,6 @@ orderCancelAll
 orderCancelAll _  _ =
   _mkRequest "DELETE" ["/order/all"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data OrderCancelAll
@@ -1531,7 +1517,6 @@ orderCancelAllAfter
 orderCancelAllAfter _  _ (Timeout timeout) =
   _mkRequest "POST" ["/order/cancelAllAfter"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("timeout", timeout)
 
@@ -1573,7 +1558,6 @@ orderClosePosition
 orderClosePosition _  _ (Symbol symbol) =
   _mkRequest "POST" ["/order/closePosition"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("symbol", symbol)
 
@@ -1617,7 +1601,6 @@ orderGetOrders
 orderGetOrders  _ =
   _mkRequest "GET" ["/order"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data OrderGetOrders
@@ -1698,7 +1681,6 @@ orderNew
 orderNew _  _ (Symbol symbol) =
   _mkRequest "POST" ["/order"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("symbol", symbol)
 
@@ -1829,7 +1811,6 @@ orderNewBulk
 orderNewBulk _  _ =
   _mkRequest "POST" ["/order/bulk"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data OrderNewBulk
@@ -1952,7 +1933,6 @@ positionGet
 positionGet  _ =
   _mkRequest "GET" ["/position"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data PositionGet
@@ -2008,7 +1988,6 @@ positionIsolateMargin
 positionIsolateMargin _  _ (Symbol symbol) =
   _mkRequest "POST" ["/position/isolate"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("symbol", symbol)
 
@@ -2056,7 +2035,6 @@ positionTransferIsolatedMargin
 positionTransferIsolatedMargin _  _ (Symbol symbol) (Amount amount) =
   _mkRequest "POST" ["/position/transferMargin"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("symbol", symbol)
     `addForm` toForm ("amount", amount)
@@ -2100,7 +2078,6 @@ positionUpdateLeverage
 positionUpdateLeverage _  _ (Symbol symbol) (Leverage leverage) =
   _mkRequest "POST" ["/position/leverage"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("symbol", symbol)
     `addForm` toForm ("leverage", leverage)
@@ -2144,7 +2121,6 @@ positionUpdateRiskLimit
 positionUpdateRiskLimit _  _ (Symbol symbol) (RiskLimit riskLimit) =
   _mkRequest "POST" ["/position/riskLimit"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("symbol", symbol)
     `addForm` toForm ("riskLimit", riskLimit)
@@ -2840,7 +2816,6 @@ userConfirmEnableTFA
 userConfirmEnableTFA _  _ (Token token) =
   _mkRequest "POST" ["/user/confirmEnableTFA"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("token", token)
 
@@ -2920,7 +2895,6 @@ userDisableTFA
 userDisableTFA _  _ (Token token) =
   _mkRequest "POST" ["/user/disableTFA"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("token", token)
 
@@ -2962,7 +2936,6 @@ userGet
 userGet  _ =
   _mkRequest "GET" ["/user"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserGet
@@ -2998,7 +2971,6 @@ userGetAffiliateStatus
 userGetAffiliateStatus  _ =
   _mkRequest "GET" ["/user/affiliateStatus"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserGetAffiliateStatus
@@ -3034,7 +3006,6 @@ userGetCommission
 userGetCommission  _ =
   _mkRequest "GET" ["/user/commission"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserGetCommission
@@ -3070,7 +3041,6 @@ userGetDepositAddress
 userGetDepositAddress  _ =
   _mkRequest "GET" ["/user/depositAddress"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserGetDepositAddress
@@ -3109,7 +3079,6 @@ userGetMargin
 userGetMargin  _ =
   _mkRequest "GET" ["/user/margin"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserGetMargin
@@ -3148,7 +3117,6 @@ userGetWallet
 userGetWallet  _ =
   _mkRequest "GET" ["/user/wallet"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserGetWallet
@@ -3187,7 +3155,6 @@ userGetWalletHistory
 userGetWalletHistory  _ =
   _mkRequest "GET" ["/user/walletHistory"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserGetWalletHistory
@@ -3226,7 +3193,6 @@ userGetWalletSummary
 userGetWalletSummary  _ =
   _mkRequest "GET" ["/user/walletSummary"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserGetWalletSummary
@@ -3298,7 +3264,6 @@ userLogoutAll
 userLogoutAll  _ =
   _mkRequest "POST" ["/user/logoutAll"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserLogoutAll
@@ -3374,7 +3339,6 @@ userRequestEnableTFA
 userRequestEnableTFA _  _ =
   _mkRequest "POST" ["/user/requestEnableTFA"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserRequestEnableTFA
@@ -3422,7 +3386,6 @@ userRequestWithdrawal
 userRequestWithdrawal _  _ (Currency currency) (Amount amount) (Address address) =
   _mkRequest "POST" ["/user/requestWithdrawal"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("currency", currency)
     `addForm` toForm ("amount", amount)
@@ -3474,7 +3437,6 @@ userSavePreferences
 userSavePreferences _  _ (Prefs prefs) =
   _mkRequest "POST" ["/user/preferences"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("prefs", prefs)
 
@@ -3518,7 +3480,6 @@ userUpdate
 userUpdate _  _ =
   _mkRequest "PUT" ["/user"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserUpdate
