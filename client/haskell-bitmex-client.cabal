@@ -104,7 +104,10 @@ test-suite test-haskell-bitmex-client
   ghc-options:        -Wall -fno-warn-orphans
 
   build-depends:        base
-                      -- , haskell-bitmex-rest
+                      , text
+                      , http-client
+                      , http-client-tls
+                      , haskell-bitmex-rest
                       , haskell-bitmex-client
                       , tasty
                       , tasty-hunit
