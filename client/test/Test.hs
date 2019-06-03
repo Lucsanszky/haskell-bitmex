@@ -11,16 +11,24 @@ import Test.Tasty
 import Test.Tasty.Options
 import Test.Tasty.HUnit
 
--- import PropMime
--- import Instances ()
+import Data.Text                (pack)
+import Network.HTTP.Client      (newManager)
+import Network.HTTP.Client.TLS  (tlsManagerSettings)
 
--- import BitMEX.Model
--- import BitMEX.MimeTypes
+import BitMEX
+          ( ContentType(..)
+          , MimeJSON(..)
+          , Accept(..)
+          , Symbol(..)
+          , Leverage(..)
+          , positionUpdateLeverage
+          , initLogContext
+          )
 
-import BitMEXClient (Environment(..)) -- , BitMEXWrapperConfig(..)) -- , APIKeys(..))
+import           BitMEXClient hiding (error)
+import qualified BitMEXClient as BMC (Symbol(..))
 
 ----------------------------------------
-
 newtype API_ID     = API_ID      String deriving (Show, Eq)
 newtype API_SECRET = API_SECRET  String deriving Show
 
@@ -50,8 +58,8 @@ instance IsOption API_SECRET where
 main :: IO ()
 main = defaultMainWithIngredients ings $
     askOption $ \env ->
-    askOption $ \apikey ->
     askOption $ \apiid ->
+    askOption $ \apikey ->
     withResource (mkConfig env apiid apikey) (\_ -> return ()) (\config -> tests config)
   where
     ings = includingOptions
@@ -60,20 +68,38 @@ main = defaultMainWithIngredients ings $
         , (Option (Proxy :: Proxy API_SECRET))
         ] : defaultIngredients
 
-    mkConfig :: Environment -> API_ID -> API_SECRET -> IO (Environment, API_ID, API_SECRET)
-    mkConfig env apiid apikey = do
-        return (env, apiid, apikey)
+    mkConfig :: Environment -> API_ID -> API_SECRET -> IO BitMEX
+    mkConfig env (API_ID apiid) (API_SECRET apikey) = do
+        mgr <- newManager tlsManagerSettings
+        log <- initLogContext
+        return $ BitMEX
+            { netEnv      = env
+            , restPath    = "/api/v1"
+            , wsPath      = "/realtime"
+            , connManager = mgr
+            , apiCreds    = APICreds {apiId = apiid, apiSecret = apikey}
+            , logConfig   = log
+            }
 
-tests :: IO (Environment, API_ID, API_SECRET) -> TestTree
+tests :: IO BitMEX -> TestTree
 tests config = testGroup "" [instanceProps, unitTests config]
 
-unitTests :: IO (Environment, API_ID, API_SECRET) -> TestTree
+unitTests :: IO BitMEX -> TestTree
 unitTests config = testGroup "\nAPI unit tests"
   [ testCase "Show API credentials" $ do
-        (env, apiId, apiSecret) <- config
-        print env
-        print apiId
-        print apiSecret
+        bitmex <- config
+        print $ netEnv   bitmex
+        print $ apiCreds bitmex
+        res <- dispatchRequest
+                  bitmex
+                  (positionUpdateLeverage
+                      (ContentType MimeJSON)
+                      (Accept MimeJSON)
+                      (Symbol ((pack . show) BMC.XBTUSD))
+                      (Leverage 3.0))
+
+        print res
+        return ()
   ]
 
 instanceProps :: TestTree

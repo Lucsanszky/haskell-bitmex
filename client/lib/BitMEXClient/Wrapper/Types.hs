@@ -1,14 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module BitMEXClient.Wrapper.Types
-    ( BitMEXWrapperConfig(..)
-    , BitMEXReader(..)
-    , Environment(..)
-    , BitMEXApp
-    , Authenticator(..)
-    , APIKeys(..)
-    , run
-    ) where
+module BitMEXClient.Wrapper.Types where
 
 import           BitMEX
     ( AuthApiKeyApiKey (..)
@@ -38,6 +30,22 @@ data Environment
 instance Show Environment where
     show MainNet = "https://www.bitmex.com"
     show TestNet = "https://testnet.bitmex.com"
+
+-- | API credentials
+data APICredentials = APICreds
+    { apiId     :: String
+    , apiSecret :: String
+    } deriving (Generic, Show)
+
+-- | BitMEX configuration
+data BitMEX = BitMEX
+    { netEnv      :: Environment -- ^ MainNet or TestNet
+    , restPath    :: String      -- ^ base path to be prependend in REST API calls
+    , wsPath      :: String
+    , connManager :: Manager
+    , apiCreds    :: APICredentials
+    , logConfig   :: LogContext
+    } deriving Generic
 
 data APIKeys = APIKeys
     { publicKey  :: !Text
