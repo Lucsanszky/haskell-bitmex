@@ -23,6 +23,10 @@ import BitMEX
           , Leverage(..)
           , positionUpdateLeverage
           , initLogContext
+          , stderrLevelLoggingContext
+          , levelDebug
+          , MimeFormUrlEncoded(..)
+          , mimeResultResponse
           )
 
 import           BitMEXClient hiding (error)
@@ -71,7 +75,7 @@ main = defaultMainWithIngredients ings $
     mkConfig :: Environment -> API_ID -> API_SECRET -> IO BitMEX
     mkConfig env (API_ID apiid) (API_SECRET apikey) = do
         mgr <- newManager tlsManagerSettings
-        log <- initLogContext
+        log <- initLogContext -- >>= stderrLevelLoggingContext levelDebug
         return $ BitMEX
             { netEnv      = env
             , restPath    = "/api/v1"
@@ -86,19 +90,21 @@ tests config = testGroup "" [instanceProps, unitTests config]
 
 unitTests :: IO BitMEX -> TestTree
 unitTests config = testGroup "\nAPI unit tests"
-  [ testCase "Show API credentials" $ do
+  [ testCase "Show API credentials and change leverage" $ do
         bitmex <- config
         print $ netEnv   bitmex
         print $ apiCreds bitmex
-        res <- dispatchRequest
-                  bitmex
-                  (positionUpdateLeverage
-                      (ContentType MimeJSON)
-                      (Accept MimeJSON)
-                      (Symbol ((pack . show) BMC.XBTUSD))
-                      (Leverage 3.0))
 
-        print res
+        let leverageRequest =
+                positionUpdateLeverage
+                    (ContentType MimeFormUrlEncoded)
+                    (Accept MimeJSON)
+                    (Symbol ((pack . show) BMC.XBTUSD))
+                    (Leverage 8.0)
+
+        res <- dispatchRequest bitmex leverageRequest
+
+        print (mimeResultResponse res)
         return ()
   ]
 

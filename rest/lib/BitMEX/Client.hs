@@ -50,6 +50,7 @@ import Data.Monoid ((<>))
 import Data.Text (Text)
 import GHC.Exts (IsString(..))
 
+import Debug.Trace
 -- * Dispatch
 
 -- ** Lbs
@@ -139,7 +140,7 @@ dispatchInitUnsafe manager config (InitRequest req) = do
   runConfigLogWithExceptions src config $
     do _log src levelInfo requestLogMsg
        _log src levelDebug requestDbgLogMsg
-       res <- P.liftIO $ NH.httpLbs req manager
+       res <- P.liftIO $ NH.httpLbs ({-traceShowId -} req) manager
        _log src levelInfo (responseLogMsg res)
        _log src levelDebug ((T.pack . show) res)
        return res

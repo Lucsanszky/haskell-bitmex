@@ -13,7 +13,6 @@ import           BitMEX
     , BitMEXRequest (..)
     , MimeResult
     , MimeType
-    , MimeJSON
     , MimeUnrender
     , ParamBody (..)
     , Produces
@@ -23,7 +22,8 @@ import           BitMEX
     , setHeader
     , addAuthMethod
     , AuthApiKeyApiKey(..)
-    , AuthApiKeyApiSignature(..)
+    , AuthBitMEXApiMAC(..)
+    , MimeFormUrlEncoded
     )
 import           BitMEX.Logging
 import           BitMEXClient.CustomPrelude
@@ -250,49 +250,25 @@ makeBitMEXRESTConfig BitMEX{..} =
         , configValidateAuthMethods = True
         }
 
-generateAuthInfo :: ByteArrayAccess msg => msg -> BitMEX -> BitMEXConfig -> BitMEXConfig
-generateAuthInfo msg BitMEX{..} config =
-    let sig = sign (BC.pack $ apiSecret apiCreds) msg
-     in config
-            `addAuthMethod` AuthApiKeyApiSignature (T.pack $ show sig)
-            `addAuthMethod` AuthApiKeyApiKey (T.pack $ apiId apiCreds)
+generateAuthInfo :: BitMEX -> BitMEXConfig -> BitMEXConfig
+generateAuthInfo BitMEX{..} config =
+    config
+        `addAuthMethod` AuthApiKeyApiKey ( T.pack $ apiId     apiCreds)
+        `addAuthMethod` AuthBitMEXApiMAC (BC.pack $ apiSecret apiCreds)
+        -- `addAuthMethod` AuthApiKeyApiSignature (T.pack $ show $ sign (BC.pack $ apiSecret apiCreds) msg)
+        -- (This old method would force me to generate the MAC right here with `sign`)
 
-
--- | Prepare, authenticate and dispatch a request
--- via the auto-generated BitMEX REST API.
+-- | Prepare, authenticate and dispatch a request via the auto-generated BitMEX REST API.
 dispatchRequest ::
       ( Produces req accept
       , MimeUnrender accept res
-      , MimeType contentType
       , MonadIO m
       )
-   => BitMEX -> BitMEXRequest req contentType res accept
+   => BitMEX -> BitMEXRequest req MimeFormUrlEncoded res accept
    -> m (MimeResult res)
 dispatchRequest config req@BitMEXRequest{..} = do
     time <- liftIO $ makeTimestamp <$> getPOSIXTime
-    let verb = filter (/= '"') $ show rMethod
-        query = rParams ^. paramsQueryL
-        msg = case rParams ^. paramsBodyL of
-            ParamBodyBL lbs ->
-                    (BC.pack
-                         (verb <> restPath config <>
-                          (LBC.unpack . head) rUrlPath <>
-                          BC.unpack (renderQuery True query) <>
-                          show time <>
-                          LBC.unpack lbs))
-            ParamBodyB bs ->
-                    (BC.pack
-                         (verb <> restPath config <>
-                          (LBC.unpack . head) rUrlPath <>
-                          BC.unpack (renderQuery True query) <>
-                          show time <>
-                          BC.unpack bs))
-            _ ->
-                    (BC.pack
-                         (verb <> restPath config <>
-                          (LBC.unpack . head) rUrlPath <>
-                          BC.unpack (renderQuery True query) <>
-                          show time))
-        restConfig = makeBitMEXRESTConfig config
-        newReq = setHeader req [("api-expires", toByteString' time)] -- FIX ME! This should also be an `addAuthMethod`
-    liftIO $ dispatchMime (connManager config) (generateAuthInfo msg config restConfig) newReq
+    let restConfig = makeBitMEXRESTConfig config
+        -- FIX ME! This should also be an `addAuthMethod` like the nonce was
+        newReq = setHeader req [("api-expires", toByteString' time)]
+    liftIO $ dispatchMime (connManager config) (generateAuthInfo config restConfig) newReq
