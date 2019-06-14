@@ -1,7 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
--- {-# LANGUAGE OverloadedStrings #-}
--- {-# LANGUAGE RecordWildCards #-}
--- {-# LANGUAGE PartialTypeSignatures #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Main where
 
@@ -12,24 +10,13 @@ import Test.Tasty.Options
 import Test.Tasty.HUnit
 
 import Data.Text                (pack)
+import Data.Time.Clock.POSIX    (getPOSIXTime)
 import Network.HTTP.Client      (newManager)
 import Network.HTTP.Client.TLS  (tlsManagerSettings)
 
 import BitMEX
-          ( ContentType(..)
-          , MimeJSON(..)
-          , Accept(..)
-          , Symbol(..)
-          , Leverage(..)
-          , positionUpdateLeverage
-          , initLogContext
-          , stderrLevelLoggingContext
-          , levelDebug
-          , MimeFormUrlEncoded(..)
-          , mimeResultResponse
-          )
 
-import           BitMEXClient hiding (error)
+import           BitMEXClient hiding (error, Position, Order)
 import qualified BitMEXClient as BMC (Symbol(..))
 
 ----------------------------------------
@@ -43,7 +30,7 @@ instance IsOption Environment where
       | x == "TestNet" = Just TestNet
       | otherwise      = Just defaultValue
 
-    optionName = return "BITMEX_ENVIRONMENT"
+    optionName = return "BITMEX_ENVIRONMENT"  -- env: prepend 'TASTY_'
     optionHelp = return "Which BitMEX environment (MainNet or TestNet) to use to run the tests."
 
 instance IsOption API_ID where
@@ -55,7 +42,7 @@ instance IsOption API_ID where
 instance IsOption API_SECRET where
     defaultValue = error "User must supply BITMEX_API_SECRET (on command line or environment) for authenticated tests."
     parseValue = Just . API_SECRET
-    optionName = return "BITMEX_API_SECRET"
+    optionName = return "BITMEX_API_SECRET" -- export TASTY_BITMEX_API_SECRET=...
     optionHelp = return "Customer's API secret for Bitmex account (hex encoded)."
 
 
@@ -74,15 +61,15 @@ main = defaultMainWithIngredients ings $
 
     mkConfig :: Environment -> API_ID -> API_SECRET -> IO BitMEX
     mkConfig env (API_ID apiid) (API_SECRET apikey) = do
-        mgr <- newManager tlsManagerSettings
-        log <- initLogContext -- >>= stderrLevelLoggingContext levelDebug
+        mgr  <- newManager tlsManagerSettings
+        logs <- initLogContext -- >>= stderrLevelLoggingContext levelDebug
         return $ BitMEX
             { netEnv      = env
             , restPath    = "/api/v1"
             , wsPath      = "/realtime"
             , connManager = mgr
             , apiCreds    = APICreds {apiId = apiid, apiSecret = apikey}
-            , logConfig   = log
+            , logConfig   = logs
             }
 
 tests :: IO BitMEX -> TestTree
@@ -90,22 +77,51 @@ tests config = testGroup "" [instanceProps, unitTests config]
 
 unitTests :: IO BitMEX -> TestTree
 unitTests config = testGroup "\nAPI unit tests"
-  [ testCase "Show API credentials and change leverage" $ do
-        bitmex <- config
-        print $ netEnv   bitmex
-        print $ apiCreds bitmex
+  [ testCase "Change leverage" $ do
+      let leverageRequest =
+              positionUpdateLeverage
+                  (ContentType MimeFormUrlEncoded)
+                  (Accept MimeJSON)
+                  (Symbol $ (pack . show) BMC.XBTUSD)
+                  (Leverage 8.0)
 
-        let leverageRequest =
-                positionUpdateLeverage
-                    (ContentType MimeFormUrlEncoded)
-                    (Accept MimeJSON)
-                    (Symbol ((pack . show) BMC.XBTUSD))
-                    (Leverage 8.0)
+      bitmex   <- config
+      response <- dispatchRequest bitmex leverageRequest
+      case mimeResult response of
+          Right (Position {}) -> return ()
+          _                   -> assertFailure $ "Unable to update leverage:" <> show response
 
-        res <- dispatchRequest bitmex leverageRequest
+  -- CAREFUL: This testCase will use (TestNet or Real) funds
+  -- Don't give it credentials that can make you lose real money, use the TestNet
+  , testCase "Place and cancel order" $ do
+      bitmex <- config
+      time   <- getPOSIXTime
 
-        print (mimeResultResponse res)
-        return ()
+      let clientOrderId = "TEST--ClientOrdID-" <> show time -- must be unique
+          placeNewOrder =
+              orderNew
+                  (ContentType MimeFormUrlEncoded)
+                  (Accept MimeJSON)
+                  (Symbol $ (pack . show) BMC.XBTUSD)
+                  -&- (OrderQty  40)
+                  -&- (Price   1000)
+                  -&- (ClOrdId $ pack clientOrderId)
+          cancelOrder =
+              orderCancel
+                  (ContentType MimeFormUrlEncoded)
+                  (Accept MimeJSON)
+                  -&- (ClOrdId $ pack clientOrderId)
+
+      response <- dispatchRequest bitmex placeNewOrder
+      _ <- case mimeResult response of
+          Right (Order {}) -> return ()
+          _ -> assertFailure $ "Unable to place order: " <> show response
+
+      response' <- dispatchRequest bitmex cancelOrder
+      case mimeResult response' of
+          Right [Order {}] -> return ()
+          _ -> assertFailure $ "Unable to cancel order: " <> show response
+
   ]
 
 instanceProps :: TestTree

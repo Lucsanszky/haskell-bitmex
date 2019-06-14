@@ -50,7 +50,6 @@ import Data.Monoid ((<>))
 import Data.Text (Text)
 import GHC.Exts (IsString(..))
 
-import Debug.Trace
 -- * Dispatch
 
 -- ** Lbs

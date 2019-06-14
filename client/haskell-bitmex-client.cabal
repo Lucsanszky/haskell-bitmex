@@ -105,6 +105,7 @@ test-suite test-haskell-bitmex-client
 
   build-depends:        base
                       , text
+                      , time
                       , http-client
                       , http-client-tls
                       , haskell-bitmex-rest

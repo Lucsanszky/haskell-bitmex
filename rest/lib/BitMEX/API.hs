@@ -71,7 +71,6 @@ import GHC.Base ((<|>))
 import Prelude ((==),(/=),($), (.),(<$>),(<*>),(>>=),Maybe(..),Bool(..),Char,Double,FilePath,Float,Int,Integer,String,fmap,undefined,mempty,maybe,pure,Monad,Applicative,Functor, show, filter)
 import qualified Prelude as P
 
-import Debug.Trace
 -- * Operations
 
 
@@ -1417,7 +1416,7 @@ orderCancel
 orderCancel _  _ =
   _mkRequest "DELETE" ["/order"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
+    `_hasAuthType` (P.Proxy :: P.Proxy AuthBitMEXApiMAC)
 
 data OrderCancel
 
@@ -1688,7 +1687,7 @@ orderNew
 orderNew _  _ (Symbol symbol) =
   _mkRequest "POST" ["/order"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
+    `_hasAuthType` (P.Proxy :: P.Proxy AuthBitMEXApiMAC)
     `addForm` toForm ("symbol", symbol)
 
 data OrderNew
@@ -3697,7 +3696,7 @@ generateMessage req =
             ParamBodyFormUrlEncoded form -> BCL.unpack $ WH.urlEncodeForm form
             -- FIX ME! ParamBodyMultipartFormData parts ->... not implemented"
 
-     in BC.pack $ traceShowId
+     in BC.pack $ {- traceShowId -}
             ( verb
             <> BCL.unpack path
             <> BC.unpack (NH.renderQuery True query)
