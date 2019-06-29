@@ -10,6 +10,7 @@ import Test.Tasty.Options
 import Test.Tasty.HUnit
 
 import Data.Text                (pack)
+import Data.Aeson               (decode)
 import Data.Time.Clock.POSIX    (getPOSIXTime)
 import Network.HTTP.Client      (newManager)
 import Network.HTTP.Client.TLS  (tlsManagerSettings)
@@ -77,52 +78,69 @@ tests config = testGroup "" [instanceProps, unitTests config]
 
 unitTests :: IO BitMEX -> TestTree
 unitTests config = testGroup "\nAPI unit tests"
-  [ testCase "Change leverage" $ do
-      let leverageRequest =
-              positionUpdateLeverage
-                  (ContentType MimeFormUrlEncoded)
-                  (Accept MimeJSON)
-                  (Symbol $ (pack . show) BMC.XBTUSD)
-                  (Leverage 8.0)
+    [ testCase "Change leverage" $ do
+        let leverageRequest =
+                positionUpdateLeverage
+                    (ContentType MimeFormUrlEncoded)
+                    (Accept MimeJSON)
+                    (Symbol $ (pack . show) BMC.XBTUSD)
+                    (Leverage 8.0)
 
-      bitmex   <- config
-      response <- dispatchRequest bitmex leverageRequest
-      case mimeResult response of
-          Right (Position {}) -> return ()
-          _                   -> assertFailure $ "Unable to update leverage:" <> show response
+        bitmex   <- config
+        response <- dispatchRequest bitmex leverageRequest
+        case mimeResult response of
+            Right (Position {}) -> return ()
+            _                   -> assertFailure $ "Unable to update leverage:" <> show response
 
-  -- CAREFUL: This testCase will use (TestNet or Real) funds
-  -- Don't give it credentials that can make you lose real money, use the TestNet
-  , testCase "Place and cancel order" $ do
-      bitmex <- config
-      time   <- getPOSIXTime
+    -- CAREFUL: This testCase will use (TestNet or Real) funds
+    -- Don't give it credentials that can make you lose real money, use the TestNet
+    , testCase "Place and cancel order" $ do
+        bitmex <- config
+        time   <- getPOSIXTime
 
-      let clientOrderId = "TEST--ClientOrdID-" <> show time -- must be unique
-          placeNewOrder =
-              orderNew
-                  (ContentType MimeFormUrlEncoded)
-                  (Accept MimeJSON)
-                  (Symbol $ (pack . show) BMC.XBTUSD)
-                  -&- (OrderQty  40)
-                  -&- (Price   1000)
-                  -&- (ClOrdId $ pack clientOrderId)
-          cancelOrder =
-              orderCancel
-                  (ContentType MimeFormUrlEncoded)
-                  (Accept MimeJSON)
-                  -&- (ClOrdId $ pack clientOrderId)
+        let clientOrderId = "TEST--ClientOrdID-" <> show time -- must be unique
+            placeNewOrder =
+                orderNew
+                    (ContentType MimeFormUrlEncoded)
+                    (Accept MimeJSON)
+                    (Symbol $ (pack . show) BMC.XBTUSD)
+                    -&- (OrderQty  40)
+                    -&- (Price   1000)
+                    -&- (ClOrdId $ pack clientOrderId)
+            cancelOrder =
+                orderCancel
+                    (ContentType MimeFormUrlEncoded)
+                    (Accept MimeJSON)
+                    -&- (ClOrdId $ pack clientOrderId)
 
-      response <- dispatchRequest bitmex placeNewOrder
-      _ <- case mimeResult response of
-          Right (Order {}) -> return ()
-          _ -> assertFailure $ "Unable to place order: " <> show response
+        response <- dispatchRequest bitmex placeNewOrder
+        _ <- case mimeResult response of
+            Right (Order {}) -> return ()
+            _ -> assertFailure $ "Unable to place order: " <> show response
 
-      response' <- dispatchRequest bitmex cancelOrder
-      case mimeResult response' of
-          Right [Order {}] -> return ()
-          _ -> assertFailure $ "Unable to cancel order: " <> show response
+        response' <- dispatchRequest bitmex cancelOrder
+        case mimeResult response' of
+            Right [Order {}] -> return ()
+            _ -> assertFailure $ "Unable to cancel order: " <> show response
 
-  ]
+    , testCase "Websocket parse funding fee" $ do
+        case decode sampleFundingExecutionMsg :: Maybe Response of
+            Just _ -> return ()
+            Nothing -> assertFailure "Could not parse funding fee execution message."
+    ]
 
 instanceProps :: TestTree
 instanceProps = testGroup "Properties" []
+
+sampleFundingExecutionMsg =
+    "{\"table\":\"execution\",\"action\":\"insert\",\"data\":[{\"execID\":\"a747f8fb-b420-2564-ee83-50715b574eb2\",\"orderID\":"
+    <> "\"00000000-0000-0000-0000-000000000000\",\"clOrdID\":\"\",\"clOrdLinkID\":\"\",\"account\":517257,\"symbol\":\"XBTUSD\","
+    <> "\"side\":\"\",\"lastQty\":14,\"lastPx\":10571.37,\"underlyingLastPx\":null,\"lastMkt\":\"XBME\",\"lastLiquidityInd\":\"\""
+    <> ",\"simpleOrderQty\":null,\"orderQty\":14,\"price\":10571.37,\"displayQty\":null,\"stopPx\":null,\"pegOffsetValue\":null,"
+    <> "\"pegPriceType\":\"\",\"currency\":\"USD\",\"settlCurrency\":\"XBt\",\"execType\":\"Funding\",\"ordType\":\"Limit\","
+    <> "\"timeInForce\":\"AtTheClose\",\"execInst\":\"\",\"contingencyType\":\"\",\"exDestination\":\"XBME\",\"ordStatus\":"
+    <> "\"Filled\",\"triggered\":\"\",\"workingIndicator\":false,\"ordRejReason\":\"\",\"simpleLeavesQty\":null,\"leavesQty\":0,"
+    <> "\"simpleCumQty\":null,\"cumQty\":14,\"avgPx\":10571.37,\"commission\":0.002832,\"tradePublishIndicator\":\"\","
+    <> "\"multiLegReportingType\":\"SingleSecurity\",\"text\":\"Funding\",\"trdMatchID\":\"716fe240-bdee-29da-ab67-6aaf02698a0d\","
+    <> "\"execCost\":-132440,\"execComm\":375,\"homeNotional\":0.0013244,\"foreignNotional\":-14,"
+    <> "\"transactTime\":\"2019-06-23T12:00:00.000Z\",\"timestamp\":\"2019-06-23T12:00:01.438Z\"}]}"
