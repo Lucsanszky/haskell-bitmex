@@ -15,6 +15,10 @@ import Data.Time.Clock.POSIX    (getPOSIXTime)
 import Network.HTTP.Client      (newManager)
 import Network.HTTP.Client.TLS  (tlsManagerSettings)
 
+import qualified Network.HTTP.Client.Internal as NH
+import qualified Network.HTTP.Types           as NH
+import           Data.IORef
+
 import BitMEX
 
 import           BitMEXClient hiding (error, Position, Order)
@@ -127,11 +131,21 @@ unitTests config = testGroup "\nAPI unit tests"
         case decode sampleFundingExecutionMsg :: Maybe Response of
             Just _ -> return ()
             Nothing -> assertFailure "Could not parse funding fee execution message."
+
+    , testCase "Multiple retries upon 503 HTTP Status" $ do
+        ref   <- newIORef 0
+        resp  <- retryOn503 9 (fakeDispatch ref)
+        count <- readIORef ref
+        assertEqual "retry response status does not match action status"
+            (NH.responseStatus $ mimeResultResponse sampleTooBusyResponse)
+            (NH.responseStatus $ mimeResultResponse resp)
+        assertEqual "Retried wrong number of times" 10 count
     ]
 
 instanceProps :: TestTree
 instanceProps = testGroup "Properties" []
 
+--------------------------------------------------------------------------------
 sampleFundingExecutionMsg =
     "{\"table\":\"execution\",\"action\":\"insert\",\"data\":[{\"execID\":\"a747f8fb-b420-2564-ee83-50715b574eb2\",\"orderID\":"
     <> "\"00000000-0000-0000-0000-000000000000\",\"clOrdID\":\"\",\"clOrdLinkID\":\"\",\"account\":517257,\"symbol\":\"XBTUSD\","
@@ -144,3 +158,41 @@ sampleFundingExecutionMsg =
     <> "\"multiLegReportingType\":\"SingleSecurity\",\"text\":\"Funding\",\"trdMatchID\":\"716fe240-bdee-29da-ab67-6aaf02698a0d\","
     <> "\"execCost\":-132440,\"execComm\":375,\"homeNotional\":0.0013244,\"foreignNotional\":-14,"
     <> "\"transactTime\":\"2019-06-23T12:00:00.000Z\",\"timestamp\":\"2019-06-23T12:00:01.438Z\"}]}"
+
+--------------------------------------------------------------------------------
+sampleTooBusyResponse :: MimeResult res
+sampleTooBusyResponse =  MimeResult
+    { mimeResult = Left
+        ( MimeError
+            { mimeError = "error statusCode: 503"
+            , mimeErrorResponse = NH.Response
+                { NH.responseStatus = NH.Status
+                    { NH.statusCode = 503
+                    , NH.statusMessage = "Service Unavailable"
+                    }
+                , NH.responseVersion = NH.http11
+                , NH.responseHeaders = []
+                , NH.responseBody = "{\"error\":{\"message\":\"The system is currently overloaded. Please try again later.\",\"name\":\"HTTPError\"}}"
+                , NH.responseCookieJar = NH.CJ {NH.expose = []}
+                , NH.responseClose' = undefined
+                }
+            }
+        )
+    , mimeResultResponse = NH.Response
+        { NH.responseStatus = NH.Status
+            { NH.statusCode = 503
+            , NH.statusMessage = "Service Unavailable"
+            }
+        , NH.responseVersion = NH.http11
+        , NH.responseHeaders = []
+        , NH.responseBody = "{\"error\":{\"message\":\"The system is currently overloaded. Please try again later.\",\"name\":\"HTTPError\"}}"
+        , NH.responseCookieJar = NH.CJ {NH.expose = []}
+        , NH.responseClose' = undefined
+        }
+    }
+
+fakeDispatch :: IORef Int -> IO (MimeResult ())
+fakeDispatch ref = do
+    modifyIORef ref (+1)
+    return sampleTooBusyResponse
+--------------------------------------------------------------------------------
