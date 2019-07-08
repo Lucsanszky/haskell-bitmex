@@ -15,5 +15,6 @@ sign s m = hmacGetDigest . hmac s $ m
 
 -- | Convenience function to generate a timestamp
 -- for the signature of the request.
+-- FIX ME!!! THIS MUST BE FIXED at this constant for now.
 makeTimestamp :: (RealFrac a) => a -> Int
-makeTimestamp = floor . (* 1000000)
+makeTimestamp _ = 9999999999 -- floor . (* 1000000)

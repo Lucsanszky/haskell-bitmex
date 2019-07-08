@@ -81,6 +81,11 @@ stderrLoggingContext cxt = do
     handleScribe <- LG.mkHandleScribe LG.ColorIfTerminal IO.stderr (LG.permitItem LG.InfoS) LG.V2
     LG.registerScribe "stderr" handleScribe LG.defaultScribeSettings cxt
 
+stderrLevelLoggingContext :: LG.Severity -> LogContext -> IO LogContext
+stderrLevelLoggingContext level cxt = do
+    handleScribe <- LG.mkHandleScribe LG.ColorIfTerminal IO.stderr (LG.permitItem level) LG.V2
+    LG.registerScribe "stderr" handleScribe LG.defaultScribeSettings cxt
+
 -- * Null logger
 
 -- | Disables Katip logging

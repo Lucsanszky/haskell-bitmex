@@ -5,6 +5,7 @@ module BitMEXClient.Wrapper.API
     , makeTimestamp
     , getMessage
     , sendMessage
+    , dispatchRequest
     ) where
 
 import           BitMEX
@@ -19,6 +20,10 @@ import           BitMEX
     , paramsBodyL
     , paramsQueryL
     , setHeader
+    , addAuthMethod
+    , AuthApiKeyApiKey(..)
+    , AuthBitMEXApiMAC(..)
+    , MimeFormUrlEncoded
     )
 import           BitMEX.Logging
 import           BitMEXClient.CustomPrelude
@@ -49,6 +54,9 @@ import qualified Data.ByteString.Lazy.Char8    as LBC
     )
 import qualified Data.Text.Lazy                as LT
     ( toStrict
+    )
+import qualified Data.Text                     as T
+    ( pack
     )
 import qualified Data.Text.Lazy.Encoding       as LT
     ( decodeUtf8
@@ -228,3 +236,39 @@ sendMessage ::
 sendMessage conn comm topics =
     sendTextData conn $
     encode $ Message {op = comm, args = fromList topics}
+
+----------------------------------------
+makeBitMEXRESTConfig :: BitMEX -> BitMEXConfig
+makeBitMEXRESTConfig BitMEX{..} =
+    let baseURL = LBC.pack $ show netEnv <> restPath
+     in BitMEXConfig
+        { configHost                = baseURL -- This is misnamed, it's not just the hostname
+        , configUserAgent           = "haskell"
+        , configLogExecWithContext  = runDefaultLogExecWithContext
+        , configLogContext          = logConfig
+        , configAuthMethods         = []
+        , configValidateAuthMethods = True
+        }
+
+generateAuthInfo :: BitMEX -> BitMEXConfig -> BitMEXConfig
+generateAuthInfo BitMEX{..} config =
+    config
+        `addAuthMethod` AuthApiKeyApiKey ( T.pack $ apiId     apiCreds)
+        `addAuthMethod` AuthBitMEXApiMAC (BC.pack $ apiSecret apiCreds)
+        -- `addAuthMethod` AuthApiKeyApiSignature (T.pack $ show $ sign (BC.pack $ apiSecret apiCreds) msg)
+        -- (This old method would force me to generate the MAC right here with `sign`)
+
+-- | Prepare, authenticate and dispatch a request via the auto-generated BitMEX REST API.
+dispatchRequest ::
+      ( Produces req accept
+      , MimeUnrender accept res
+      , MonadIO m
+      )
+   => BitMEX -> BitMEXRequest req MimeFormUrlEncoded res accept
+   -> m (MimeResult res)
+dispatchRequest config req@BitMEXRequest{..} = do
+    time <- liftIO $ makeTimestamp <$> getPOSIXTime
+    let restConfig = makeBitMEXRESTConfig config
+        -- FIX ME! This should also be an `addAuthMethod` like the nonce was
+        newReq = setHeader req [("api-expires", toByteString' time)]
+    liftIO $ dispatchMime (connManager config) (generateAuthInfo config restConfig) newReq

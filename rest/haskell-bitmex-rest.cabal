@@ -57,6 +57,9 @@ library
     , case-insensitive
     , microlens >= 0.4.3 && <0.5
     , deepseq >= 1.4 && <1.6
+    , memory
+    , cryptonite
+
   exposed-modules:
       BitMEX
       BitMEX.API

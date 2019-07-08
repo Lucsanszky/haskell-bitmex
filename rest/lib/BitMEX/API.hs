@@ -32,11 +32,17 @@ import BitMEX.Core
 import BitMEX.MimeTypes
 import BitMEX.Model as M
 
+import           Data.ByteArray          (ByteArrayAccess)
+import           Crypto.Hash             (Digest)
+import           Crypto.Hash.Algorithms  (SHA256)
+import           Crypto.MAC.HMAC         (hmac, hmacGetDigest)
+
 import qualified Data.Aeson as A
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Base64 as B64
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as BL
+import qualified Data.ByteString.Lazy.Char8 as BCL
 import qualified Data.Data as P (Typeable, TypeRep, typeOf, typeRep)
 import qualified Data.Foldable as P
 import qualified Data.Map as Map
@@ -62,7 +68,7 @@ import Data.Function ((&))
 import Data.Text (Text)
 import GHC.Base ((<|>))
 
-import Prelude ((==),(/=),($), (.),(<$>),(<*>),(>>=),Maybe(..),Bool(..),Char,Double,FilePath,Float,Int,Integer,String,fmap,undefined,mempty,maybe,pure,Monad,Applicative,Functor)
+import Prelude ((==),(/=),($), (.),(<$>),(<*>),(>>=),Maybe(..),Bool(..),Char,Double,FilePath,Float,Int,Integer,String,fmap,undefined,mempty,maybe,pure,Monad,Applicative,Functor, show, filter)
 import qualified Prelude as P
 
 -- * Operations
@@ -87,7 +93,6 @@ aPIKeyDisable
 aPIKeyDisable _  _ (ApiKeyId apiKeyId) =
   _mkRequest "POST" ["/apiKey/disable"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("apiKeyID", apiKeyId)
 
@@ -127,7 +132,6 @@ aPIKeyEnable
 aPIKeyEnable _  _ (ApiKeyId apiKeyId) =
   _mkRequest "POST" ["/apiKey/enable"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("apiKeyID", apiKeyId)
 
@@ -164,7 +168,6 @@ aPIKeyGet
 aPIKeyGet  _ =
   _mkRequest "GET" ["/apiKey"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data APIKeyGet
@@ -209,7 +212,6 @@ aPIKeyNew
 aPIKeyNew _  _ =
   _mkRequest "POST" ["/apiKey"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data APIKeyNew
@@ -273,7 +275,6 @@ aPIKeyRemove
 aPIKeyRemove _  _ (ApiKeyId apiKeyId) =
   _mkRequest "DELETE" ["/apiKey"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("apiKeyID", apiKeyId)
 
@@ -348,7 +349,6 @@ announcementGetUrgent
 announcementGetUrgent  _ =
   _mkRequest "GET" ["/announcement/urgent"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data AnnouncementGetUrgent
@@ -504,7 +504,6 @@ chatNew
 chatNew _  _ (Message message) =
   _mkRequest "POST" ["/chat"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("message", message)
 
@@ -550,7 +549,6 @@ executionGet
 executionGet  _ =
   _mkRequest "GET" ["/execution"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data ExecutionGet
@@ -626,7 +624,6 @@ executionGetTradeHistory
 executionGetTradeHistory  _ =
   _mkRequest "GET" ["/execution/tradeHistory"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data ExecutionGetTradeHistory
@@ -1240,7 +1237,6 @@ notificationGet
 notificationGet  _ =
   _mkRequest "GET" ["/notification"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data NotificationGet
@@ -1282,7 +1278,6 @@ orderAmend
 orderAmend _  _ =
   _mkRequest "PUT" ["/order"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data OrderAmend
@@ -1377,7 +1372,6 @@ orderAmendBulk
 orderAmendBulk _  _ =
   _mkRequest "PUT" ["/order/bulk"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data OrderAmendBulk
@@ -1422,8 +1416,7 @@ orderCancel
 orderCancel _  _ =
   _mkRequest "DELETE" ["/order"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
+    `_hasAuthType` (P.Proxy :: P.Proxy AuthBitMEXApiMAC)
 
 data OrderCancel
 
@@ -1475,7 +1468,6 @@ orderCancelAll
 orderCancelAll _  _ =
   _mkRequest "DELETE" ["/order/all"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data OrderCancelAll
@@ -1531,7 +1523,6 @@ orderCancelAllAfter
 orderCancelAllAfter _  _ (Timeout timeout) =
   _mkRequest "POST" ["/order/cancelAllAfter"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("timeout", timeout)
 
@@ -1573,7 +1564,6 @@ orderClosePosition
 orderClosePosition _  _ (Symbol symbol) =
   _mkRequest "POST" ["/order/closePosition"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("symbol", symbol)
 
@@ -1617,7 +1607,6 @@ orderGetOrders
 orderGetOrders  _ =
   _mkRequest "GET" ["/order"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data OrderGetOrders
@@ -1698,8 +1687,7 @@ orderNew
 orderNew _  _ (Symbol symbol) =
   _mkRequest "POST" ["/order"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
+    `_hasAuthType` (P.Proxy :: P.Proxy AuthBitMEXApiMAC)
     `addForm` toForm ("symbol", symbol)
 
 data OrderNew
@@ -1829,7 +1817,6 @@ orderNewBulk
 orderNewBulk _  _ =
   _mkRequest "POST" ["/order/bulk"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data OrderNewBulk
@@ -1952,7 +1939,6 @@ positionGet
 positionGet  _ =
   _mkRequest "GET" ["/position"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data PositionGet
@@ -2008,7 +1994,6 @@ positionIsolateMargin
 positionIsolateMargin _  _ (Symbol symbol) =
   _mkRequest "POST" ["/position/isolate"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("symbol", symbol)
 
@@ -2056,7 +2041,6 @@ positionTransferIsolatedMargin
 positionTransferIsolatedMargin _  _ (Symbol symbol) (Amount amount) =
   _mkRequest "POST" ["/position/transferMargin"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("symbol", symbol)
     `addForm` toForm ("amount", amount)
@@ -2100,8 +2084,8 @@ positionUpdateLeverage
 positionUpdateLeverage _  _ (Symbol symbol) (Leverage leverage) =
   _mkRequest "POST" ["/position/leverage"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
+    `_hasAuthType` (P.Proxy :: P.Proxy AuthBitMEXApiMAC) -- FIX ME! This entry is not auto-generated
+    -- `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature) -- no longer used
     `addForm` toForm ("symbol", symbol)
     `addForm` toForm ("leverage", leverage)
 
@@ -2144,7 +2128,6 @@ positionUpdateRiskLimit
 positionUpdateRiskLimit _  _ (Symbol symbol) (RiskLimit riskLimit) =
   _mkRequest "POST" ["/position/riskLimit"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("symbol", symbol)
     `addForm` toForm ("riskLimit", riskLimit)
@@ -2840,7 +2823,6 @@ userConfirmEnableTFA
 userConfirmEnableTFA _  _ (Token token) =
   _mkRequest "POST" ["/user/confirmEnableTFA"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("token", token)
 
@@ -2920,7 +2902,6 @@ userDisableTFA
 userDisableTFA _  _ (Token token) =
   _mkRequest "POST" ["/user/disableTFA"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("token", token)
 
@@ -2962,7 +2943,6 @@ userGet
 userGet  _ =
   _mkRequest "GET" ["/user"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserGet
@@ -2998,7 +2978,6 @@ userGetAffiliateStatus
 userGetAffiliateStatus  _ =
   _mkRequest "GET" ["/user/affiliateStatus"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserGetAffiliateStatus
@@ -3034,7 +3013,6 @@ userGetCommission
 userGetCommission  _ =
   _mkRequest "GET" ["/user/commission"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserGetCommission
@@ -3070,7 +3048,6 @@ userGetDepositAddress
 userGetDepositAddress  _ =
   _mkRequest "GET" ["/user/depositAddress"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserGetDepositAddress
@@ -3109,7 +3086,6 @@ userGetMargin
 userGetMargin  _ =
   _mkRequest "GET" ["/user/margin"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserGetMargin
@@ -3148,7 +3124,6 @@ userGetWallet
 userGetWallet  _ =
   _mkRequest "GET" ["/user/wallet"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserGetWallet
@@ -3187,7 +3162,6 @@ userGetWalletHistory
 userGetWalletHistory  _ =
   _mkRequest "GET" ["/user/walletHistory"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserGetWalletHistory
@@ -3226,7 +3200,6 @@ userGetWalletSummary
 userGetWalletSummary  _ =
   _mkRequest "GET" ["/user/walletSummary"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserGetWalletSummary
@@ -3298,7 +3271,6 @@ userLogoutAll
 userLogoutAll  _ =
   _mkRequest "POST" ["/user/logoutAll"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserLogoutAll
@@ -3374,7 +3346,6 @@ userRequestEnableTFA
 userRequestEnableTFA _  _ =
   _mkRequest "POST" ["/user/requestEnableTFA"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserRequestEnableTFA
@@ -3422,7 +3393,6 @@ userRequestWithdrawal
 userRequestWithdrawal _  _ (Currency currency) (Amount amount) (Address address) =
   _mkRequest "POST" ["/user/requestWithdrawal"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("currency", currency)
     `addForm` toForm ("amount", amount)
@@ -3474,7 +3444,6 @@ userSavePreferences
 userSavePreferences _  _ (Prefs prefs) =
   _mkRequest "POST" ["/user/preferences"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
     `addForm` toForm ("prefs", prefs)
 
@@ -3518,7 +3487,6 @@ userUpdate
 userUpdate _  _ =
   _mkRequest "PUT" ["/user"]
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiKey)
-    `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiNonce)
     `_hasAuthType` (P.Proxy :: P.Proxy AuthApiKeyApiSignature)
 
 data UserUpdate
@@ -3680,6 +3648,62 @@ instance AuthMethod AuthApiKeyApiSignature where
       else req
 
 
+--------------------------------------------------------------------------------
+-- FIX ME! This section should not be in an auto-generated file.
+-- But I don't have time to go fix the generator.
+
+-- FIX ME!
+-- This implemenation is subject to replay attacks if someone gets inside the TLS tunnel.
+-- We need to pass in the expiring timestamp to avoid replay attacks, but
+-- I don't know how to pass this parameter using the current mechanism
+
+-- FIX ME! generateMessage has essentially to duplicate the work done at  `_toInitRequest`
+-- we should change the order of execution inside _toInitRequest to only do the authentication
+-- later, after all fields have been calculated. But I don't have time to open that can of worms.
+-- Also, the authentication mechanism is broken and should be changed anyway.
+
+data AuthBitMEXApiMAC = AuthBitMEXApiMAC BC.ByteString -- ^ secret
+  deriving (P.Eq, P.Show, P.Typeable)
+
+instance AuthMethod AuthBitMEXApiMAC where
+  applyAuthMethod _ a@(AuthBitMEXApiMAC secret) req =
+    P.pure $
+    if (P.typeOf a `P.elem` rAuthTypes req)
+      then
+        let msg = generateMessage req
+            mac = calculateMAC secret msg
+            display = T.pack (show mac)
+         in req `setHeader` toHeader ("api-signature", display)
+            & L.over rAuthTypesL (P.filter (/= P.typeOf a))
+      else req
+
+-- | Create a signature for the request.
+calculateMAC
+    :: (ByteArrayAccess secret, ByteArrayAccess message)
+    => secret -> message -> Digest SHA256
+calculateMAC s msg = hmacGetDigest . hmac s $ msg
+
+generateMessage :: BitMEXRequest req contentType res accept -> BC.ByteString
+generateMessage req =
+    let verb  = filter (/= '"') $ show (rMethod req)
+        path  = BL.concat ("/api/v1" : rUrlPath req)
+        query = rParams req L.^. paramsQueryL
+        body :: String
+        body  = case rParams req L.^. paramsBodyL of
+            ParamBodyNone   -> mempty
+            ParamBodyB   bs -> BC.unpack  bs
+            ParamBodyBL lbs -> BCL.unpack lbs
+            ParamBodyFormUrlEncoded form -> BCL.unpack $ WH.urlEncodeForm form
+            -- FIX ME! ParamBodyMultipartFormData parts ->... not implemented"
+
+     in BC.pack $ {- traceShowId -}
+            ( verb
+            <> BCL.unpack path
+            <> BC.unpack (NH.renderQuery True query)
+            <> show 9999999999
+            <> body
+            )
+--------------------------------------------------------------------------------
 
 -- * Custom Mime Types
 
