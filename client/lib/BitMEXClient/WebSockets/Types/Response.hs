@@ -31,8 +31,8 @@ import           BitMEX.Core         (DateTime)
 import           Data.Text           (Text)
 import           Data.Vector         (Vector)
 
-import           Control.Applicative (pure, (<*>))
-import           Data.Aeson          ((.:), (.:?))
+import           Data.HashMap.Strict (insert)
+import           Data.Aeson          ((.:?))
 
 import           BitMEXClient.CustomPrelude
 import           BitMEXClient.WebSockets.Types.General
@@ -212,71 +212,17 @@ data RespExecution = RespExecution
 
 
 {- Unfortunately, we have to write an instance for parsing this because of the
-   case where the execution is just the funding fee. The response comes
-   has an empty string for the side (instead of "Buy" or "Sell") and this
-   is failing the parser.
+   case where the execution is just the funding fee. The response has an empty
+   string for the 'side' (instead of "Buy" or "Sell") and this is failing the
+   parser.
 -}
 instance FromJSON RespExecution where
     parseJSON = withObject "RespExecution" $ \o -> do
         side'     :: Maybe Text <- o .:? "side"
         execType' :: Maybe Text <- o .:? "execType"
-        text'     :: Maybe Text <- o .:? "text"
-        mSide <- case (side', execType', text') of
-            (Just ""   , Just "Funding", Just "Funding") -> return Nothing
-            (Nothing    , _ , _ ) -> return Nothing
-            (Just "Buy" , _ , _ ) -> return (Just Buy)
-            (Just "Sell", _ , _ ) -> return (Just Sell)
-            _ -> fail ("Parsing RespExecution has invalid execution \"side\" field: " <> show side')
-
-        RespExecution
-            <$> o .:  "execID"
-            <*> o .:? "orderID"
-            <*> o .:? "clOrdID"
-            <*> o .:? "clOrdLinkID"
-            <*> o .:? "account"
-            <*> o .:? "symbol"
-            <*> pure mSide
-            <*> o .:? "lastQty"
-            <*> o .:? "lastPx"
-            <*> o .:? "underlyingLastPx"
-            <*> o .:? "lastMkt"
-            <*> o .:? "lastLiquidityInd"
-            <*> o .:? "simpleOrderQty"
-            <*> o .:? "orderQty"
-            <*> o .:? "price"
-            <*> o .:? "displayQty"
-            <*> o .:? "stopPx"
-            <*> o .:? "pegOffsetValue"
-            <*> o .:? "pegPriceType"
-            <*> o .:? "currency"
-            <*> o .:? "settlCurrency"
-            <*> o .:? "execType"
-            <*> o .:? "ordType"
-            <*> o .:? "timeInForce"
-            <*> o .:? "execInst"
-            <*> o .:? "contingencyType"
-            <*> o .:? "exDestination"
-            <*> o .:? "ordStatus"
-            <*> o .:? "triggered"
-            <*> o .:? "workingIndicator"
-            <*> o .:? "ordRejReason"
-            <*> o .:? "simpleLeavesQty"
-            <*> o .:? "leavesQty"
-            <*> o .:? "simpleCumQty"
-            <*> o .:? "cumQty"
-            <*> o .:? "avgPx"
-            <*> o .:? "commission"
-            <*> o .:? "tradePublishIndicator"
-            <*> o .:? "multiLegReportingType"
-            <*> o .:? "text"
-            <*> o .:? "trdMatchID"
-            <*> o .:? "execCost"
-            <*> o .:? "execComm"
-            <*> o .:? "homeNotional"
-            <*> o .:? "foreignNotional"
-            <*> o .:? "transactTime"
-            <*> o .:? "timestamp"
-
+        case (side', execType') of
+            (Just "", Just "Funding") -> genericParseJSON defaultOptions (Object $ insert "side" Null o)
+            _                         -> genericParseJSON defaultOptions (Object                      o)
 
 data RespFunding = RespFunding
     { timestamp        :: !DateTime -- ^ /Required/ "timestamp"
@@ -507,7 +453,15 @@ data RespOrder = RespOrder
     , timestamp             :: !(Maybe DateTime) -- ^ "timestamp"
     } deriving (Show, Eq, Generic)
 
-instance FromJSON RespOrder
+instance FromJSON RespOrder where
+    parseJSON = withObject "RespOrder" forgivingParser
+      where
+        -- ignores 'side' on "position close"
+        forgivingParser obj = do
+            execInst' :: Maybe Text <- obj .:? "execInst"
+            case execInst' of
+                Just "Close" -> genericParseJSON defaultOptions (Object $ insert "side" Null obj)
+                _            -> genericParseJSON defaultOptions (Object                      obj)
 
 data RespOrderBookL2 = RespOrderBookL2
     { symbol :: !Symbol -- ^ /Required/ "symbol"
