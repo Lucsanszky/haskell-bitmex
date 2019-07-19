@@ -132,6 +132,11 @@ unitTests config = testGroup "\nAPI unit tests"
             Just _ -> return ()
             Nothing -> assertFailure "Could not parse funding fee execution message."
 
+    , testCase "Websocket parse position close" $ do
+        case decode sampleClosePositionMsg :: Maybe Response of
+            Just _ -> return ()
+            Nothing -> assertFailure "Could not parse position close message."
+
     , testCase "Multiple retries upon 503 HTTP Status" $ do
         ref   <- newIORef 0
         resp  <- retryOn503 9 (fakeDispatch ref)
@@ -196,3 +201,13 @@ fakeDispatch ref = do
     modifyIORef ref (+1)
     return sampleTooBusyResponse
 --------------------------------------------------------------------------------
+
+sampleClosePositionMsg =
+    "{\"table\":\"order\",\"action\":\"insert\",\"data\":[{\"orderID\":\"af3e3796-f1a4-47a1-8782-db6a7de1cd5e\","
+    <> "\"clOrdID\":\"\",\"clOrdLinkID\":\"\",\"account\":1112233,\"symbol\":\"XBTUSD\",\"side\":\"\",\"simpleOrderQty\":null,"
+    <> "\"orderQty\":null,\"price\":null,\"displayQty\":null,\"stopPx\":null,\"pegOffsetValue\":null,\"pegPriceType\":\"\","
+    <> "\"currency\":\"USD\",\"settlCurrency\":\"XBt\",\"ordType\":\"Market\",\"timeInForce\":\"ImmediateOrCancel\","
+    <> "\"execInst\":\"Close\",\"contingencyType\":\"\",\"exDestination\":\"XBME\",\"ordStatus\":\"New\",\"triggered\":\"\","
+    <> "\"workingIndicator\":false,\"ordRejReason\":\"\",\"simpleLeavesQty\":null,\"leavesQty\":null,\"simpleCumQty\":null,"
+    <> "\"cumQty\":0,\"avgPx\":null,\"multiLegReportingType\":\"SingleSecurity\",\"text\":\"Position Close from www.bitmex.com\","
+    <> "\"transactTime\":\"2019-07-03T05:13:54.838Z\",\"timestamp\":\"2019-07-03T05:13:54.838Z\"}]}"

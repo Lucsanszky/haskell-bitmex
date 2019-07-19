@@ -54,6 +54,7 @@ library
                      , vector >=0.10.9 && <0.13
                      , websockets >= 0.12
                      , wuss >= 1.1
+                     , unordered-containers
   hs-source-dirs:      lib
   default-language:    Haskell2010
   default-extensions:  DataKinds
