@@ -70,6 +70,9 @@ data Symbol
     | ETHM18
     | LTCM18
     | XRPM18
+    | XBTM19
+    | XBTU19
+    | XBTZ19
     deriving (Eq, Show, Generic)
 
 instance ToJSON Symbol
