@@ -6,7 +6,7 @@ module BitMEXClient.Wrapper.API
     , getMessage
     , sendMessage
     , dispatchRequest
-    , retryOn503
+    , retryOn
     ) where
 
 import           BitMEX
@@ -294,12 +294,14 @@ class ThreadSleep m where
 instance ThreadSleep IO where
     threadSleep = threadDelay
 
--- | Retries 'retries' times waiting 1 second between attempts, while receiving error 503
-retryOn503 :: (Monad m, ThreadSleep m) => Int -> m (MimeResult res) -> m (MimeResult res)
-retryOn503 0       action = action -- no more retries
-retryOn503 retries action = do
+-- | Retries 'retries' times waiting 'uSecDelay' microseconds between attempts,
+--   while receiving errors in the list (e.g. [503,502,429])
+retryOn :: (Monad m, ThreadSleep m) => [Int] -> Int -> Int -> m (MimeResult res) -> m (MimeResult res)
+retryOn errorCodes uSecDelay 0       action = action -- no more retries
+retryOn errorCodes uSecDelay retries action = do
     res <- action
     case res of
         MimeResult {mimeResult = Left (MimeError {mimeErrorResponse = response})}
-            | NH.Status{statusCode = 503} <- NH.responseStatus response  -> threadSleep 1000000 >> retryOn503 (retries - 1) action
+            | NH.Status{statusCode = errorCode} <- NH.responseStatus response
+            , errorCode `elem` errorCodes -> threadSleep uSecDelay >> retryOn errorCodes uSecDelay (retries - 1) action
         _ -> return res

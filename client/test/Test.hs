@@ -139,7 +139,7 @@ unitTests config = testGroup "\nAPI unit tests"
 
     , testCase "Multiple retries upon 503 HTTP Status" $ do
         ref   <- newIORef 0
-        resp  <- retryOn503 9 (fakeDispatch ref)
+        resp  <- retryOn [502, 503, 429] 50000 9 (fakeDispatch ref)
         count <- readIORef ref
         assertEqual "retry response status does not match action status"
             (NH.responseStatus $ mimeResultResponse sampleTooBusyResponse)
