@@ -6,7 +6,13 @@ module BitMEXClient.Wrapper.API
     , getMessage
     , sendMessage
     , dispatchRequest
-    , retryOn
+    , Delay
+    , RetryAction(..)
+    , RetryPolicy
+    , retry
+    , retryXTimesWithDelayPolicy
+    , ThreadSleep
+    , threadSleep
     ) where
 
 import           BitMEX
@@ -294,14 +300,42 @@ class ThreadSleep m where
 instance ThreadSleep IO where
     threadSleep = threadDelay
 
--- | Retries 'retries' times waiting 'uSecDelay' microseconds between attempts,
---   while receiving errors in the list (e.g. [503,502,429])
-retryOn :: (Monad m, ThreadSleep m) => [Int] -> Int -> Int -> m (MimeResult res) -> m (MimeResult res)
-retryOn errorCodes uSecDelay 0       action = action -- no more retries
-retryOn errorCodes uSecDelay retries action = do
-    res <- action
-    case res of
-        MimeResult {mimeResult = Left (MimeError {mimeErrorResponse = response})}
-            | NH.Status{statusCode = errorCode} <- NH.responseStatus response
-            , errorCode `elem` errorCodes -> threadSleep uSecDelay >> retryOn errorCodes uSecDelay (retries - 1) action
-        _ -> return res
+
+type Delay = Int -- Should really only be a Natural number (in microseconds)
+data RetryAction res = ReturnResult (MimeResult res) | RetryAfter Delay
+
+-- | Given a (possibly empty) list of what happened on previous attempts, tells us what to do next.
+type RetryPolicy res = [MimeResult res] -> RetryAction res
+
+retry :: (Monad m, ThreadSleep m) => RetryPolicy res -> m (MimeResult res) -> m (MimeResult res)
+retry = retry' []
+  where
+    retry' :: (Monad m, ThreadSleep m) => [MimeResult res] -> RetryPolicy res -> m (MimeResult res) -> m (MimeResult res)
+    retry' previousResults policy action
+        | ReturnResult res <- policy previousResults = pure res
+        | RetryAfter delay <- policy previousResults = do
+                                                        threadSleep delay
+                                                        res <- action
+                                                        retry' (res : previousResults) policy action
+        | otherwise = error "retry' - RetryAction should only have 2 constructors, this should be impossible!"
+
+----------------------------------------
+-- This is an example policy.
+-- It retries up to X times (for a maximum of X+1 attempts in total)
+-- while receiving errors in the designated list (e.g. [503,502,429]).
+-- It uses the specified delay between attempts.
+retryXTimesWithDelayPolicy :: [Int] -> Int -> Delay -> RetryPolicy res
+retryXTimesWithDelayPolicy errorCodes count uSecDelay []      = RetryAfter 0  -- never attempted, try immediately
+retryXTimesWithDelayPolicy errorCodes count uSecDelay results =
+    let lastResult = head results
+     in case lastResult of
+            -- success
+            MimeResult {mimeResult = Right _} -> ReturnResult lastResult
+            -- retry-able failure
+            MimeResult {mimeResult = Left (MimeError {mimeErrorResponse = response})}
+                | NH.Status{NH.statusCode = errorCode} <- NH.responseStatus response
+                , errorCode `elem` errorCodes -> if length results <= count
+                                                    then RetryAfter   uSecDelay
+                                                    else ReturnResult lastResult
+            -- fatal failure
+            _ -> ReturnResult lastResult
