@@ -6,13 +6,6 @@ module BitMEXClient.Wrapper.API
     , getMessage
     , sendMessage
     , dispatchRequest
-    , Delay
-    , RetryAction(..)
-    , RetryPolicy
-    , retry
-    , retryXTimesWithDelayPolicy
-    , ThreadSleep
-    , threadSleep
     ) where
 
 import           BitMEX
@@ -32,13 +25,7 @@ import           BitMEX
     , AuthBitMEXApiMAC(..)
     , MimeFormUrlEncoded
     , MimeResult(..)
-    , MimeError(..)
     )
-import qualified Network.HTTP.Client as NH (Response(..))
-import qualified Network.HTTP.Types  as NH (Status(..))
-import           Data.Either (Either(..))
-import           Control.Concurrent (threadDelay)
-import           Control.Monad
 
 -- FIX ME!!! Too many little things to import here. Having to import GHC.Num to have (+) work broke the camels back.
 -- We should ditch CustomPrelude until it is polished enough.
@@ -292,50 +279,3 @@ dispatchRequest config req@BitMEXRequest{..} = do
         newReq = setHeader req [("api-expires", toByteString' time)]
     liftIO $ dispatchMime (connManager config) (generateAuthInfo config restConfig) newReq
 
-
--- FIX ME! Put these in the proper location
-class ThreadSleep m where
-    threadSleep :: Int -> m ()  -- threadDelay, generalized
-
-instance ThreadSleep IO where
-    threadSleep = threadDelay
-
-
-type Delay = Int -- Should really only be a Natural number (in microseconds)
-data RetryAction res = ReturnResult (MimeResult res) | RetryAfter Delay
-
--- | Given a (possibly empty) list of what happened on previous attempts, tells us what to do next.
-type RetryPolicy res = [MimeResult res] -> RetryAction res
-
-retry :: (Monad m, ThreadSleep m) => RetryPolicy res -> m (MimeResult res) -> m (MimeResult res)
-retry = retry' []
-  where
-    retry' :: (Monad m, ThreadSleep m) => [MimeResult res] -> RetryPolicy res -> m (MimeResult res) -> m (MimeResult res)
-    retry' previousResults policy action
-        | ReturnResult res <- policy previousResults = pure res
-        | RetryAfter delay <- policy previousResults = do
-                                                        threadSleep delay
-                                                        res <- action
-                                                        retry' (res : previousResults) policy action
-        | otherwise = error "retry' - RetryAction should only have 2 constructors, this should be impossible!"
-
-----------------------------------------
--- This is an example policy.
--- It retries up to X times (for a maximum of X+1 attempts in total)
--- while receiving errors in the designated list (e.g. [503,502,429]).
--- It uses the specified delay between attempts.
-retryXTimesWithDelayPolicy :: [Int] -> Int -> Delay -> RetryPolicy res
-retryXTimesWithDelayPolicy errorCodes count uSecDelay []      = RetryAfter 0  -- never attempted, try immediately
-retryXTimesWithDelayPolicy errorCodes count uSecDelay results =
-    let lastResult = head results
-     in case lastResult of
-            -- success
-            MimeResult {mimeResult = Right _} -> ReturnResult lastResult
-            -- retry-able failure
-            MimeResult {mimeResult = Left (MimeError {mimeErrorResponse = response})}
-                | NH.Status{NH.statusCode = errorCode} <- NH.responseStatus response
-                , errorCode `elem` errorCodes -> if length results <= count
-                                                    then RetryAfter   uSecDelay
-                                                    else ReturnResult lastResult
-            -- fatal failure
-            _ -> ReturnResult lastResult
