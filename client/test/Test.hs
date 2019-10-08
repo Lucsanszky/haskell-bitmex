@@ -137,7 +137,7 @@ unitTests config = testGroup "\nAPI unit tests"
 
     , testCase "Multiple retries upon 503 HTTP Status" $ do
         ref   <- newIORef 0
-        resp  <- retry exponential429BackOff (fakeDispatch (take 50 $ repeat sample503Response) ref)
+        resp  <- retry exponential429BackOff (fakeDispatch (repeat sample503Response) ref)
         count <- readIORef ref
         assertEqual "retry response status does not match action status"
             (NH.responseStatus $ mimeResultResponse sample503Response)
@@ -146,7 +146,7 @@ unitTests config = testGroup "\nAPI unit tests"
 
     , testCase "Multiple retries upon 502 HTTP Status" $ do
         ref   <- newIORef 0
-        resp  <- retry exponential429BackOff (fakeDispatch (take 50 $ repeat sample502Response) ref)
+        resp  <- retry exponential429BackOff (fakeDispatch (repeat sample502Response) ref)
         count <- readIORef ref
         assertEqual "retry response status does not match action status"
             (NH.responseStatus $ mimeResultResponse sample502Response)
@@ -155,7 +155,7 @@ unitTests config = testGroup "\nAPI unit tests"
 
     , testCase "Multiple retries upon 429 HTTP Status" $ do
         ref   <- newIORef 0
-        resp  <- retry exponential429BackOff (fakeDispatch (take 50 $ repeat sample429Response) ref)
+        resp  <- retry exponential429BackOff (fakeDispatch (repeat sample429Response) ref)
         count <- readIORef ref
         assertEqual "retry response status does not match action status"
             (NH.responseStatus $ mimeResultResponse sample429Response)
@@ -167,7 +167,7 @@ unitTests config = testGroup "\nAPI unit tests"
         resp  <- retry exponential429BackOff (fakeDispatch sampleAttempts ref)
         count <- readIORef ref
         assertEqual "retry response status does not match action status"
-            (NH.responseStatus $ mimeResultResponse sampleSuccessResponse)
+            (NH.responseStatus $ mimeResultResponse sample200OKResponse)
             (NH.responseStatus $ mimeResultResponse resp)
         assertEqual "Retried wrong number of times" 15 count
 
@@ -288,8 +288,8 @@ sample502Response =  MimeResult
     }
 
 
-sampleSuccessResponse :: MimeResult ()
-sampleSuccessResponse = MimeResult
+sample200OKResponse :: MimeResult ()
+sample200OKResponse = MimeResult
     { mimeResult = Right ()
     , mimeResultResponse = NH.Response
         { NH.responseStatus = NH.Status
@@ -324,7 +324,7 @@ sampleAttempts =
     , sample429Response      --  6.1 +  8 = 14.1
     , sample429Response      -- 14.1 + 16 = 30.1
 
-    , sampleSuccessResponse  -- 30.1 + 32 = 62.1
+    , sample200OKResponse    -- 30.1 + 32 = 62.1
     ]
 
 fakeDispatch :: [MimeResult ()] -> IORef Int -> IO (MimeResult ())
