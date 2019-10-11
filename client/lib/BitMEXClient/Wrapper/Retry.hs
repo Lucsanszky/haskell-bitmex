@@ -34,18 +34,18 @@ instance ThreadSleep IO where
 -- | This should really only be a Natural number (in microseconds), rather than an Int
 type Delay = Int
 
-data RetryAction res = ReturnResult (MimeResult res) | RetryAfter Delay
+data RetryAction res = ReturnResult res | RetryAfter Delay
 
 -- | Given the currentTime and a (possibly empty) list of what happened on previous attempts, tells us what to do next.
-type RetryPolicy res = UTCTime -> [MimeResult res] -> RetryAction res
+type RetryPolicy res = UTCTime -> [res] -> RetryAction res
 
 ----------------------------------------
-retry :: forall m res. (MonadTime m, ThreadSleep m) => RetryPolicy res -> m (MimeResult res) -> m (MimeResult res)
+retry :: forall m res. (MonadTime m, ThreadSleep m) => RetryPolicy res -> m res -> m res
 retry policy action = do
     now <- currentTime
     retry' now []
   where
-    retry' :: UTCTime -> [MimeResult res] -> m (MimeResult res)
+    retry' :: UTCTime -> [res] -> m res
     retry' now previousResults
         | ReturnResult res <- policy now previousResults = pure res
         | RetryAfter delay <- policy now previousResults = do
@@ -60,7 +60,7 @@ retry policy action = do
 -- It retries up to X times (for a maximum of X+1 attempts in total)
 -- while receiving errors in the designated list (e.g. [503,502,429]).
 -- It uses the specified delay between attempts.
-retryXTimesWithDelayPolicy :: [Int] -> Int -> Delay -> RetryPolicy res
+retryXTimesWithDelayPolicy :: [Int] -> Int -> Delay -> RetryPolicy (MimeResult res)
 retryXTimesWithDelayPolicy          _     _         _ _      [] = RetryAfter 0  -- never attempted, try immediately
 retryXTimesWithDelayPolicy errorCodes count uSecDelay _ results =
     let lastResult = head results
@@ -96,7 +96,7 @@ retryXTimesWithDelayPolicy errorCodes count uSecDelay _ results =
 --
 -- Because some retries are immediate, we may actually hit those high error counts.
 --
-exponential429BackOff :: RetryPolicy res
+exponential429BackOff :: RetryPolicy (MimeResult res)
 exponential429BackOff _ []      = RetryAfter 0  -- never attempted, try immediately
 exponential429BackOff _ results = case lastResult of
     -- success
