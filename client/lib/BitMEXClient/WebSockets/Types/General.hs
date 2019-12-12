@@ -70,6 +70,22 @@ data Symbol
     | ETHM18
     | LTCM18
     | XRPM18
+    | XBTM19
+    | XBTU19
+    | XBTZ19
+
+    | XBTH20
+    | XBTM20
+    | XBTU20
+    | XBTZ20
+
+    | ETHUSD
+
+    | ETHZ19
+    | ETHH20
+    | ETHM20
+    | ETHU20
+    | ETHZ20
     deriving (Eq, Show, Generic)
 
 instance ToJSON Symbol

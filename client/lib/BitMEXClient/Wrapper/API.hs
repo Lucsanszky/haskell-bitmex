@@ -6,7 +6,6 @@ module BitMEXClient.Wrapper.API
     , getMessage
     , sendMessage
     , dispatchRequest
-    , retryOn503
     ) where
 
 import           BitMEX
@@ -26,13 +25,7 @@ import           BitMEX
     , AuthBitMEXApiMAC(..)
     , MimeFormUrlEncoded
     , MimeResult(..)
-    , MimeError(..)
     )
-import qualified Network.HTTP.Client as NH (Response(..))
-import qualified Network.HTTP.Types  as NH (Status(..))
-import           Data.Either (Either(..))
-import           Control.Concurrent (threadDelay)
-import           Control.Monad
 
 -- FIX ME!!! Too many little things to import here. Having to import GHC.Num to have (+) work broke the camels back.
 -- We should ditch CustomPrelude until it is polished enough.
@@ -286,20 +279,3 @@ dispatchRequest config req@BitMEXRequest{..} = do
         newReq = setHeader req [("api-expires", toByteString' time)]
     liftIO $ dispatchMime (connManager config) (generateAuthInfo config restConfig) newReq
 
-
--- FIX ME! Put these in the proper location
-class ThreadSleep m where
-    threadSleep :: Int -> m ()  -- threadDelay, generalized
-
-instance ThreadSleep IO where
-    threadSleep = threadDelay
-
--- | Retries 'retries' times waiting 1 second between attempts, while receiving error 503
-retryOn503 :: (Monad m, ThreadSleep m) => Int -> m (MimeResult res) -> m (MimeResult res)
-retryOn503 0       action = action -- no more retries
-retryOn503 retries action = do
-    res <- action
-    case res of
-        MimeResult {mimeResult = Left (MimeError {mimeErrorResponse = response})}
-            | NH.Status{statusCode = 503} <- NH.responseStatus response  -> threadSleep 1000000 >> retryOn503 (retries - 1) action
-        _ -> return res

@@ -3,26 +3,24 @@
 
 module Main where
 
-import Data.Typeable (Proxy(..))
+import           Data.Typeable            (Proxy(..))
+import           Data.IORef
+import           Data.Text                (pack)
+import           Data.Aeson               (decode)
+import           Data.Time.Clock.POSIX    (getPOSIXTime)
 
-import Test.Tasty
-import Test.Tasty.Options
-import Test.Tasty.HUnit
-
-import Data.Text                (pack)
-import Data.Aeson               (decode)
-import Data.Time.Clock.POSIX    (getPOSIXTime)
-import Network.HTTP.Client      (newManager)
-import Network.HTTP.Client.TLS  (tlsManagerSettings)
-
+import           Network.HTTP.Client      (newManager)
+import           Network.HTTP.Client.TLS  (tlsManagerSettings)
 import qualified Network.HTTP.Client.Internal as NH
 import qualified Network.HTTP.Types           as NH
-import           Data.IORef
 
-import BitMEX
+import           BitMEX
+import           BitMEXClient hiding      (error, Position, Order)
+import qualified BitMEXClient as BMC      (Symbol(..))
 
-import           BitMEXClient hiding (error, Position, Order)
-import qualified BitMEXClient as BMC (Symbol(..))
+import           Test.Tasty
+import           Test.Tasty.Options
+import           Test.Tasty.HUnit
 
 ----------------------------------------
 newtype API_ID     = API_ID      String deriving (Show, Eq)
@@ -139,12 +137,40 @@ unitTests config = testGroup "\nAPI unit tests"
 
     , testCase "Multiple retries upon 503 HTTP Status" $ do
         ref   <- newIORef 0
-        resp  <- retryOn503 9 (fakeDispatch ref)
+        resp  <- retry exponential429BackOff (fakeDispatch (repeat sample503Response) ref)
         count <- readIORef ref
         assertEqual "retry response status does not match action status"
-            (NH.responseStatus $ mimeResultResponse sampleTooBusyResponse)
+            (NH.responseStatus $ mimeResultResponse sample503Response)
             (NH.responseStatus $ mimeResultResponse resp)
-        assertEqual "Retried wrong number of times" 10 count
+        assertEqual "Retried wrong number of times" 30 count
+
+    , testCase "Multiple retries upon 502 HTTP Status" $ do
+        ref   <- newIORef 0
+        resp  <- retry exponential429BackOff (fakeDispatch (repeat sample502Response) ref)
+        count <- readIORef ref
+        assertEqual "retry response status does not match action status"
+            (NH.responseStatus $ mimeResultResponse sample502Response)
+            (NH.responseStatus $ mimeResultResponse resp)
+        assertEqual "Retried wrong number of times" 20 count
+
+    , testCase "Multiple retries upon 429 HTTP Status" $ do
+        ref   <- newIORef 0
+        resp  <- retry exponential429BackOff (fakeDispatch (repeat sample429Response) ref)
+        count <- readIORef ref
+        assertEqual "retry response status does not match action status"
+            (NH.responseStatus $ mimeResultResponse sample429Response)
+            (NH.responseStatus $ mimeResultResponse resp)
+        assertEqual "Retried wrong number of times" 6 count
+
+    , testCase "Success after retries of different HTTP Status" $ do
+        ref   <- newIORef 0
+        resp  <- retry exponential429BackOff (fakeDispatch sampleAttempts ref)
+        count <- readIORef ref
+        assertEqual "retry response status does not match action status"
+            (NH.responseStatus $ mimeResultResponse sample200OKResponse)
+            (NH.responseStatus $ mimeResultResponse resp)
+        assertEqual "Retried wrong number of times" 15 count
+
     ]
 
 instanceProps :: TestTree
@@ -165,8 +191,8 @@ sampleFundingExecutionMsg =
     <> "\"transactTime\":\"2019-06-23T12:00:00.000Z\",\"timestamp\":\"2019-06-23T12:00:01.438Z\"}]}"
 
 --------------------------------------------------------------------------------
-sampleTooBusyResponse :: MimeResult res
-sampleTooBusyResponse =  MimeResult
+sample503Response :: MimeResult res
+sample503Response =  MimeResult
     { mimeResult = Left
         ( MimeError
             { mimeError = "error statusCode: 503"
@@ -196,10 +222,116 @@ sampleTooBusyResponse =  MimeResult
         }
     }
 
-fakeDispatch :: IORef Int -> IO (MimeResult ())
-fakeDispatch ref = do
+--------------------------------------------------------------------------------
+sample429Response :: MimeResult res
+sample429Response =  MimeResult
+    { mimeResult = Left
+        ( MimeError
+            { mimeError = "error statusCode: 429"
+            , mimeErrorResponse = NH.Response
+                { NH.responseStatus = NH.Status
+                    { NH.statusCode = 429
+                    , NH.statusMessage = "Too Many Requests"
+                    }
+                , NH.responseVersion = NH.http11
+                , NH.responseHeaders = []
+                , NH.responseBody = "{\"error\":{\"message\":\"Dude, just slow down, will you.\",\"name\":\"HTTPError\"}}"
+                , NH.responseCookieJar = NH.CJ {NH.expose = []}
+                , NH.responseClose' = undefined
+                }
+            }
+        )
+    , mimeResultResponse = NH.Response
+        { NH.responseStatus = NH.Status
+            { NH.statusCode = 429
+            , NH.statusMessage = "Too Many Requests"
+            }
+        , NH.responseVersion = NH.http11
+        , NH.responseHeaders = []
+        , NH.responseBody = "{\"error\":{\"message\":\"Dude, just slow down, will you.\",\"name\":\"HTTPError\"}}"
+        , NH.responseCookieJar = NH.CJ {NH.expose = []}
+        , NH.responseClose' = undefined
+        }
+    }
+
+
+--------------------------------------------------------------------------------
+sample502Response :: MimeResult res
+sample502Response =  MimeResult
+    { mimeResult = Left
+        ( MimeError
+            { mimeError = "error statusCode: 502"
+            , mimeErrorResponse = NH.Response
+                { NH.responseStatus = NH.Status
+                    { NH.statusCode = 502
+                    , NH.statusMessage = "Bad Gateway"
+                    }
+                , NH.responseVersion = NH.http11
+                , NH.responseHeaders = []
+                , NH.responseBody = "{\"error\":{\"message\":\"Yowl, sorry, can't get you through.\",\"name\":\"HTTPError\"}}"
+                , NH.responseCookieJar = NH.CJ {NH.expose = []}
+                , NH.responseClose' = undefined
+                }
+            }
+        )
+    , mimeResultResponse = NH.Response
+        { NH.responseStatus = NH.Status
+            { NH.statusCode = 503
+            , NH.statusMessage = "Service Unavailable"
+            }
+        , NH.responseVersion = NH.http11
+        , NH.responseHeaders = []
+        , NH.responseBody = "{\"error\":{\"message\":\"Yowl, sorry, can't get you through.\",\"name\":\"HTTPError\"}}"
+        , NH.responseCookieJar = NH.CJ {NH.expose = []}
+        , NH.responseClose' = undefined
+        }
+    }
+
+
+sample200OKResponse :: MimeResult ()
+sample200OKResponse = MimeResult
+    { mimeResult = Right ()
+    , mimeResultResponse = NH.Response
+        { NH.responseStatus = NH.Status
+            { NH.statusCode = 200
+            , NH.statusMessage = "OK"
+            }
+        , NH.responseVersion = NH.http11
+        , NH.responseHeaders = []
+        , NH.responseBody = "We're good!"
+        , NH.responseCookieJar = NH.CJ {NH.expose = []}
+        , NH.responseClose' = undefined
+        }
+    }
+
+sampleAttempts :: [MimeResult ()]
+sampleAttempts =
+    [ sample502Response      -- we hit this at time 0
+
+    , sample429Response      -- we hit this at time 0.1
+    , sample429Response      -- 2.1
+
+    , sample503Response      -- 2.1 + 4 = 6.1
+    , sample503Response
+    , sample503Response
+    , sample503Response
+    , sample503Response
+    , sample503Response
+    , sample503Response
+    , sample503Response
+
+    , sample429Response      --  6.1
+    , sample429Response      --  6.1 +  8 = 14.1
+    , sample429Response      -- 14.1 + 16 = 30.1
+
+    , sample200OKResponse    -- 30.1 + 32 = 62.1
+    ]
+
+fakeDispatch :: [MimeResult ()] -> IORef Int -> IO (MimeResult ())
+fakeDispatch responses ref = do
+    i <- readIORef ref
     modifyIORef ref (+1)
-    return sampleTooBusyResponse
+    return (responses !! i)
 --------------------------------------------------------------------------------
 
 sampleClosePositionMsg =
